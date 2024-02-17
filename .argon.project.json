@@ -1,0 +1,12 @@
+{
+  "name": "Argon",
+  "tree": {
+    "$path": "src",
+    "Packages": {
+      "$path": "Packages"
+    },
+    "manifest": {
+      "$path": "wally.toml"
+    }
+  }
+}

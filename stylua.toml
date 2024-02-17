@@ -1,0 +1,3 @@
+indent_type = "Tabs"
+quote_style = "AutoPreferSingle"
+call_parentheses = "Input"
