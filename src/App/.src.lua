@@ -3,10 +3,13 @@ local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 local Packages = script.Parent.Packages
 local Components = script.Components
 local Pages = script.Pages
-local Util = Components.Util
 
 local Fusion = require(Packages.Fusion)
 local Config = require(script.Parent.Config)
+
+local Enums = require(script.Enums)
+local Assets = require(script.Assets)
+local manifest = require(script.Parent.manifest)
 
 local Toolbar = require(Components.Plugin.Toolbar)
 local ToolbarButton = require(Components.Plugin.ToolbarButton)
@@ -14,14 +17,10 @@ local Widget = require(Components.Plugin.Widget)
 local Container = require(Components.Container)
 local Image = require(Components.Image)
 local Text = require(Components.Text)
+local List = require(Components.List)
 
 local NotConnected = require(Pages.NotConnected)
 
-local Enums = require(Util.Enums)
-local Assets = require(script.Assets)
-local manifest = require(script.Parent.manifest)
-
-local New = Fusion.New
 local Value = Fusion.Value
 local OnEvent = Fusion.OnEvent
 local OnChange = Fusion.OnChange
@@ -35,8 +34,8 @@ App.__index = App
 function App.new()
 	local self = setmetatable({}, App)
 
-	local defaultSize = Vector2.new(400, 250)
-	local config = Config.load()
+	local defaultSize = Vector2.new(330, 190)
+	local _config = Config.load()
 
 	local isOpen = Value(false)
 	local title = Value('Argon')
@@ -80,32 +79,30 @@ end
 
 function App:render()
 	return {
-		New 'UIListLayout' {
-			SortOrder = Enum.SortOrder.LayoutOrder,
+		List {
 			VerticalAlignment = Enum.VerticalAlignment.Center,
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		},
 		Container {
-			Size = UDim2.fromScale(1, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
+			Size = UDim2.new(1, -24, 0, 0),
 			[Children] = {
 				Image {
-
 					Size = UDim2.fromOffset(200, 50),
 					Image = Assets.Argon.Banner,
 				},
 				Text {
 					AnchorPoint = Vector2.new(1, 1),
-					Position = UDim2.new(1, -10, 1, -5),
+					Position = UDim2.new(1, -10, 1, -2),
 					Text = `v{manifest.package.version}`,
-					Color = Enums.Color.Dimmed,
+					Color = Enums.Color.TextDimmed,
 					Font = Enums.Font.Default,
+					TextSize = 18,
 				},
 			},
 		},
 		Container {
-			LayoutOrder = 1,
-			Size = UDim2.fromScale(1, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
+			LayoutOrder = 2,
+			Size = UDim2.new(1, -36, 0, 0),
 			[Children] = {
 				NotConnected {},
 			},

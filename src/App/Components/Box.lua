@@ -1,11 +1,13 @@
 local Argon = script:FindFirstAncestor('Argon')
 local Fusion = require(Argon.Packages.Fusion)
 
+local App = script:FindFirstAncestor('App')
 local Components = script.Parent
 local Util = Components.Util
 
+local Enums = require(App.Enums)
+local Style = require(App.Style)
 local Types = require(Util.Types)
-local Enums = require(Util.Enums)
 local stripProps = require(Util.stripProps)
 local mapColor = require(Util.mapColor)
 
@@ -28,14 +30,13 @@ type Props = {
 
 return function(props: Props): Frame
 	return Hydrate(Container {
-		Text = '',
-		Size = UDim2.fromOffset(200, 60),
-		AutoButtonColor = false,
-		BackgroundColor3 = mapColor(props.BackgroundColor, Enums.Color.Primary),
+		Size = UDim2.fromOffset(120, Style.YSize),
+		BackgroundColor3 = mapColor(props.BackgroundColor, Enums.Color.Background),
+		BackgroundTransparency = 0,
 
 		[Children] = {
 			Border {
-				Color = mapColor(props.BorderColor, Enums.Color.Dimmed),
+				Color = mapColor(props.BorderColor, Enums.Color.BackgroundDimmed),
 			},
 		},
 	})(stripProps(props, COMPONENT_ONLY_PROPS))

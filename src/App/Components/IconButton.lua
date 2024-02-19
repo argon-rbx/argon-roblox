@@ -1,10 +1,12 @@
 local Argon = script:FindFirstAncestor('Argon')
 local Fusion = require(Argon.Packages.Fusion)
 
+local App = script:FindFirstAncestor('App')
 local Components = script.Parent
 local Util = Components.Util
 
-local Enums = require(Util.Enums)
+local Enums = require(App.Enums)
+local Style = require(App.Style)
 local Types = require(Util.Types)
 local ThemeProvider = require(Util.ThemeProvider)
 local stripProps = require(Util.stripProps)
@@ -42,10 +44,10 @@ return function(props: Props): TextButton
 
 	return Hydrate(New 'TextButton' {
 		Name = 'BaseButton',
-		Size = UDim2.fromOffset(40, 40),
+		Size = UDim2.fromOffset(Style.YSize, Style.YSize),
 		Text = '',
 		AutoButtonColor = false,
-		BackgroundColor3 = Spring(ThemeProvider:GetColor(Enums.Color.Primary, state), 30),
+		BackgroundColor3 = Spring(ThemeProvider:GetColor(Enums.Color.Background, state), 30),
 
 		[OnEvent 'InputBegan'] = function(inputObject)
 			if inputObject.UserInputType == Enum.UserInputType.MouseMovement then

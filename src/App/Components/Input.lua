@@ -18,20 +18,24 @@ local Hydrate = Fusion.Hydrate
 local COMPONENT_ONLY_PROPS = {
 	'Font',
 	'Color',
+	'PlaceholderColor',
 }
 
 type Props = {
 	Font: Types.CanBeState<Enums.Font>?,
 	Color: Types.CanBeState<Enums.Color | Color3>?,
+	PlaceholderColor: Types.CanBeState<Enums.Color | Color3>?,
 	[any]: any,
 }
 
-return function(props: Props): TextLabel
-	return Hydrate(New('TextLabel') {
+return function(props: Props): TextBox
+	return Hydrate(New('TextBox') {
 		FontFace = mapFont(props.Font, Enums.Font.Default),
 		TextColor3 = mapColor(props.Color, Enums.Color.Text),
-		TextSize = Style.TextSize,
+		PlaceholderColor3 = mapColor(props.PlaceholderColor, Enums.Color.TextDimmed),
+		TextXAlignment = Enum.TextXAlignment.Left,
 		AutomaticSize = Enum.AutomaticSize.XY,
+		TextSize = Style.TextSize,
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))

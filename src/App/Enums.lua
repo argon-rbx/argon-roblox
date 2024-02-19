@@ -1,24 +1,20 @@
-export type Color = 'Primary' | 'Accent' | 'Dimmed' | 'Text'
+export type Color = 'Background' | 'Brand' | 'Text' | 'BackgroundDimmed' | 'BrandDimmed' | 'TextDimmed'
 export type Font = 'Default' | 'Bold' | 'Italic' | 'Mono'
-export type ButtonState = 'Default' | 'Hovered' | 'Pressed'
 
 local Enums = {
 	Color = {
-		Primary = 1,
-		Accent = 2,
-		Dimmed = 3,
-		Text = 4,
+		Background = 1,
+		Brand = 2,
+		Text = 3,
+		BackgroundDimmed = 4,
+		BrandDimmed = 5,
+		TextDimmed = 6,
 	},
 	Font = {
 		Default = 1,
 		Bold = 2,
 		Italic = 3,
 		Mono = 4,
-	},
-	ButtonState = {
-		Default = 1,
-		Hovered = 2,
-		Pressed = 3,
 	},
 }
 

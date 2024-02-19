@@ -4,9 +4,12 @@ local Studio = settings().Studio
 local Argon = script:FindFirstAncestor('Argon')
 local Fusion = require(Argon.Packages.Fusion)
 
-local Enums = require(script.Parent.Enums)
-local Types = require(script.Parent.Types)
-local Defaults = require(script.Parent.Defaults)
+local App = script:FindFirstAncestor('App')
+local Util = script.Parent
+
+local Enums = require(App.Enums)
+local Style = require(App.Style)
+local Types = require(Util.Types)
 
 local peek = Fusion.peek
 local Value = Fusion.Value
@@ -18,7 +21,7 @@ local ThemeProvider = {
 
 function ThemeProvider:GetColor(
 	color: Types.CanBeState<Enums.Color>,
-	state: Types.CanBeState<Enums.ButtonState>?
+	state: Types.CanBeState<Enum.GuiState>?
 ): Types.Computed<Color3>
 	color = peek(color)
 
@@ -26,7 +29,7 @@ function ThemeProvider:GetColor(
 
 	color = Computed(function(use)
 		local isDark = use(self.IsDark)
-		return Defaults.Colors[colorName][isDark and 'Dark' or 'Light']
+		return Style.Colors[colorName][isDark and 'Dark' or 'Light']
 	end)
 
 	if not state then
@@ -40,9 +43,9 @@ function ThemeProvider:GetColor(
 		local state = use(state)
 		local h, s, v = color:ToHSV()
 
-		if state == Enums.ButtonState.Hovered then
+		if state == Enum.GuiState.Hover then
 			return Color3.fromHSV(h, s, v * (isDark and 1.2 or 0.9))
-		elseif state == Enums.ButtonState.Pressed then
+		elseif state == Enum.GuiState.Press then
 			return Color3.fromHSV(h, s, v * (isDark and 1.4 or 0.8))
 		else
 			return color
