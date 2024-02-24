@@ -2,10 +2,10 @@ local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 local Studio = settings().Studio
 
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
 local Util = script.Parent
+
+local Fusion = require(Argon.Packages.Fusion)
 
 local Enums = require(App.Enums)
 local Style = require(App.Style)
@@ -44,9 +44,9 @@ function ThemeProvider:GetColor(
 		local h, s, v = color:ToHSV()
 
 		if state == Enum.GuiState.Hover then
-			return Color3.fromHSV(h, s, v * (isDark and 1.2 or 0.9))
+			return Color3.fromHSV(h, s, v * (isDark and 1.3 or 0.9))
 		elseif state == Enum.GuiState.Press then
-			return Color3.fromHSV(h, s, v * (isDark and 1.4 or 0.8))
+			return Color3.fromHSV(h, s, v * (isDark and 1.5 or 0.8))
 		else
 			return color
 		end

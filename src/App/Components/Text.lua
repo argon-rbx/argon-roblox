@@ -1,13 +1,13 @@
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
 local Components = script.Parent
 local Util = Components.Util
 
+local Fusion = require(Argon.Packages.Fusion)
+
 local Enums = require(App.Enums)
 local Style = require(App.Style)
-local Types = require(Util.Types)
+local Types = require(App.Types)
 local stripProps = require(Util.stripProps)
 local mapColor = require(Util.mapColor)
 local mapFont = require(Util.mapFont)

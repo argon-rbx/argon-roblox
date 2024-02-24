@@ -1,14 +1,14 @@
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
 local Components = script.Parent
 local Util = Components.Util
 
+local Fusion = require(Argon.Packages.Fusion)
+
 local Enums = require(App.Enums)
 local Style = require(App.Style)
-local Types = require(Util.Types)
-local ThemeProvider = require(Util.ThemeProvider)
+local Types = require(App.Types)
+local ThemeProvider = require(App.ThemeProvider)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 
@@ -44,7 +44,7 @@ return function(props: Props): TextButton
 
 	return Hydrate(New 'TextButton' {
 		Name = 'BaseButton',
-		Size = UDim2.fromOffset(Style.YSize, Style.YSize),
+		Size = UDim2.fromOffset(Style.CompSizeY, Style.CompSizeY),
 		Text = '',
 		AutoButtonColor = false,
 		BackgroundColor3 = Spring(ThemeProvider:GetColor(Enums.Color.Background, state), 30),

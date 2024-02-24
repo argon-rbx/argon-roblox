@@ -1,13 +1,13 @@
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
 local Components = script.Parent
 local Util = Components.Util
 
+local Fusion = require(Argon.Packages.Fusion)
+
 local Enums = require(App.Enums)
 local Style = require(App.Style)
-local Types = require(Util.Types)
+local Types = require(App.Types)
 local mapColor = require(Util.mapColor)
 
 local New = Fusion.New
@@ -26,7 +26,7 @@ return function(props: Props): { Instance }
 		},
 		New 'UIStroke' {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Color = mapColor(props.Color, Enums.Color.BackgroundDimmed),
+			Color = mapColor(props.Color, Enums.Color.Border),
 			Thickness = props.Thickness or Style.BorderThickness,
 			Transparency = props.Transparency or 0,
 		},

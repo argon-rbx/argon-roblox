@@ -1,10 +1,12 @@
 local HttpService = game:GetService('HttpService')
 
 local plugin = script:FindFirstAncestorWhichIsA('Plugin')
-local Fusion = require(plugin:FindFirstChild('Fusion', true))
 
+local Argon = script:FindFirstAncestor('Argon')
 local Components = script.Parent.Parent
 local Util = Components.Util
+
+local Fusion = require(Argon.Packages.Fusion)
 
 local stripProps = require(Util.stripProps)
 local default = require(Util.default)

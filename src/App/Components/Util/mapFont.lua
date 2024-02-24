@@ -1,12 +1,11 @@
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
-local Util = script.Parent
+
+local Fusion = require(Argon.Packages.Fusion)
 
 local Enums = require(App.Enums)
 local Style = require(App.Style)
-local Types = require(Util.Types)
+local Types = require(App.Types)
 
 local Computed = Fusion.Computed
 

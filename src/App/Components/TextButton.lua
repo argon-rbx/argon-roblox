@@ -1,15 +1,15 @@
 local TextService = game:GetService('TextService')
 
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
 local Components = script.Parent
 local Util = Components.Util
 
+local Fusion = require(Argon.Packages.Fusion)
+
 local Enums = require(App.Enums)
 local Style = require(App.Style)
-local ThemeProvider = require(Util.ThemeProvider)
+local ThemeProvider = require(App.ThemeProvider)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 
@@ -50,7 +50,7 @@ return function(props: Props): TextButton
 			local size =
 				TextService:GetTextSize(text, Style.TextSize, Enum.Font.Ubuntu, Vector2.new(math.huge, math.huge))
 
-			return UDim2.fromOffset(size.X + 20, Style.YSize)
+			return UDim2.fromOffset(size.X + 20, Style.CompSizeY)
 		end)
 
 	return Hydrate(New 'TextButton' {

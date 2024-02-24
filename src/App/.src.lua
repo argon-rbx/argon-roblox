@@ -6,7 +6,6 @@ local Pages = script.Pages
 
 local Fusion = require(Packages.Fusion)
 local Config = require(script.Parent.Config)
-
 local Enums = require(script.Enums)
 local Assets = require(script.Assets)
 local manifest = require(script.Parent.manifest)
@@ -35,7 +34,6 @@ function App.new()
 	local self = setmetatable({}, App)
 
 	local defaultSize = Vector2.new(330, 190)
-	local _config = Config.load()
 
 	local isOpen = Value(false)
 	local title = Value('Argon')

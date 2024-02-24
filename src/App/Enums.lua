@@ -1,13 +1,12 @@
-export type Color = 'Background' | 'Brand' | 'Text' | 'BackgroundDimmed' | 'BrandDimmed' | 'TextDimmed'
+export type Color = 'Brand' | 'Background' | 'Border' | 'Text' | 'TextDimmed'
 export type Font = 'Default' | 'Bold' | 'Italic' | 'Mono'
 
 local Enums = {
 	Color = {
-		Background = 1,
-		Brand = 2,
-		Text = 3,
-		BackgroundDimmed = 4,
-		BrandDimmed = 5,
+		Brand = 1,
+		Background = 2,
+		Border = 3,
+		Text = 4,
 		TextDimmed = 6,
 	},
 	Font = {

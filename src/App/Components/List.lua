@@ -1,7 +1,7 @@
 local Argon = script:FindFirstAncestor('Argon')
-local Fusion = require(Argon.Packages.Fusion)
-
 local App = script:FindFirstAncestor('App')
+
+local Fusion = require(Argon.Packages.Fusion)
 
 local Style = require(App.Style)
 
