@@ -1,7 +1,7 @@
-return function(prop: any, default: any): any
-	if prop == nil then
+return function(value: any, default: any): any
+	if value == nil then
 		return default
 	else
-		return prop
+		return value
 	end
 end

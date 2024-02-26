@@ -62,7 +62,7 @@ function App.new(): Types.App
 		Name = title,
 		InitialEnabled = true,
 		InitialDockTo = Enum.InitialDockState.Float,
-		MinimumSize = Vector2.new(300, 190),
+		MinimumSize = Vector2.new(300, 190), -- almost golden rectangle
 		Enabled = isOpen,
 		[OnChange 'Enabled'] = function(isEnabled)
 			isOpen:set(isEnabled)
@@ -118,10 +118,8 @@ function App:openSettings()
 	self.settingsWidget = Widget {
 		Name = 'Argon Settings',
 		InitialEnabled = true,
-		MinimumSize = Vector2.new(300, 400),
-		[Children] = Settings {
-			App = self,
-		},
+		MinimumSize = Vector2.new(360, 520),
+		[Children] = Settings(),
 	}
 end
 

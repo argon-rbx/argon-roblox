@@ -10,10 +10,17 @@ local Types = require(App.Types)
 local stripProps = require(Util.stripProps)
 
 local New = Fusion.New
+local Out = Fusion.Out
+local Value = Fusion.Value
 local Hydrate = Fusion.Hydrate
+local OnEvent = Fusion.OnEvent
+local OnChange = Fusion.OnChange
 local Children = Fusion.Children
+local peek = Fusion.peek
 
 local COMPONENT_ONLY_PROPS = {
+	'Changed',
+	'Finished',
 	'Font',
 	'Color',
 	'PlaceholderColor',
@@ -21,6 +28,8 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
+	Changed: ((text: string) -> nil)?,
+	Finished: ((text: string) -> nil)?,
 	Font: Types.CanBeState<Font>?,
 	Color: Types.CanBeState<Color3>?,
 	PlaceholderColor: Types.CanBeState<Color3>?,
@@ -29,6 +38,8 @@ type Props = {
 }
 
 return function(props: Props): TextBox
+	local text = Value('')
+
 	return Hydrate(New('TextBox') {
 		FontFace = props.Font or Theme.Fonts.Regular,
 		TextColor3 = props.Color or Theme.Colors.Text,
@@ -39,6 +50,22 @@ return function(props: Props): TextBox
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
 		TextScaled = props.Scaled,
+		PlaceholderText = '...',
+
+		[OnChange 'Text'] = function(text)
+			if props.Changed then
+				props.Changed(text)
+			end
+		end,
+
+		[OnEvent 'FocusLost'] = function()
+			if props.Finished then
+				props.Finished(peek(text))
+			end
+		end,
+
+		[Out 'Text'] = text,
+
 		[Children] = props.Scaled and New('UITextSizeConstraint') {
 			MaxTextSize = Theme.TextSize,
 		} or nil,

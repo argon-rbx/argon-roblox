@@ -3,17 +3,13 @@ local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
-local Fusion = require(Argon.Packages.Fusion)
-local Types = require(Argon.App.Types)
 
-local Value = Fusion.Value
-
-type Level = 'Place' | 'Game' | 'Global'
+export type Level = 'Place' | 'Game' | 'Global'
 
 local CONFIGS = {
 	Place = 'ArgonConfigPlace_' .. game.PlaceId,
 	Game = 'ArgonConfigGame_' .. game.GameId,
-	Global = 'setConfigGlobal',
+	Global = 'ArgonConfigGlobal',
 }
 
 local Config = {
@@ -25,7 +21,6 @@ local Config = {
 		twoWaySync = false,
 	},
 	configs = {},
-	bindings = {},
 }
 
 function Config.load()
@@ -70,30 +65,19 @@ function Config:getDefault(key: string): any
 	return default
 end
 
-function Config:getBinding(key: string): Types.Computed<any>
-	local binding = self.bindings[key]
+function Config:set(key: string, value: any, level: Level)
+	local default = self.DEFAULTS[key]
 
-	if binding then
-		return binding
+	if default == nil then
+		error(`Setting '{key}' does not exist!`)
 	end
 
-	binding = Value(self:get(key))
-	self.bindings[key] = binding
+	value = Util.cast(value, type(default))
 
-	return binding
-end
-
-function Config:set(key: string, value: any, level: Level)
-	if value == self.DEFAULTS[key] then
+	if value == default then
 		self.configs[level][key] = nil
 	else
 		self.configs[level][key] = value
-	end
-
-	local binding = self.bindings[key]
-
-	if binding then
-		binding:set(value)
 	end
 
 	local config = self.configs[level]
@@ -103,6 +87,11 @@ function Config:set(key: string, value: any, level: Level)
 	else
 		plugin:SetSetting(CONFIGS[level], config)
 	end
+end
+
+function Config:restoreDefaults(level: Level)
+	self.configs[level] = {}
+	plugin:SetSetting(CONFIGS[level], nil)
 end
 
 return Config

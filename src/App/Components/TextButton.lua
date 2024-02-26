@@ -25,11 +25,13 @@ local Children = Fusion.Children
 local COMPONENT_ONLY_PROPS = {
 	'Activated',
 	'Solid',
+	'Borderless',
 }
 
 type Props = {
 	Activated: (() -> nil)?,
 	Solid: Types.CanBeState<boolean>?,
+	Borderless: boolean?,
 	[any]: any,
 }
 
@@ -87,10 +89,12 @@ return function(props: Props): TextButton
 		end,
 
 		[Children] = {
-			Border {
+			not props.Borderless and Border {
 				Color = Computed(function(use)
 					return use(props.Solid) and use(color) or use(Theme.Colors.Border)
 				end),
+			} or New 'UICorner' {
+				CornerRadius = Theme.CornerRadius,
 			},
 		},
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
