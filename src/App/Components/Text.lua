@@ -1,16 +1,13 @@
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
-local Components = script.Parent
+local App = Argon.App
+local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local Enums = require(App.Enums)
-local Style = require(App.Style)
+local Theme = require(App.Theme)
 local Types = require(App.Types)
 local stripProps = require(Util.stripProps)
-local mapColor = require(Util.mapColor)
-local mapFont = require(Util.mapFont)
 
 local New = Fusion.New
 local Hydrate = Fusion.Hydrate
@@ -21,16 +18,16 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
-	Font: Types.CanBeState<Enums.Font>?,
-	Color: Types.CanBeState<Enums.Color | Color3>?,
+	Font: Types.CanBeState<Font>?,
+	Color: Types.CanBeState<Color3>?,
 	[any]: any,
 }
 
 return function(props: Props): TextLabel
 	return Hydrate(New('TextLabel') {
-		FontFace = mapFont(props.Font, Enums.Font.Default),
-		TextColor3 = mapColor(props.Color, Enums.Color.Text),
-		TextSize = Style.TextSize,
+		FontFace = props.Font or Theme.Fonts.Regular,
+		TextColor3 = props.Color or Theme.Colors.Text,
+		TextSize = Theme.TextSize,
 		AutomaticSize = Enum.AutomaticSize.XY,
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,

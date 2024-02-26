@@ -1,13 +1,13 @@
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
+local App = Argon.App
 local Components = App.Components
 
 local Fusion = require(Argon.Packages.Fusion)
 local Config = require(Argon.Config)
 
-local Enums = require(App.Enums)
-local Style = require(App.Style)
 local Assets = require(App.Assets)
+local Theme = require(App.Theme)
+local Types = require(App.Types)
 
 local TextButton = require(Components.TextButton)
 local IconButton = require(Components.IconButton)
@@ -22,7 +22,7 @@ local Children = Fusion.Children
 local OnChange = Fusion.OnChange
 
 type Props = {
-	[any]: any,
+	App: Types.App,
 }
 
 local function filterHost(host: string): string
@@ -44,7 +44,7 @@ local function getConfigValue(key: string): string
 	end
 end
 
-return function(_props: Props): { Instance }
+return function(props: Props): { Instance }
 	local hostInput = Value(getConfigValue('host'))
 	local portInput = Value(getConfigValue('port'))
 
@@ -53,15 +53,16 @@ return function(_props: Props): { Instance }
 		Box {
 			AnchorPoint = Vector2.new(0.5, 0),
 			Position = UDim2.fromScale(0.5, 0),
-			Size = UDim2.new(1, 0, 0, Style.CompSizeY),
+			Size = UDim2.new(1, 0, 0, Theme.CompSizeY),
 			[Children] = {
 				Input {
 					AnchorPoint = Vector2.new(0, 0.5),
 					Position = UDim2.new(0, 10, 0.5, 0),
 					Size = UDim2.fromScale(0.75, 1),
-					Font = Enums.Font.Mono,
+					Font = Theme.Fonts.Mono,
 					PlaceholderText = 'localhost',
 					Text = hostInput,
+					Scaled = true,
 
 					[OnChange 'Text'] = function(text)
 						hostInput:set(filterHost(text))
@@ -71,7 +72,7 @@ return function(_props: Props): { Instance }
 					AnchorPoint = Vector2.new(1, 0.5),
 					Position = UDim2.new(1, -10, 0.5, 0),
 					Size = UDim2.fromScale(0, 1),
-					Font = Enums.Font.Mono,
+					Font = Theme.Fonts.Mono,
 					PlaceholderText = '8000',
 					Text = portInput,
 
@@ -84,8 +85,8 @@ return function(_props: Props): { Instance }
 							AnchorPoint = Vector2.new(1, 0.5),
 							Position = UDim2.fromScale(0, 0.5),
 							Text = ': ',
-							Font = Enums.Font.Mono,
-							Color = Enums.Color.TextDimmed,
+							Font = Theme.Fonts.Mono,
+							Color = Theme.Colors.TextDimmed,
 						},
 					},
 				},
@@ -103,14 +104,16 @@ return function(_props: Props): { Instance }
 					Solid = true,
 					LayoutOrder = 1,
 					Text = 'Connect',
-					Size = UDim2.fromOffset(96, Style.CompSizeY),
+					Size = UDim2.fromOffset(96, Theme.CompSizeY),
 					Activated = function()
 						print('Button clicked!')
 					end,
 				},
-
 				IconButton {
 					Icon = Assets.Icons.Settings,
+					Activated = function()
+						props.App:openSettings()
+					end,
 				},
 			},
 		},

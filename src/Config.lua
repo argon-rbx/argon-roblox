@@ -1,4 +1,5 @@
 local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+
 local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
@@ -15,15 +16,14 @@ local CONFIGS = {
 	Global = 'setConfigGlobal',
 }
 
-local DEFAULTS = {
-	host = 'localhost',
-	port = 8000,
-	autoConnect = true,
-	openInEditor = false,
-	twoWaySync = false,
-}
-
 local Config = {
+	DEFAULTS = {
+		host = 'localhost',
+		port = 8000,
+		autoConnect = true,
+		openInEditor = false,
+		twoWaySync = false,
+	},
 	configs = {},
 	bindings = {},
 }
@@ -41,7 +41,7 @@ function Config.load()
 end
 
 function Config:get(key: string, level: Level?): any
-	local default = DEFAULTS[key]
+	local default = self.DEFAULTS[key]
 
 	if default == nil then
 		error(`Setting '{key}' does not exist!`)
@@ -61,7 +61,7 @@ function Config:get(key: string, level: Level?): any
 end
 
 function Config:getDefault(key: string): any
-	local default = DEFAULTS[key]
+	local default = self.DEFAULTS[key]
 
 	if default == nil then
 		error(`Setting '{key}' does not exist!`)
@@ -84,7 +84,7 @@ function Config:getBinding(key: string): Types.Computed<any>
 end
 
 function Config:set(key: string, value: any, level: Level)
-	if value == DEFAULTS[key] then
+	if value == self.DEFAULTS[key] then
 		self.configs[level][key] = nil
 	else
 		self.configs[level][key] = value

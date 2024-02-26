@@ -1,19 +1,15 @@
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
-local Components = script.Parent
-local Util = Components.Util
+local App = Argon.App
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local Enums = require(App.Enums)
-local Style = require(App.Style)
+local Theme = require(App.Theme)
 local Types = require(App.Types)
-local mapColor = require(Util.mapColor)
 
 local New = Fusion.New
 
 type Props = {
-	Color: Types.CanBeState<Enums.Color | Color3>?,
+	Color: Types.CanBeState<Color3>?,
 	Transparency: Types.CanBeState<number>?,
 	Thickness: Types.CanBeState<number>?,
 	CornerRadius: Types.CanBeState<UDim>?,
@@ -22,12 +18,12 @@ type Props = {
 return function(props: Props): { Instance }
 	return {
 		New 'UICorner' {
-			CornerRadius = props.CornerRadius or Style.CornerRadius,
+			CornerRadius = props.CornerRadius or Theme.CornerRadius,
 		},
 		New 'UIStroke' {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Color = mapColor(props.Color, Enums.Color.Border),
-			Thickness = props.Thickness or Style.BorderThickness,
+			Color = props.Color or Theme.Colors.Border,
+			Thickness = props.Thickness or Theme.BorderThickness,
 			Transparency = props.Transparency or 0,
 		},
 	}

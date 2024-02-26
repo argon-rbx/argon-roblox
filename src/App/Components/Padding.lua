@@ -12,9 +12,11 @@ type Props = {
 	[any]: any,
 }
 
-return function(props: Props): UIListLayout
-	return Hydrate(New 'UIListLayout' {
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = Theme.ListSpacing,
+return function(props: Props): UIPadding
+	return Hydrate(New 'UIPadding' {
+		PaddingBottom = Theme.Padding,
+		PaddingLeft = Theme.Padding,
+		PaddingRight = Theme.Padding,
+		PaddingTop = Theme.Padding,
 	})(props)
 end

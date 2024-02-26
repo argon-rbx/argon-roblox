@@ -1,15 +1,15 @@
 local TextService = game:GetService('TextService')
 
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
-local Components = script.Parent
+local App = Argon.App
+local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local Enums = require(App.Enums)
-local Style = require(App.Style)
-local ThemeProvider = require(App.ThemeProvider)
+local Theme = require(App.Theme)
+local Types = require(App.Types)
+local animateState = require(Util.animateState)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 
@@ -17,7 +17,6 @@ local Border = require(Components.Border)
 
 local New = Fusion.New
 local Value = Fusion.Value
-local Spring = Fusion.Spring
 local Hydrate = Fusion.Hydrate
 local OnEvent = Fusion.OnEvent
 local Computed = Fusion.Computed
@@ -30,7 +29,7 @@ local COMPONENT_ONLY_PROPS = {
 
 type Props = {
 	Activated: (() -> nil)?,
-	Solid: boolean?,
+	Solid: Types.CanBeState<boolean>?,
 	[any]: any,
 }
 
@@ -43,25 +42,29 @@ return function(props: Props): TextButton
 		Pressed = isPressed,
 	})
 
-	props.Text = props.Text or 'Button'
-	props.Size = props.Size
-		or Computed(function(use)
-			local text = use(props.Text)
-			local size =
-				TextService:GetTextSize(text, Style.TextSize, Enum.Font.Ubuntu, Vector2.new(math.huge, math.huge))
-
-			return UDim2.fromOffset(size.X + 20, Style.CompSizeY)
-		end)
+	local color = animateState(
+		Computed(function(use)
+			return use(props.Solid) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
+		end),
+		state
+	)
 
 	return Hydrate(New 'TextButton' {
-		FontFace = Style.Fonts.Default,
+		Text = 'Button',
+		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
-		TextSize = Style.TextSize,
-		BackgroundColor3 = Spring(
-			ThemeProvider:GetColor(props.Solid and Enums.Color.Brand or Enums.Color.Background, state),
-			30
-		),
-		TextColor3 = Spring(ThemeProvider:GetColor(Enums.Color.Text, state), 30),
+		TextSize = Theme.TextSize,
+
+		Size = Computed(function(use)
+			local text = use(props.Text)
+			local size =
+				TextService:GetTextSize(text, Theme.TextSize, Theme.Fonts.Enum, Vector2.new(math.huge, math.huge))
+
+			return UDim2.fromOffset(size.X + 20, Theme.CompSizeY)
+		end),
+
+		BackgroundColor3 = color,
+		TextColor3 = animateState(Theme.Colors.Text, state),
 
 		[OnEvent 'InputBegan'] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -85,10 +88,9 @@ return function(props: Props): TextButton
 
 		[Children] = {
 			Border {
-				Color = props.Solid and Spring(
-					ThemeProvider:GetColor(props.Solid and Enums.Color.Brand or Enums.Color.Background, state),
-					30
-				) or nil,
+				Color = Computed(function(use)
+					return use(props.Solid) and use(color) or use(Theme.Colors.Border)
+				end),
 			},
 		},
 	})(stripProps(props, COMPONENT_ONLY_PROPS))

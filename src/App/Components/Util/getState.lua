@@ -1,5 +1,5 @@
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
+local App = Argon.App
 
 local Fusion = require(Argon.Packages.Fusion)
 
@@ -8,8 +8,8 @@ local Types = require(App.Types)
 local Computed = Fusion.Computed
 
 type Input = {
-	Pressed: Types.CanBeState<boolean>?,
-	Hovered: Types.CanBeState<boolean>?,
+	Pressed: Types.StateObject<boolean>?,
+	Hovered: Types.StateObject<boolean>?,
 }
 
 return function(input: Input): Types.Computed<Enum.GuiState>

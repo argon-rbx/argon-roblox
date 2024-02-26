@@ -3,7 +3,8 @@ local HttpService = game:GetService('HttpService')
 local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 
 local Argon = script:FindFirstAncestor('Argon')
-local Components = script.Parent.Parent
+local App = Argon.App
+local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
@@ -28,30 +29,28 @@ type WidgetProps = {
 	InitialDockTo: Enum.InitialDockState?,
 	InitialEnabled: boolean?,
 	ForceInitialEnabled: boolean?,
-	FloatingSize: Vector2,
+	FloatingSize: Vector2?,
 	MinimumSize: Vector2,
 	[any]: any,
 }
 
 return function(props: WidgetProps): DockWidgetPluginGui
+	local floatingSize = props.FloatingSize or props.MinimumSize
+
 	local widget = plugin:CreateDockWidgetPluginGui(
 		props.Id or HttpService:GenerateGUID(),
 		DockWidgetPluginGuiInfo.new(
-			default(props.InitialDockTo, Enum.InitialDockState.Float),
+			props.InitialDockTo or Enum.InitialDockState.Float,
 			default(props.InitialEnabled, false),
 			default(props.ForceInitialEnabled, false),
-			props.FloatingSize.X,
-			props.FloatingSize.Y,
+			floatingSize.X,
+			floatingSize.Y,
 			props.MinimumSize.X,
 			props.MinimumSize.Y
 		)
 	)
 
 	props.Title = props.Name
-
-	if typeof(props.Enabled) == 'table' and props.Enabled.kind == 'Value' then
-		props.Enabled:set(widget.Enabled)
-	end
 
 	return Hydrate(widget)(stripProps(props, COMPONENT_ONLY_PROPS))
 end

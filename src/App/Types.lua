@@ -154,4 +154,9 @@ export type Children = Instance | StateObject<Children> | { [any]: Children }
 -- A table that defines an instance's properties, handlers and children.
 export type PropertyTable = { [string | SpecialKey]: any }
 
+export type App = {
+	new: () -> App,
+	openSettings: (App) -> nil,
+}
+
 return nil

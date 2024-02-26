@@ -1,14 +1,13 @@
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
-local Components = script.Parent
+local App = Argon.App
+local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local Enums = require(App.Enums)
-local Style = require(App.Style)
+local Theme = require(App.Theme)
 local Types = require(App.Types)
-local ThemeProvider = require(App.ThemeProvider)
+local animateState = require(Util.animateState)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 
@@ -17,18 +16,20 @@ local Image = require(Components.Image)
 
 local New = Fusion.New
 local Value = Fusion.Value
-local Spring = Fusion.Spring
 local Hydrate = Fusion.Hydrate
 local OnEvent = Fusion.OnEvent
+local Computed = Fusion.Computed
 local Children = Fusion.Children
 
 local COMPONENT_ONLY_PROPS = {
 	'Activated',
+	'Solid',
 	'Icon',
 }
 
 type Props = {
 	Activated: (() -> nil)?,
+	Solid: Types.CanBeState<boolean>?,
 	Icon: Types.CanBeState<string>?,
 	[any]: any,
 }
@@ -42,12 +43,18 @@ return function(props: Props): TextButton
 		Pressed = isPressed,
 	})
 
+	local color = animateState(
+		Computed(function(use)
+			return use(props.Solid) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
+		end),
+		state
+	)
+
 	return Hydrate(New 'TextButton' {
-		Name = 'BaseButton',
-		Size = UDim2.fromOffset(Style.CompSizeY, Style.CompSizeY),
+		Size = UDim2.fromOffset(Theme.CompSizeY, Theme.CompSizeY),
 		Text = '',
 		AutoButtonColor = false,
-		BackgroundColor3 = Spring(ThemeProvider:GetColor(Enums.Color.Background, state), 30),
+		BackgroundColor3 = color,
 
 		[OnEvent 'InputBegan'] = function(inputObject)
 			if inputObject.UserInputType == Enum.UserInputType.MouseMovement then
@@ -70,13 +77,17 @@ return function(props: Props): TextButton
 		end,
 
 		[Children] = {
-			Border {},
+			Border {
+				Color = Computed(function(use)
+					return use(props.Solid) and use(color) or use(Theme.Colors.Border)
+				end),
+			},
 			Image {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Position = UDim2.fromScale(0.5, 0.5),
 				Size = UDim2.fromScale(0.65, 0.65),
 				SizeConstraint = Enum.SizeConstraint.RelativeYY,
-				ImageColor3 = Spring(ThemeProvider:GetColor(Enums.Color.Text, state), 30),
+				ImageColor3 = animateState(Theme.Colors.Text, state),
 				Image = props.Icon,
 			},
 		},

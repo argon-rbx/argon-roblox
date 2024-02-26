@@ -1,42 +1,46 @@
 local Argon = script:FindFirstAncestor('Argon')
-local App = script:FindFirstAncestor('App')
-local Components = script.Parent
+local App = Argon.App
+local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local Enums = require(App.Enums)
-local Style = require(App.Style)
+local Theme = require(App.Theme)
 local Types = require(App.Types)
 local stripProps = require(Util.stripProps)
-local mapColor = require(Util.mapColor)
-local mapFont = require(Util.mapFont)
 
 local New = Fusion.New
 local Hydrate = Fusion.Hydrate
+local Children = Fusion.Children
 
 local COMPONENT_ONLY_PROPS = {
 	'Font',
 	'Color',
 	'PlaceholderColor',
+	'Scaled',
 }
 
 type Props = {
-	Font: Types.CanBeState<Enums.Font>?,
-	Color: Types.CanBeState<Enums.Color | Color3>?,
-	PlaceholderColor: Types.CanBeState<Enums.Color | Color3>?,
+	Font: Types.CanBeState<Font>?,
+	Color: Types.CanBeState<Color3>?,
+	PlaceholderColor: Types.CanBeState<Color3>?,
+	Scaled: boolean?,
 	[any]: any,
 }
 
 return function(props: Props): TextBox
 	return Hydrate(New('TextBox') {
-		FontFace = mapFont(props.Font, Enums.Font.Default),
-		TextColor3 = mapColor(props.Color, Enums.Color.Text),
-		PlaceholderColor3 = mapColor(props.PlaceholderColor, Enums.Color.TextDimmed),
+		FontFace = props.Font or Theme.Fonts.Regular,
+		TextColor3 = props.Color or Theme.Colors.Text,
+		PlaceholderColor3 = props.PlaceholderColor or Theme.Colors.TextDimmed,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		AutomaticSize = Enum.AutomaticSize.XY,
-		TextSize = Style.TextSize,
+		AutomaticSize = props.Scaled and Enum.AutomaticSize.None or Enum.AutomaticSize.XY,
+		TextSize = Theme.TextSize,
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
+		TextScaled = props.Scaled,
+		[Children] = props.Scaled and New('UITextSizeConstraint') {
+			MaxTextSize = Theme.TextSize,
+		} or nil,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

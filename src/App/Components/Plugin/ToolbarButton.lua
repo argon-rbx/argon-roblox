@@ -1,5 +1,6 @@
 local Argon = script:FindFirstAncestor('Argon')
-local Components = script.Parent.Parent
+local App = Argon.App
+local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
