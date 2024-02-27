@@ -50,6 +50,7 @@ return function(props: WidgetProps): DockWidgetPluginGui
 		)
 	)
 
+	widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	props.Title = props.Name
 
 	return Hydrate(widget)(stripProps(props, COMPONENT_ONLY_PROPS))

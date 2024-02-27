@@ -14,6 +14,7 @@ local default = require(Util.default)
 local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
 
+local OptionSelector = require(Components.OptionSelector)
 local TextButton = require(Components.TextButton)
 local Container = require(Components.Container)
 local Checkbox = require(Components.Checkbox)
@@ -29,7 +30,6 @@ local Hydrate = Fusion.Hydrate
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local OnChange = Fusion.OnChange
-local ForValues = Fusion.ForValues
 local ForPairs = Fusion.ForPairs
 local peek = Fusion.peek
 
@@ -126,7 +126,6 @@ local function Cell(props: Props): Frame
 		valueComponent = Checkbox {
 			Value = props.Binding,
 			Changed = function(value)
-				print(props.Setting, value)
 				Config:set(props.Setting, value, peek(props.Level))
 			end,
 		}
@@ -208,37 +207,15 @@ return function(): ScrollingFrame
 			Padding {
 				Padding = 16,
 			},
-			Box {
-				Size = UDim2.fromScale(1, 0),
+			OptionSelector {
+				Options = LEVELS,
+				Selected = function(option)
+					level:set(option)
 
-				[Children] = {
-					List {
-						FillDirection = Enum.FillDirection.Horizontal,
-						HorizontalFlex = Enum.UIFlexAlignment.Fill,
-						Padding = 0,
-					},
-					ForValues(LEVELS, function(_, value)
-						return TextButton {
-							Size = UDim2.new(1, 0, 0, Theme.CompSizeY - 8),
-							Borderless = true,
-							Text = value,
-							Solid = Computed(function(use)
-								return use(level) == value
-							end),
-							Activated = function()
-								if value == peek(level) then
-									return
-								end
-
-								level:set(value)
-
-								for setting, binding in pairs(bindings) do
-									binding:set(default(Config:get(setting, value), Config:getDefault(setting)))
-								end
-							end,
-						}
-					end, Fusion.cleanup),
-				},
+					for setting, binding in pairs(bindings) do
+						binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
+					end
+				end,
 			},
 			ForPairs(Config.DEFAULTS, function(_, setting)
 				local binding = Value(default(Config:get(setting, peek(level)), Config:getDefault(setting)))
