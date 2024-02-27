@@ -153,7 +153,6 @@ local function Cell(props: Props): Frame
 							Text {
 								TextWrapped = true,
 								AutomaticSize = Enum.AutomaticSize.None,
-								TextXAlignment = Enum.TextXAlignment.Left,
 								Text = data.Description or 'No description',
 								TextSize = Theme.TextSize - 4,
 								Color = Theme.Colors.TextDimmed,
@@ -205,7 +204,7 @@ return function(): ScrollingFrame
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 			},
 			Padding {
-				Padding = 16,
+				Padding = Theme.WidgetPadding,
 			},
 			OptionSelector {
 				Options = LEVELS,

@@ -23,10 +23,6 @@ local Box = require(Components.Box)
 local Value = Fusion.Value
 local Children = Fusion.Children
 
-type Props = {
-	App: { [any]: any },
-}
-
 local function getConfigValue(key: string): string
 	local config = Config:get(key)
 	local default = Config:getDefault(key)
@@ -38,15 +34,13 @@ local function getConfigValue(key: string): string
 	end
 end
 
-return function(props: Props): { Instance }
+return function(app): { Instance }
 	local hostInput = Value(getConfigValue('host'))
 	local portInput = Value(getConfigValue('port'))
 
 	return {
 		List {},
 		Box {
-			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.fromScale(0.5, 0),
 			Size = UDim2.new(1, 0, 0, Theme.CompSizeY),
 			[Children] = {
 				Input {
@@ -61,7 +55,7 @@ return function(props: Props): { Instance }
 					end,
 
 					Finished = function(host)
-						props.App.client:setHost(host ~= '' and host or Config:getDefault('host'))
+						app:setHost(host ~= '' and host or Config:getDefault('host'))
 					end,
 				},
 				Input {
@@ -77,7 +71,7 @@ return function(props: Props): { Instance }
 					end,
 
 					Finished = function(port)
-						props.App.client:setPort(port ~= '' and tonumber(port) or Config:getDefault('port'))
+						app:setPort(port ~= '' and tonumber(port) or Config:getDefault('port'))
 					end,
 
 					[Children] = {
@@ -97,7 +91,6 @@ return function(props: Props): { Instance }
 			},
 		},
 		Container {
-			LayoutOrder = 1,
 			Size = UDim2.fromScale(1, 0),
 			[Children] = {
 				List {
@@ -106,19 +99,24 @@ return function(props: Props): { Instance }
 				},
 				TextButton {
 					Solid = true,
-					LayoutOrder = 1,
+					LayoutOrder = 2,
 					Text = 'Connect',
 					Size = UDim2.fromOffset(96, Theme.CompSizeY),
 					Activated = function()
-						props.App.client:subscribe():andThen(function(test)
-							print(test)
-						end)
+						app:connect()
 					end,
 				},
 				IconButton {
 					Icon = Assets.Icons.Settings,
+					LayoutOrder = 1,
 					Activated = function()
-						props.App:openSettings()
+						app:settings()
+					end,
+				},
+				IconButton {
+					Icon = Assets.Icons.Help,
+					Activated = function()
+						app:help()
 					end,
 				},
 			},

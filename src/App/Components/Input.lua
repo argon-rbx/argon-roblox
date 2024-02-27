@@ -66,7 +66,7 @@ return function(props: Props): TextBox
 		[Out 'Text'] = text,
 
 		[Children] = props.Scaled and New('UITextSizeConstraint') {
-			MaxTextSize = Theme.TextSize,
+			MaxTextSize = props.TextSize or Theme.TextSize,
 		} or nil,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

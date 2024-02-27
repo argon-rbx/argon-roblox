@@ -4,7 +4,7 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
-local function responseify(response: { [string]: any }): any
+local function methodify(response: { [string]: any }): any
 	return setmetatable(response, {
 		__index = {
 			json = function(self)
@@ -29,7 +29,7 @@ local function request(method: string, url: string, body: { [string]: any }?): P
 
 		if success then
 			if response.Success then
-				resolve(responseify(response))
+				resolve(methodify(response))
 			else
 				reject(response)
 			end

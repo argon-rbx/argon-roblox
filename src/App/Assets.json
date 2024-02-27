@@ -4,7 +4,10 @@
     "Banner": "rbxassetid://16377210434"
   },
   "Icons": {
-    "Settings": "rbxassetid://11234399611",
-    "Checkmark": "rbxassetid://16528403189"
+    "Settings": "rbxassetid://16549970121",
+    "Checkmark": "rbxassetid://16528403189",
+    "Spinner": "rbxassetid://16548972586",
+    "Info": "rbxassetid://16549936110",
+    "Help": "rbxassetid://16549970317"
   }
 }

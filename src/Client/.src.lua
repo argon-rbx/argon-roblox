@@ -53,6 +53,16 @@ function Client:subscribe(): Promise.Promise
 	end)
 end
 
+function Client:unsubscribe(): Promise.Promise
+	local url = self:getUrl() .. 'unsubscribe'
+
+	return Http.post(url, {
+		clientId = self.clientId,
+	}):andThen(function()
+		self.isConnected = false
+	end)
+end
+
 function Client:setHost(host: string)
 	self.host = host
 end

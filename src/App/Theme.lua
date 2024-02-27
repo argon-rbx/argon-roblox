@@ -52,6 +52,7 @@ local Theme = {
 	Padding = UDim.new(0, 8),
 
 	BorderThickness = 1,
+	WidgetPadding = 16,
 	CompSizeY = 36,
 	TextSize = 20,
 

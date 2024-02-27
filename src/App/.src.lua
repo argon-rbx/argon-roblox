@@ -9,7 +9,6 @@ local Pages = script.Pages
 local Fusion = require(Packages.Fusion)
 
 local manifest = require(Argon.manifest)
-local Config = require(Argon.Config)
 local Client = require(Argon.Client)
 local Core = require(Argon.Core)
 
@@ -20,11 +19,16 @@ local Toolbar = require(Components.Plugin.Toolbar)
 local ToolbarButton = require(Components.Plugin.ToolbarButton)
 local Widget = require(Components.Plugin.Widget)
 local Container = require(Components.Container)
+local Padding = require(Components.Padding)
 local Image = require(Components.Image)
 local Text = require(Components.Text)
 local List = require(Components.List)
 
 local NotConnected = require(Pages.NotConnected)
+local Connecting = require(Pages.Connecting)
+local Connected = require(Pages.Connected)
+local Error = require(Pages.Error)
+
 local Settings = require(Widgets.Settings)
 
 local Value = Fusion.Value
@@ -42,6 +46,8 @@ function App.new()
 
 	self.client = Client.new()
 	self.core = Core.new(self.client)
+
+	self.page = Value(NotConnected(self))
 
 	local isOpen = Value(false)
 
@@ -61,7 +67,7 @@ function App.new()
 	Widget {
 		Name = 'Argon',
 		InitialDockTo = Enum.InitialDockState.Float,
-		MinimumSize = Vector2.new(300, 190), -- almost golden rectangle
+		MinimumSize = Vector2.new(300, 200),
 		Enabled = isOpen,
 		[OnChange 'Enabled'] = function(isEnabled)
 			isOpen:set(isEnabled)
@@ -72,8 +78,11 @@ function App.new()
 				VerticalAlignment = Enum.VerticalAlignment.Center,
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 			},
+			Padding {
+				Padding = Theme.WidgetPadding,
+			},
 			Container {
-				Size = UDim2.new(1, -24, 0, 0),
+				Size = UDim2.fromScale(1, 0),
 				[Children] = {
 					Image {
 						Size = UDim2.fromOffset(200, 50),
@@ -81,21 +90,16 @@ function App.new()
 					},
 					Text {
 						AnchorPoint = Vector2.new(1, 1),
-						Position = UDim2.new(1, -10, 1, -2),
+						Position = UDim2.new(1, -4, 1, -2),
 						Text = `v{manifest.package.version}`,
 						Color = Theme.Colors.TextDimmed,
-						TextSize = 18,
+						TextSize = Theme.TextSize - 2,
 					},
 				},
 			},
 			Container {
-				LayoutOrder = 2,
-				Size = UDim2.new(1, -36, 0, 0),
-				[Children] = {
-					NotConnected {
-						App = self,
-					},
-				},
+				Size = UDim2.fromScale(1, 0),
+				[Children] = self.page,
 			},
 		},
 	}
@@ -109,7 +113,11 @@ function App.new()
 	return self
 end
 
-function App:openSettings()
+function App:home()
+	self.page:set(NotConnected(self))
+end
+
+function App:settings()
 	if self.settingsWidget then
 		self.settingsWidget:Destroy()
 	end
@@ -125,6 +133,36 @@ function App:openSettings()
 
 		[Children] = Settings(),
 	}
+end
+
+function App:help()
+	-- TODO
+end
+
+function App:connect()
+	self.page:set(Connecting(self))
+
+	self.client
+		:subscribe()
+		:andThen(function(details)
+			self.page:set(Connected(self, details))
+		end)
+		:catch(function(err)
+			self.page:set(Error(self, err))
+		end)
+end
+
+function App:disconnect()
+	self.client:unsubscribe()
+	self:home()
+end
+
+function App:setHost(host: string)
+	self.client:setHost(host)
+end
+
+function App:setPort(port: number)
+	self.client:setPort(port)
 end
 
 return App
