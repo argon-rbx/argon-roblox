@@ -7,12 +7,14 @@ local Widgets = script.Widgets
 local Pages = script.Pages
 
 local Fusion = require(Packages.Fusion)
-local Config = require(Argon.Config)
+
 local manifest = require(Argon.manifest)
+local Config = require(Argon.Config)
+local Client = require(Argon.Client)
+local Core = require(Argon.Core)
 
 local Assets = require(script.Assets)
 local Theme = require(script.Theme)
-local Types = require(script.Types)
 
 local Toolbar = require(Components.Plugin.Toolbar)
 local ToolbarButton = require(Components.Plugin.ToolbarButton)
@@ -23,7 +25,6 @@ local Text = require(Components.Text)
 local List = require(Components.List)
 
 local NotConnected = require(Pages.NotConnected)
-
 local Settings = require(Widgets.Settings)
 
 local Value = Fusion.Value
@@ -31,19 +32,18 @@ local OnEvent = Fusion.OnEvent
 local OnChange = Fusion.OnChange
 local Observer = Fusion.Observer
 local Children = Fusion.Children
-local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
 local App = {}
 App.__index = App
 
-function App.new(): Types.App
-	local self = setmetatable({
-		settingsWidget = nil,
-	}, App)
+function App.new()
+	local self = setmetatable({}, App)
+
+	self.client = Client.new()
+	self.core = Core.new(self.client)
 
 	local isOpen = Value(false)
-	local title = Value('Argon')
 
 	local toolbarButton = ToolbarButton {
 		Toolbar = Toolbar {
@@ -59,8 +59,7 @@ function App.new(): Types.App
 	}
 
 	Widget {
-		Name = title,
-		InitialEnabled = true,
+		Name = 'Argon',
 		InitialDockTo = Enum.InitialDockState.Float,
 		MinimumSize = Vector2.new(300, 190), -- almost golden rectangle
 		Enabled = isOpen,
@@ -105,20 +104,25 @@ function App.new(): Types.App
 		toolbarButton:SetActive(peek(isOpen))
 	end))
 
-	self:openSettings() --TEMP
+	toolbarButton:SetActive(peek(isOpen))
 
 	return self
 end
 
 function App:openSettings()
 	if self.settingsWidget then
-		cleanup(self.settingsWidget)
+		self.settingsWidget:Destroy()
 	end
 
 	self.settingsWidget = Widget {
 		Name = 'Argon Settings',
-		InitialEnabled = true,
 		MinimumSize = Vector2.new(360, 520),
+
+		Closed = function()
+			self.settingsWidget:Destroy()
+			self.settingsWidget = nil
+		end,
+
 		[Children] = Settings(),
 	}
 end

@@ -4,17 +4,16 @@ local App = Argon.App
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 
 local Spring = Fusion.Spring
 local Computed = Fusion.Computed
 
 return function(
-	goal: Types.StateObject<Color3>,
-	state: Types.Computed<Enum.GuiState>,
-	speed: Types.CanBeState<number>?,
-	damping: Types.CanBeState<number>?
-): Types.Spring<Color3>
+	goal: Fusion.StateObject<Color3>,
+	state: Fusion.Computed<Enum.GuiState>,
+	speed: Fusion.CanBeState<number>?,
+	damping: Fusion.CanBeState<number>?
+): Fusion.Spring<Color3>
 	return Spring(
 		Computed(function(use)
 			local goal = use(goal)

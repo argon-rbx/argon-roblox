@@ -4,15 +4,14 @@ local App = Argon.App
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 
 local New = Fusion.New
 
 type Props = {
-	Color: Types.CanBeState<Color3>?,
-	Transparency: Types.CanBeState<number>?,
-	Thickness: Types.CanBeState<number>?,
-	CornerRadius: Types.CanBeState<UDim>?,
+	Color: Fusion.CanBeState<Color3>?,
+	Transparency: Fusion.CanBeState<number>?,
+	Thickness: Fusion.CanBeState<number>?,
+	CornerRadius: Fusion.CanBeState<UDim>?,
 }
 
 return function(props: Props): { Instance }

@@ -9,7 +9,6 @@ local Fusion = require(Argon.Packages.Fusion)
 local Config = require(Argon.Config)
 
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 local default = require(Util.default)
 local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
@@ -65,8 +64,8 @@ local LEVELS = { 'Global', 'Game', 'Place' }
 
 type Props = {
 	Setting: string,
-	Level: Types.Value<Config.Level>,
-	Binding: Types.Value<any>,
+	Level: Fusion.Value<Config.Level>,
+	Binding: Fusion.Value<any>,
 }
 
 local function Cell(props: Props): Frame
@@ -104,11 +103,12 @@ local function Cell(props: Props): Frame
 						userInput = true
 						props.Binding:set(filter(text))
 					end,
-
 					Finished = function(text)
-						if text ~= '' then
-							Config:set(props.Setting, text, peek(props.Level))
-						end
+						Config:set(
+							props.Setting,
+							text ~= '' and text or Config:getDefault(props.Setting),
+							peek(props.Level)
+						)
 					end,
 
 					[Children] = {

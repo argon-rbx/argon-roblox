@@ -10,6 +10,7 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local stripProps = require(Util.stripProps)
+local isState = require(Util.isState)
 local default = require(Util.default)
 
 local Hydrate = Fusion.Hydrate
@@ -18,19 +19,21 @@ local COMPONENT_ONLY_PROPS = {
 	'Id',
 	'InitialDockTo',
 	'InitialEnabled',
-	'ForceInitialEnabled',
+	'OverrideEnabled',
 	'FloatingSize',
 	'MinimumSize',
+	'Closed',
 }
 
 type WidgetProps = {
 	Id: string?,
-	Name: string,
+	Name: Fusion.CanBeState<string>,
 	InitialDockTo: Enum.InitialDockState?,
 	InitialEnabled: boolean?,
-	ForceInitialEnabled: boolean?,
+	OverrideEnabled: boolean?,
 	FloatingSize: Vector2?,
 	MinimumSize: Vector2,
+	Closed: (() -> nil)?,
 	[any]: any,
 }
 
@@ -41,14 +44,22 @@ return function(props: WidgetProps): DockWidgetPluginGui
 		props.Id or HttpService:GenerateGUID(),
 		DockWidgetPluginGuiInfo.new(
 			props.InitialDockTo or Enum.InitialDockState.Float,
-			default(props.InitialEnabled, false),
-			default(props.ForceInitialEnabled, false),
+			default(props.InitialEnabled, true),
+			default(props.OverrideEnabled, false),
 			floatingSize.X,
 			floatingSize.Y,
 			props.MinimumSize.X,
 			props.MinimumSize.Y
 		)
 	)
+
+	if isState(props.Enabled) then
+		props.Enabled:set(widget.Enabled)
+	end
+
+	if props.Closed then
+		widget:BindToClose(props.Closed)
+	end
 
 	widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	props.Title = props.Name

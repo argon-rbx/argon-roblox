@@ -8,7 +8,6 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 local animateState = require(Util.animateState)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
@@ -29,7 +28,7 @@ local COMPONENT_ONLY_PROPS = {
 
 type Props = {
 	Activated: (() -> nil)?,
-	Solid: Types.CanBeState<boolean>?,
+	Solid: Fusion.CanBeState<boolean>?,
 	[any]: any,
 }
 

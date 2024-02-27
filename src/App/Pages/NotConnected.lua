@@ -8,7 +8,6 @@ local Config = require(Argon.Config)
 
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
 
@@ -25,7 +24,7 @@ local Value = Fusion.Value
 local Children = Fusion.Children
 
 type Props = {
-	App: Types.App,
+	App: { [any]: any },
 }
 
 local function getConfigValue(key: string): string
@@ -60,6 +59,10 @@ return function(props: Props): { Instance }
 					Changed = function(text)
 						hostInput:set(filterHost(text))
 					end,
+
+					Finished = function(host)
+						props.App.client:setHost(host ~= '' and host or Config:getDefault('host'))
+					end,
 				},
 				Input {
 					AnchorPoint = Vector2.new(1, 0),
@@ -71,6 +74,10 @@ return function(props: Props): { Instance }
 
 					Changed = function(text)
 						portInput:set(filterPort(text))
+					end,
+
+					Finished = function(port)
+						props.App.client:setPort(port ~= '' and tonumber(port) or Config:getDefault('port'))
 					end,
 
 					[Children] = {
@@ -103,7 +110,9 @@ return function(props: Props): { Instance }
 					Text = 'Connect',
 					Size = UDim2.fromOffset(96, Theme.CompSizeY),
 					Activated = function()
-						print('Button clicked!')
+						props.App.client:subscribe():andThen(function(test)
+							print(test)
+						end)
 					end,
 				},
 				IconButton {

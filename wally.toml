@@ -6,6 +6,6 @@ realm = "shared"
 private = true
 
 [dependencies]
-Promise = "evaera/promise@4.0.0"
+Promise = "lukadev-0/typed-promise@4.0.2"
 # Fusion = "elttob/fusion@0.2.0"
 Fusion = "dervexhero/fusion-03-dev@0.3.0-dev.1"

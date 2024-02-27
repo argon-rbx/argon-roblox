@@ -7,7 +7,6 @@ local Fusion = require(Argon.Packages.Fusion)
 
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 local stripProps = require(Util.stripProps)
 local isState = require(Util.isState)
 
@@ -25,7 +24,7 @@ local COMPONENT_ONLY_PROPS = {
 
 type Props = {
 	Changed: ((value: boolean) -> nil)?,
-	Value: Types.CanBeState<boolean>?,
+	Value: Fusion.CanBeState<boolean>?,
 	[any]: any,
 }
 

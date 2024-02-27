@@ -6,7 +6,6 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local Types = require(App.Types)
 local stripProps = require(Util.stripProps)
 
 local New = Fusion.New
@@ -18,8 +17,8 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
-	Font: Types.CanBeState<Font>?,
-	Color: Types.CanBeState<Color3>?,
+	Font: Fusion.CanBeState<Font>?,
+	Color: Fusion.CanBeState<Color3>?,
 	[any]: any,
 }
 

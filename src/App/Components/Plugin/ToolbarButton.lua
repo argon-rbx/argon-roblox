@@ -25,7 +25,8 @@ type ToolbarButtonProps = {
 }
 
 return function(props: ToolbarButtonProps): PluginToolbarButton
-	return Hydrate(props.Toolbar:CreateButton(props.Name, props.ToolTip, props.Image))(
-		stripProps(props, COMPONENT_ONLY_PROPS)
-	)
+	local button = props.Toolbar:CreateButton(props.Name, props.ToolTip, props.Image)
+	button.ClickableWhenViewportHidden = true
+
+	return Hydrate(button)(stripProps(props, COMPONENT_ONLY_PROPS))
 end
