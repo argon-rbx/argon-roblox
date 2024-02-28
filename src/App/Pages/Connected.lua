@@ -1,12 +1,15 @@
 local Argon = script:FindFirstAncestor('Argon')
 local App = Argon.App
 local Components = App.Components
+local Widgets = App.Widgets
 
 local Fusion = require(Argon.Packages.Fusion)
 
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
 
+local Widget = require(Components.Plugin.Widget)
+local ProjectDetails = require(Widgets.ProjectDetails)
 local TextButton = require(Components.TextButton)
 local IconButton = require(Components.IconButton)
 local Container = require(Components.Container)
@@ -16,8 +19,11 @@ local List = require(Components.List)
 local Box = require(Components.Box)
 
 local Children = Fusion.Children
+local Cleanup = Fusion.Cleanup
 
 return function(app, details: { [string]: any }): { Instance }
+	local widget = nil
+
 	return {
 		List {},
 		Box {
@@ -25,23 +31,28 @@ return function(app, details: { [string]: any }): { Instance }
 			[Children] = {
 				Padding {},
 				Text {
-					Size = UDim2.fromScale(0.75, 0.6),
+					Size = UDim2.fromScale(0.8, 0.6),
 					Text = details.name,
 					Font = Theme.Fonts.Bold,
 					Scaled = true,
 				},
 				Text {
 					Position = UDim2.fromScale(0, 0.6),
-					Size = UDim2.fromScale(0.75, 0.4),
+					Size = UDim2.fromScale(0.8, 0.4),
 					Text = `{app.client.host}:{app.client.port}`,
 					TextSize = Theme.TextSize - 4,
 					Font = Theme.Fonts.Mono,
 					Scaled = true,
 				},
-				IconButton {
+				Text {
 					AnchorPoint = Vector2.new(1, 0.5),
-					Position = UDim2.fromScale(1, 0.5),
-					Icon = Assets.Icons.Info,
+					Position = UDim2.new(1, -2, 0.5, 0),
+					Text = 'Synced\n10s ago',
+					Font = Theme.Fonts.Italic,
+					Color = Theme.Colors.TextDimmed,
+					TextSize = Theme.TextSize - 4,
+					TextXAlignment = Enum.TextXAlignment.Right,
+					LineHeight = 1.2,
 				},
 			},
 		},
@@ -69,9 +80,29 @@ return function(app, details: { [string]: any }): { Instance }
 					end,
 				},
 				IconButton {
-					Icon = Assets.Icons.Help,
+					Icon = Assets.Icons.Info,
 					Activated = function()
-						app:help()
+						if widget then
+							widget:Destroy()
+						end
+
+						widget = Widget {
+							Name = 'Argon - Project Details',
+							MinimumSize = Vector2.new(400, 250),
+
+							Closed = function()
+								widget:Destroy()
+								widget = nil
+							end,
+
+							[Children] = ProjectDetails(app, details),
+						}
+					end,
+					[Cleanup] = function()
+						if widget then
+							widget:Destroy()
+							widget = nil
+						end
 					end,
 				},
 			},

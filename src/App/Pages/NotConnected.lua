@@ -101,7 +101,6 @@ return function(app): { Instance }
 					Solid = true,
 					LayoutOrder = 2,
 					Text = 'Connect',
-					Size = UDim2.fromOffset(96, Theme.CompSizeY),
 					Activated = function()
 						app:connect()
 					end,

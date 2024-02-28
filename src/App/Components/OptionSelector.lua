@@ -8,7 +8,7 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local animateState = require(Util.animateState)
+local animate = require(Util.animate)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 
@@ -50,7 +50,7 @@ local function Button(props: ButtonProps): TextButton
 		Pressed = isPressed,
 	})
 
-	local color = animateState(
+	local color = animate(
 		Computed(function(use)
 			return use(props.Solid) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
 		end),
@@ -72,7 +72,7 @@ local function Button(props: ButtonProps): TextButton
 		end),
 
 		BackgroundColor3 = color,
-		TextColor3 = animateState(Theme.Colors.Text, state),
+		TextColor3 = animate(Theme.Colors.Text, state),
 
 		[OnEvent 'InputBegan'] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then

@@ -13,6 +13,7 @@ local default = require(Util.default)
 local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
 
+local ScrollingContainer = require(Components.ScrollingContainer)
 local OptionSelector = require(Components.OptionSelector)
 local TextButton = require(Components.TextButton)
 local Container = require(Components.Container)
@@ -26,6 +27,8 @@ local Box = require(Components.Box)
 local New = Fusion.New
 local Value = Fusion.Value
 local Hydrate = Fusion.Hydrate
+local Cleanup = Fusion.Cleanup
+local Observer = Fusion.Observer
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local OnChange = Fusion.OnChange
@@ -80,22 +83,26 @@ local function Cell(props: Props): Frame
 		local filter = isHost and filterHost or filterPort
 		local userInput = false
 
+		local disconnect = Observer(props.Binding):onChange(function()
+			local value = peek(props.Binding)
+
+			if not userInput and value == Config:getDefault(props.Setting) then
+				props.Binding:set('')
+			end
+
+			userInput = false
+		end)
+
+		if peek(props.Binding) == Config:getDefault(props.Setting) then
+			props.Binding:set('')
+		end
+
 		valueComponent = Box {
-			Size = isHost and UDim2.new(0.29, 0, 0, Theme.CompSizeY - 6) or UDim2.fromOffset(70, Theme.CompSizeY - 6),
+			Size = isHost and UDim2.new(0.31, 0, 0, Theme.CompSizeY - 6) or UDim2.fromOffset(70, Theme.CompSizeY - 6),
 			[Children] = {
 				Input {
 					Size = UDim2.fromScale(1, 1),
-					Text = Computed(function(use)
-						local binding = use(props.Binding)
-
-						if binding == Config:getDefault(props.Setting) and not userInput then
-							return ''
-						end
-
-						userInput = false
-
-						return binding
-					end),
+					Text = props.Binding,
 					Scaled = isHost,
 					PlaceholderText = Config:getDefault(props.Setting),
 
@@ -116,6 +123,7 @@ local function Cell(props: Props): Frame
 							Vertical = false,
 						},
 					},
+					[Cleanup] = disconnect,
 				},
 			},
 		}
@@ -192,17 +200,9 @@ return function(): ScrollingFrame
 	local level = Value('Global')
 	local bindings = {}
 
-	return New 'ScrollingFrame' {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 1,
-		ScrollBarThickness = 0,
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		CanvasSize = UDim2.fromScale(0, 0),
-
+	return ScrollingContainer {
 		[Children] = {
-			List {
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			},
+			List {},
 			Padding {
 				Padding = Theme.WidgetPadding,
 			},

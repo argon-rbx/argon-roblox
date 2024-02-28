@@ -6,7 +6,7 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local animateState = require(Util.animateState)
+local animate = require(Util.animate)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 
@@ -42,7 +42,7 @@ return function(props: Props): TextButton
 		Pressed = isPressed,
 	})
 
-	local color = animateState(
+	local color = animate(
 		Computed(function(use)
 			return use(props.Solid) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
 		end),
@@ -86,7 +86,7 @@ return function(props: Props): TextButton
 				Position = UDim2.fromScale(0.5, 0.5),
 				Size = UDim2.fromScale(0.6, 0.6),
 				SizeConstraint = Enum.SizeConstraint.RelativeYY,
-				ImageColor3 = animateState(Theme.Colors.Text, state),
+				ImageColor3 = animate(Theme.Colors.Text, state),
 				Image = props.Icon,
 			},
 		},

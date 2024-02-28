@@ -30,12 +30,14 @@ local Connected = require(Pages.Connected)
 local Error = require(Pages.Error)
 
 local Settings = require(Widgets.Settings)
+local Help = require(Widgets.Help)
 
 local Value = Fusion.Value
 local OnEvent = Fusion.OnEvent
 local OnChange = Fusion.OnChange
 local Observer = Fusion.Observer
 local Children = Fusion.Children
+local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
 local App = {}
@@ -67,7 +69,7 @@ function App.new()
 	Widget {
 		Name = 'Argon',
 		InitialDockTo = Enum.InitialDockState.Float,
-		MinimumSize = Vector2.new(300, 200),
+		MinimumSize = Vector2.new(300, 190),
 		Enabled = isOpen,
 		[OnChange 'Enabled'] = function(isEnabled)
 			isOpen:set(isEnabled)
@@ -85,15 +87,15 @@ function App.new()
 				Size = UDim2.fromScale(1, 0),
 				[Children] = {
 					Image {
-						Size = UDim2.fromOffset(200, 50),
+						Size = UDim2.fromOffset(160, 40),
 						Image = Assets.Argon.Banner,
 					},
 					Text {
 						AnchorPoint = Vector2.new(1, 1),
-						Position = UDim2.new(1, -4, 1, -2),
+						Position = UDim2.new(1, -5, 1, -2),
 						Text = `v{manifest.package.version}`,
 						Color = Theme.Colors.TextDimmed,
-						TextSize = Theme.TextSize - 2,
+						TextSize = Theme.TextSize - 4,
 					},
 				},
 			},
@@ -113,8 +115,13 @@ function App.new()
 	return self
 end
 
+function App:setPage(page)
+	cleanup(peek(self.page))
+	self.page:set(page)
+end
+
 function App:home()
-	self.page:set(NotConnected(self))
+	self:setPage(NotConnected(self))
 end
 
 function App:settings()
@@ -123,8 +130,8 @@ function App:settings()
 	end
 
 	self.settingsWidget = Widget {
-		Name = 'Argon Settings',
-		MinimumSize = Vector2.new(360, 520),
+		Name = 'Argon - Settings',
+		MinimumSize = Vector2.new(350, 400),
 
 		Closed = function()
 			self.settingsWidget:Destroy()
@@ -136,19 +143,33 @@ function App:settings()
 end
 
 function App:help()
-	-- TODO
+	if self.helpWidget then
+		self.helpWidget:Destroy()
+	end
+
+	self.helpWidget = Widget {
+		Name = 'Argon - Help',
+		MinimumSize = Vector2.new(400, 350),
+
+		Closed = function()
+			self.helpWidget:Destroy()
+			self.helpWidget = nil
+		end,
+
+		[Children] = Help(),
+	}
 end
 
 function App:connect()
-	self.page:set(Connecting(self))
+	self:setPage(Connecting(self))
 
 	self.client
 		:subscribe()
 		:andThen(function(details)
-			self.page:set(Connected(self, details))
+			self:setPage(Connected(self, details))
 		end)
 		:catch(function(err)
-			self.page:set(Error(self, err))
+			self:setPage(Error(self, err))
 		end)
 end
 
