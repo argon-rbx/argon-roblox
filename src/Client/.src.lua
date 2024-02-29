@@ -2,6 +2,7 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
+local Util = require(Argon.Util)
 local Config = require(Argon.Config)
 
 local Http = require(script.Http)
@@ -20,7 +21,7 @@ function Client.new()
 	return self
 end
 
-function Client:getUrl()
+function Client:getUrl(): string
 	return `http://{self.host}:{self.port}/`
 end
 
@@ -60,6 +61,34 @@ function Client:unsubscribe(): Promise.Promise
 		clientId = self.clientId,
 	}):andThen(function()
 		self.isConnected = false
+	end)
+end
+
+function Client:read(): Promise.Promise
+	local url = self:getUrl() .. `read?clientId={self.clientId}`
+
+	return Http.get(url):andThen(function(response)
+		return response:json().queue
+	end)
+end
+
+function Client:readAll(): Promise.Promise
+	local url = self:getUrl() .. `readAll?clientId={self.clientId}`
+
+	return Http.get(url):andThen(function()
+		local queue = {}
+
+		while true do
+			local chunk = self:read():expect()
+
+			if #chunk == 0 then
+				break
+			end
+
+			Util.join(queue, chunk)
+		end
+
+		return queue
 	end)
 end
 

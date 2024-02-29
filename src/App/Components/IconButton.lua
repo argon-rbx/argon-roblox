@@ -84,7 +84,7 @@ return function(props: Props): TextButton
 			Image {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(0.6, 0.6),
+				Size = UDim2.fromScale(0.55, 0.55),
 				SizeConstraint = Enum.SizeConstraint.RelativeYY,
 				ImageColor3 = animate(Theme.Colors.Text, state),
 				Image = props.Icon,

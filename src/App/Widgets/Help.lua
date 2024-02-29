@@ -17,9 +17,10 @@ local Box = require(Components.Box)
 local Children = Fusion.Children
 
 local function Entry(body: { any })
-	return Container {
+	return Box {
 		Size = UDim2.fromScale(1, 0),
 		[Children] = {
+			Padding {},
 			List {
 				Padding = 6,
 			},
@@ -49,6 +50,7 @@ local function Link(text: string, url: string)
 		Size = UDim2.fromScale(1, 0),
 		[Children] = {
 			List {
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 				Padding = 8,
 			},
 			Text {
@@ -62,7 +64,7 @@ local function Link(text: string, url: string)
 					Input {
 						Text = url,
 						TextEditable = false,
-						TextSize = Theme.TextSize - 2,
+						TextSize = Theme.TextSize,
 					},
 				},
 			},
@@ -98,7 +100,6 @@ return function(): ScrollingFrame
 				Paragraph 'Now you can finally start syncing your changes. Remember to save your files in order to see the changes in Roblox Studio.',
 				Paragraph 'You can also enable Two-Way Sync in the settings to sync changes made in Studio back to the file system.',
 			},
-			Link('Found the problem? Report it:', 'https://github.com/argon-rbx/argon-roblox'),
 		},
 	}
 end

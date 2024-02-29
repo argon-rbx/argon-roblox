@@ -9,6 +9,7 @@ local Pages = script.Pages
 local Fusion = require(Packages.Fusion)
 
 local manifest = require(Argon.manifest)
+local Config = require(Argon.Config)
 local Client = require(Argon.Client)
 local Core = require(Argon.Core)
 
@@ -32,10 +33,13 @@ local Error = require(Pages.Error)
 local Settings = require(Widgets.Settings)
 local Help = require(Widgets.Help)
 
+local New = Fusion.New
 local Value = Fusion.Value
+local Spring = Fusion.Spring
 local OnEvent = Fusion.OnEvent
 local OnChange = Fusion.OnChange
 local Observer = Fusion.Observer
+local Computed = Fusion.Computed
 local Children = Fusion.Children
 local cleanup = Fusion.cleanup
 local peek = Fusion.peek
@@ -49,7 +53,7 @@ function App.new()
 	self.client = Client.new()
 	self.core = Core.new(self.client)
 
-	self.page = Value(NotConnected(self))
+	self.pages = Value({})
 
 	local isOpen = Value(false)
 
@@ -75,35 +79,7 @@ function App.new()
 			isOpen:set(isEnabled)
 		end,
 
-		[Children] = {
-			List {
-				VerticalAlignment = Enum.VerticalAlignment.Center,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			},
-			Padding {
-				Padding = Theme.WidgetPadding,
-			},
-			Container {
-				Size = UDim2.fromScale(1, 0),
-				[Children] = {
-					Image {
-						Size = UDim2.fromOffset(160, 40),
-						Image = Assets.Argon.Banner,
-					},
-					Text {
-						AnchorPoint = Vector2.new(1, 1),
-						Position = UDim2.new(1, -5, 1, -2),
-						Text = `v{manifest.package.version}`,
-						Color = Theme.Colors.TextDimmed,
-						TextSize = Theme.TextSize - 4,
-					},
-				},
-			},
-			Container {
-				Size = UDim2.fromScale(1, 0),
-				[Children] = self.page,
-			},
-		},
+		[Children] = self.pages,
 	}
 
 	plugin.Unloading:Connect(Observer(isOpen):onChange(function()
@@ -112,12 +88,95 @@ function App.new()
 
 	toolbarButton:SetActive(peek(isOpen))
 
+	self:setPage(NotConnected(self))
+
+	if Config:get('autoConnect') then
+		self:connect()
+	end
+
 	return self
 end
 
 function App:setPage(page)
-	cleanup(peek(self.page))
-	self.page:set(page)
+	local pages = peek(self.pages)
+
+	for i, child in ipairs(pages) do
+		if child._finished then
+			table.remove(pages, i)
+			continue
+		end
+
+		task.spawn(function()
+			child._destructor(child._value)
+			child._finished = true
+		end)
+	end
+
+	local transparency = Value(0)
+	local size = Value(UDim2.fromScale(1, 1))
+
+	page = Computed(function()
+		return New 'CanvasGroup' {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			BackgroundColor3 = Theme.Colors.Background,
+			BorderSizePixel = 0,
+			GroupTransparency = Spring(transparency, 30),
+			-- Size = UDim2.fromScale(1, 1),
+			Size = Spring(size, 5),
+			[Children] = {
+				List {
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				},
+				Padding {
+					Padding = Theme.WidgetPadding,
+				},
+				Container {
+					Size = UDim2.fromScale(1, 0),
+					[Children] = {
+						Image {
+							Size = UDim2.fromOffset(160, 40),
+							Image = Assets.Argon.Banner,
+						},
+						Text {
+							AnchorPoint = Vector2.new(1, 1),
+							Position = UDim2.new(1, -5, 1, -2),
+							Text = `v{manifest.package.version}`,
+							Color = Theme.Colors.TextDimmed,
+							TextSize = Theme.TextSize - 4,
+						},
+					},
+				},
+				Container {
+					Size = UDim2.fromScale(1, 0),
+					[Children] = page,
+				},
+			},
+		}
+	end, function(page)
+		if not page then
+			return
+		end
+
+		for _, v in page:GetDescendants() do
+			if v:IsA('GuiButton') then
+				v.Active = false
+			end
+		end
+
+		page.ZIndex = math.huge
+
+		transparency:set(1)
+		size:set(UDim2.fromScale(2, 1))
+		task.wait(0.15)
+
+		cleanup(page)
+	end)
+
+	table.insert(pages, page)
+
+	self.pages:set(pages)
 end
 
 function App:home()
@@ -161,12 +220,16 @@ function App:help()
 end
 
 function App:connect()
-	self:setPage(Connecting(self))
+	-- self:setPage(Connecting(self))
 
 	self.client
 		:subscribe()
 		:andThen(function(details)
 			self:setPage(Connected(self, details))
+
+			self.client:readAll():andThen(function(data)
+				-- print(data)
+			end)
 		end)
 		:catch(function(err)
 			self:setPage(Error(self, err))
