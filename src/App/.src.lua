@@ -99,10 +99,11 @@ end
 
 function App:setPage(page)
 	local pages = peek(self.pages)
+	local toRemove = {}
 
 	for i, child in ipairs(pages) do
 		if child._finished then
-			table.remove(pages, i)
+			table.insert(toRemove, i)
 			continue
 		end
 
@@ -110,6 +111,10 @@ function App:setPage(page)
 			child._destructor(child._value)
 			child._finished = true
 		end)
+	end
+
+	for _, i in ipairs(toRemove) do
+		table.remove(pages, i)
 	end
 
 	local transparency = Value(0)
@@ -121,8 +126,7 @@ function App:setPage(page)
 			Position = UDim2.fromScale(0.5, 0.5),
 			BackgroundColor3 = Theme.Colors.Background,
 			BorderSizePixel = 0,
-			GroupTransparency = Spring(transparency, 30),
-			-- Size = UDim2.fromScale(1, 1),
+			GroupTransparency = Spring(transparency, 25),
 			Size = Spring(size, 5),
 			[Children] = {
 				List {
@@ -168,7 +172,7 @@ function App:setPage(page)
 		page.ZIndex = math.huge
 
 		transparency:set(1)
-		size:set(UDim2.fromScale(2, 1))
+		size:set(UDim2.fromScale(2, 1.2))
 		task.wait(0.15)
 
 		cleanup(page)
@@ -221,19 +225,20 @@ end
 
 function App:connect()
 	-- self:setPage(Connecting(self))
+	self.core:init()
 
-	self.client
-		:subscribe()
-		:andThen(function(details)
-			self:setPage(Connected(self, details))
+	-- self.client
+	-- 	:subscribe()
+	-- 	:andThen(function(details)
+	-- 		self:setPage(Connected(self, details))
 
-			self.client:readAll():andThen(function(data)
-				-- print(data)
-			end)
-		end)
-		:catch(function(err)
-			self:setPage(Error(self, err))
-		end)
+	-- 		self.client:readAll():andThen(function(data)
+	-- 			-- print(data)
+	-- 		end)
+	-- 	end)
+	-- 	:catch(function(err)
+	-- 		self:setPage(Error(self, err))
+	-- 	end)
 end
 
 function App:disconnect()

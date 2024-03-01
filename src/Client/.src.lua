@@ -6,6 +6,7 @@ local Util = require(Argon.Util)
 local Config = require(Argon.Config)
 
 local Http = require(script.Http)
+local Error = require(script.Error)
 local generateId = require(script.generateId)
 
 local Client = {}
@@ -25,18 +26,20 @@ function Client:getUrl(): string
 	return `http://{self.host}:{self.port}/`
 end
 
-function Client:subscribe(): Promise.Promise
+function Client:subscribe(ignoreIds: boolean): Promise.Promise
 	local url = self:getUrl() .. 'details'
 
 	return Http.get(url):andThen(function(response)
 		local details = response:json()
 
-		if details.gameId and details.gameId ~= game.GameId then
-			return Promise.reject('Current GameId does not match the server `game_id`')
-		end
+		if not ignoreIds then
+			if details.gameId and details.gameId ~= game.GameId then
+				return Promise.reject(Error.new(Error.GameId, game.GameId, details.gameId))
+			end
 
-		if details.placeIds and not table.find(details.placeIds, game.PlaceId) then
-			return Promise.reject('Current PlaceId is not inluded in the server `place_ids` list')
+			if details.placeIds and not table.find(details.placeIds, game.PlaceId) then
+				return Promise.reject(Error.new(Error.PlaceIds, game.PlaceId, Util.arrayToString(details.placeIds)))
+			end
 		end
 
 		local url = self:getUrl() .. 'subscribe'
@@ -49,7 +52,7 @@ function Client:subscribe(): Promise.Promise
 				return details
 			end)
 			:catch(function()
-				return Promise.reject(`Client with this ID: {self.clientId}, already subscribed to the server`)
+				return Promise.reject(Error.new(Error.AlreadySubscribed, self.clientId))
 			end)
 	end)
 end

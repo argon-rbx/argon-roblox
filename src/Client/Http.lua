@@ -4,6 +4,8 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
+local Error = require(script.Parent.Error)
+
 local function methodify(response: { [string]: any }): any
 	return setmetatable(response, {
 		__index = {
@@ -31,10 +33,10 @@ local function request(method: string, url: string, body: { [string]: any }?): P
 			if response.Success then
 				resolve(methodify(response))
 			else
-				reject(response)
+				reject(Error.fromResponse(response))
 			end
 		else
-			reject(response)
+			reject(Error.fromMessage(response))
 		end
 	end)
 end
