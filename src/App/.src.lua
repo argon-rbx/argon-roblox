@@ -87,13 +87,15 @@ function App.new()
 	plugin.Unloading:Connect(Observer(isOpen):onChange(function()
 		toolbarButton:SetActive(peek(isOpen))
 	end))
-
 	toolbarButton:SetActive(peek(isOpen))
 
 	self:setPage(NotConnected(self))
 
 	self.core:setPromptHandler(function(message, options)
 		return self:prompt(message, options)
+	end)
+	self.core:setStatusChangeHandler(function(status)
+		self:onStatusChange(status)
 	end)
 
 	if Config:get('autoConnect') then
@@ -237,14 +239,23 @@ function App:prompt(message: string, options: { string }): string
 	return signal:Wait()
 end
 
+function App:onStatusChange(status: Core.Status)
+	if status == 'Connected' then
+		self:setPage(Connected(self, self.core.project))
+	elseif status == 'Disconnected' then
+		self:home()
+	elseif status == 'Error' then
+		self:setPage(Error(self, 'TODO'))
+	end
+end
+
 function App:connect()
 	self:setPage(Connecting(self))
 	self.core:init()
 end
 
 function App:disconnect()
-	self.client:unsubscribe()
-	self:home()
+	self.core:stop()
 end
 
 function App:setHost(host: string)

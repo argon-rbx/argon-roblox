@@ -21,6 +21,8 @@ function Core.new(client)
 		return options[1]
 	end
 
+	self.statusChanged = function(_status: Status) end
+
 	return self
 end
 
@@ -49,19 +51,34 @@ function Core:init(): Promise.Promise
 		end
 
 		self.client:subscribe():expect()
+		self.project = project
 
 		local initialChanges = self.client:readAll():expect()
 
 		print(initialChanges)
 
-		self.status = 'Connected'
+		self:setStatus('Connected')
 
 		return resolve('Core initialized successfully')
 	end)
 end
 
+function Core:stop()
+	self.client:unsubscribe()
+	self:setStatus('Disconnected')
+end
+
+function Core:setStatus(status: Status)
+	self.status = status
+	self.statusChanged(status)
+end
+
 function Core:setPromptHandler(prompt: (string, { string }) -> string)
 	self.prompt = prompt
+end
+
+function Core:setStatusChangeHandler(statusChanged: (Status) -> ())
+	self.statusChanged = statusChanged
 end
 
 return Core

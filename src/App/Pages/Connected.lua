@@ -21,7 +21,7 @@ local Box = require(Components.Box)
 local Children = Fusion.Children
 local Cleanup = Fusion.Cleanup
 
-return function(app, details: { [string]: any }): { Instance }
+return function(app, project: { [string]: any }): { Instance }
 	local widget = nil
 
 	return {
@@ -32,7 +32,7 @@ return function(app, details: { [string]: any }): { Instance }
 				Padding {},
 				Text {
 					Size = UDim2.fromScale(0.8, 0.6),
-					Text = details.name,
+					Text = project.name,
 					Font = Theme.Fonts.Bold,
 					Scaled = true,
 				},
@@ -95,7 +95,7 @@ return function(app, details: { [string]: any }): { Instance }
 								widget = nil
 							end,
 
-							[Children] = ProjectDetails(app, details),
+							[Children] = ProjectDetails(app, project),
 						}
 					end,
 					[Cleanup] = function()
