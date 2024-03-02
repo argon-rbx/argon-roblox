@@ -26,35 +26,26 @@ function Client:getUrl(): string
 	return `http://{self.host}:{self.port}/`
 end
 
-function Client:subscribe(ignoreIds: boolean): Promise.Promise
+function Client:fetchDetails(): Promise.Promise
 	local url = self:getUrl() .. 'details'
 
 	return Http.get(url):andThen(function(response)
-		local details = response:json()
-
-		if not ignoreIds then
-			if details.gameId and details.gameId ~= game.GameId then
-				return Promise.reject(Error.new(Error.GameId, game.GameId, details.gameId))
-			end
-
-			if details.placeIds and not table.find(details.placeIds, game.PlaceId) then
-				return Promise.reject(Error.new(Error.PlaceIds, game.PlaceId, Util.arrayToString(details.placeIds)))
-			end
-		end
-
-		local url = self:getUrl() .. 'subscribe'
-
-		return Http.post(url, {
-			clientId = self.clientId,
-		})
-			:andThen(function()
-				self.isConnected = true
-				return details
-			end)
-			:catch(function()
-				return Promise.reject(Error.new(Error.AlreadySubscribed, self.clientId))
-			end)
+		return response:json()
 	end)
+end
+
+function Client:subscribe(): Promise.Promise
+	local url = self:getUrl() .. 'subscribe'
+
+	return Http.post(url, {
+		clientId = self.clientId,
+	})
+		:andThen(function()
+			self.isConnected = true
+		end)
+		:catch(function()
+			return Promise.reject(Error.new(Error.AlreadySubscribed, self.clientId))
+		end)
 end
 
 function Client:unsubscribe(): Promise.Promise
@@ -62,9 +53,13 @@ function Client:unsubscribe(): Promise.Promise
 
 	return Http.post(url, {
 		clientId = self.clientId,
-	}):andThen(function()
-		self.isConnected = false
-	end)
+	})
+		:andThen(function()
+			self.isConnected = false
+		end)
+		:catch(function()
+			return Promise.reject(Error.new(Error.NotSubscribed, self.clientId))
+		end)
 end
 
 function Client:read(): Promise.Promise

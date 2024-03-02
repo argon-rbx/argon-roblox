@@ -1,7 +1,3 @@
-local Argon = script:FindFirstAncestor('Argon')
-
-local Util = require(Argon.Util)
-
 export type Error = {
 	message: string,
 	kind: string,
@@ -12,53 +8,55 @@ local Error = {
 	Unknown = 'Unknown HTTP error: $1',
 	-- Argon client
 	AlreadySubscribed = 'Client with this ID: $1, already subscribed to the server',
-	GameId = 'Current GameId: $1 does not match the server game_id: $2',
-	PlaceIds = 'Current PlaceId: $1 is not inluded in the server place_ids list: $2',
+	NotSubscribed = 'Client with this ID: $1, was not subscribed to the server',
 	-- HttpService
 	ConnectFail = 'Failed to connect to the Argon server! Make sure the server is running and the address is correct',
 	DnsResolve = 'Host name is corrupted or not found',
 }
 
-function Error.new(kind: string, ...): Error
-	local message = kind
+function Error.__new(message: string, kind: string, data: any?): Error
+	local err = setmetatable({
+		message = message,
+		kind = kind,
+		data = data,
+	}, {
+		__eq = function(self, other: Error): boolean
+			return self.kind == other.kind
+		end,
+	})
+
+	return err
+end
+
+function Error.new(err: Error, ...): Error
+	err = table.clone(err)
 
 	for i, v in pairs({ ... }) do
-		message = message:gsub('$' .. i, v)
+		err.message = err.message:gsub('$' .. i, v)
 	end
 
-	return {
-		message = message,
-		kind = Util.findDictionary(Error, kind),
-	}
+	return err
 end
 
 function Error.fromResponse(response: { [string]: any }): Error
-	return {
-		message = Error.Unknown:gsub('$1', response.Body),
-		kind = 'Unknown',
-		data = response,
-	}
+	return Error.__new(Error.Unknown.message:gsub('$1', response.Body), 'Unknown', response)
 end
 
 function Error.fromMessage(message: string): Error
-	for err, msg in pairs(Error) do
-		if type(msg) == 'string' and message:find(err) and err ~= 'Unknown' then
-			return {
-				message = msg,
-				kind = err,
-			}
+	for kind, err in pairs(Error) do
+		if type(err) == 'table' and message:find(kind) and kind ~= 'Unknown' then
+			return Error.__new(message, kind)
 		end
 	end
 
-	return {
-		message = message,
-		kind = 'Unknown',
-	}
+	return Error.__new(message, 'Unknown')
 end
 
-function Error.is(err: Error, kind: string): boolean
-	local key = Util.findDictionary(Error, kind)
-	return err.kind == key
+-- Convert all strings to Error objects
+for kind, msg in pairs(Error) do
+	if type(msg) == 'string' then
+		Error[kind] = Error.__new(msg, kind)
+	end
 end
 
 return Error

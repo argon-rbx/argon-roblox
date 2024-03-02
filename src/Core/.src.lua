@@ -2,7 +2,9 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
-local ClientError = require(Argon.Client.Error)
+local Util = require(Argon.Util)
+
+local Error = require(script.Error)
 
 export type Status = 'Connected' | 'Disconnected' | 'Error'
 
@@ -15,30 +17,51 @@ function Core.new(client)
 	self.client = client
 	self.status = 'Disconnected'
 
+	self.promt = function(_message: string, options: { string }): string
+		return options[1]
+	end
+
 	return self
 end
 
-function Core:init(ignoreIds: boolean): Promise.Promise
-	return self.client
-		:subscribe(ignoreIds)
-		:andThen(function(project)
-			self.client:readAll():andThen(function(data)
-				self.project = project
+function Core:init(): Promise.Promise
+	return Promise.new(function(resolve, reject)
+		local project = self.client:fetchDetails():expect()
+		local promptOptions = {
+			'Continue',
+			'Cancel',
+		}
 
-				print(data)
+		if project.gameId and project.gameId ~= game.GameId then
+			local err = Error.new(Error.GameId, game.GameId, project.gameId)
 
-				return project
-			end)
-		end)
-		:catch(function(err)
-			if ClientError.is(err, ClientError.GameId) or ClientError.is(err, ClientError.PlaceIds) then
-				-- TODO: prompt user
-
-				return self:init(true)
-			else
-				return Promise.reject(err)
+			if self.prompt(err.message, promptOptions) == 'Cancel' then
+				return reject(err)
 			end
-		end)
+		end
+
+		if project.placeIds and not table.find(project.placeIds, game.PlaceId) then
+			local err = Error.new(Error.PlaceIds, game.PlaceId, Util.arrayToString(project.placeIds))
+
+			if self.prompt(err.message, promptOptions) == 'Cancel' then
+				return reject(err)
+			end
+		end
+
+		self.client:subscribe():expect()
+
+		local initialChanges = self.client:readAll():expect()
+
+		print(initialChanges)
+
+		self.status = 'Connected'
+
+		return resolve('Core initialized successfully')
+	end)
+end
+
+function Core:setPromptHandler(prompt: (string, { string }) -> string)
+	self.prompt = prompt
 end
 
 return Core

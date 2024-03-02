@@ -7,6 +7,7 @@ local Widgets = script.Widgets
 local Pages = script.Pages
 
 local Fusion = require(Packages.Fusion)
+local Signal = require(Argon.Packages.Signal)
 
 local manifest = require(Argon.manifest)
 local Config = require(Argon.Config)
@@ -28,6 +29,7 @@ local List = require(Components.List)
 local NotConnected = require(Pages.NotConnected)
 local Connecting = require(Pages.Connecting)
 local Connected = require(Pages.Connected)
+local Prompt = require(Pages.Prompt)
 local Error = require(Pages.Error)
 
 local Settings = require(Widgets.Settings)
@@ -89,6 +91,10 @@ function App.new()
 	toolbarButton:SetActive(peek(isOpen))
 
 	self:setPage(NotConnected(self))
+
+	self.core:setPromptHandler(function(message, options)
+		return self:prompt(message, options)
+	end)
 
 	if Config:get('autoConnect') then
 		self:connect()
@@ -223,22 +229,17 @@ function App:help()
 	}
 end
 
+function App:prompt(message: string, options: { string }): string
+	local signal = Signal.new()
+
+	self:setPage(Prompt(message, options, signal))
+
+	return signal:Wait()
+end
+
 function App:connect()
-	-- self:setPage(Connecting(self))
+	self:setPage(Connecting(self))
 	self.core:init()
-
-	-- self.client
-	-- 	:subscribe()
-	-- 	:andThen(function(details)
-	-- 		self:setPage(Connected(self, details))
-
-	-- 		self.client:readAll():andThen(function(data)
-	-- 			-- print(data)
-	-- 		end)
-	-- 	end)
-	-- 	:catch(function(err)
-	-- 		self:setPage(Error(self, err))
-	-- 	end)
 end
 
 function App:disconnect()
