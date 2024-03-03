@@ -35,9 +35,9 @@ function Error.new(err: Error, ...): Error
 end
 
 -- Convert all strings to Error objects
-for kind, msg in pairs(Error) do
-	if type(msg) == 'string' then
-		Error[kind] = Error.__new(msg, kind)
+for kind, message in pairs(Error) do
+	if type(message) == 'string' then
+		Error[kind] = Error.__new(message, kind)
 	end
 end
 

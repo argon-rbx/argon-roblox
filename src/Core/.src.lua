@@ -4,6 +4,8 @@ local Promise = require(Argon.Packages.Promise)
 
 local Util = require(Argon.Util)
 
+local Processor = require(script.Processor)
+local Tree = require(script.Tree)
 local Error = require(script.Error)
 
 export type Status = 'Connected' | 'Disconnected' | 'Error'
@@ -14,8 +16,11 @@ function Core.new(client)
 	local self = setmetatable({}, { __index = Core })
 
 	self.project = nil
-	self.client = client
 	self.status = 'Disconnected'
+
+	self.client = client
+	self.tree = Tree.new()
+	self.processor = Processor.new(self.tree)
 
 	self.promt = function(_message: string, options: { string }): string
 		return options[1]
@@ -55,7 +60,7 @@ function Core:init(): Promise.Promise
 
 		local initialChanges = self.client:readAll():expect()
 
-		print(initialChanges)
+		self.processor:initialize(initialChanges)
 
 		self:setStatus('Connected')
 

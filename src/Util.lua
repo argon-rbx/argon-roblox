@@ -1,3 +1,5 @@
+local HttpService = game:GetService('HttpService')
+
 local Util = {}
 
 --- Get length of non-numerically indexed table
@@ -41,6 +43,11 @@ function Util.findDictionary(dictionary: { [any]: any }, value: any): any?
 	end
 
 	return nil
+end
+
+--- Generate a GUID, example: 04AEBFEA-87FC-480F-A98B-E5E221007A90
+function Util.generateGUID(): string
+	return HttpService:GenerateGUID(false)
 end
 
 --- Cast the value to the provided type

@@ -11,8 +11,10 @@ local Signal = require(Argon.Packages.Signal)
 
 local manifest = require(Argon.manifest)
 local Config = require(Argon.Config)
+local Util = require(Argon.Util)
 local Client = require(Argon.Client)
 local Core = require(Argon.Core)
+local CoreError = require(Argon.Core.Error)
 
 local Assets = require(script.Assets)
 local Theme = require(script.Theme)
@@ -107,11 +109,10 @@ end
 
 function App:setPage(page)
 	local pages = peek(self.pages)
-	local toRemove = {}
 
-	for i, child in ipairs(pages) do
+	for id, child in pairs(pages) do
 		if child._finished then
-			table.insert(toRemove, i)
+			page[id] = nil
 			continue
 		end
 
@@ -119,10 +120,6 @@ function App:setPage(page)
 			child._destructor(child._value)
 			child._finished = true
 		end)
-	end
-
-	for _, i in ipairs(toRemove) do
-		table.remove(pages, i)
 	end
 
 	local transparency = Value(0)
@@ -186,8 +183,7 @@ function App:setPage(page)
 		cleanup(page)
 	end)
 
-	table.insert(pages, page)
-
+	pages[Util.generateGUID()] = page
 	self.pages:set(pages)
 end
 
@@ -250,8 +246,16 @@ function App:onStatusChange(status: Core.Status)
 end
 
 function App:connect()
-	self:setPage(Connecting(self))
-	self.core:init()
+	-- self:setPage(Connecting(self))
+
+	self.core:init():catch(function(err)
+		if err == CoreError.GameId or err == CoreError.PlaceIds then
+			self:home()
+			return
+		end
+
+		self:setPage(Error(self, err.message))
+	end)
 end
 
 function App:disconnect()

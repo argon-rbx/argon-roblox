@@ -1,5 +1,3 @@
-local HttpService = game:GetService('HttpService')
-
 local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 
 local Argon = script:FindFirstAncestor('Argon')
@@ -8,6 +6,8 @@ local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
+
+local GlobalUtil = require(Argon.Util)
 
 local stripProps = require(Util.stripProps)
 local isState = require(Util.isState)
@@ -41,7 +41,7 @@ return function(props: WidgetProps): DockWidgetPluginGui
 	local floatingSize = props.FloatingSize or props.MinimumSize
 
 	local widget = plugin:CreateDockWidgetPluginGui(
-		props.Id or HttpService:GenerateGUID(),
+		props.Id or GlobalUtil.generateGUID(),
 		DockWidgetPluginGuiInfo.new(
 			props.InitialDockTo or Enum.InitialDockState.Float,
 			default(props.InitialEnabled, true),
