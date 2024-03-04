@@ -2,6 +2,8 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
+local Client = require(Argon.Client)
+local Config = require(Argon.Config)
 local Util = require(Argon.Util)
 
 local Processor = require(script.Processor)
@@ -11,14 +13,15 @@ local Error = require(script.Error)
 export type Status = 'Connected' | 'Disconnected' | 'Error'
 
 local Core = {}
+Core.__index = Core
 
-function Core.new(client)
-	local self = setmetatable({}, { __index = Core })
+function Core.new(host: string?, port: string?)
+	local self = setmetatable({}, Core)
 
 	self.project = nil
 	self.status = 'Disconnected'
 
-	self.client = client
+	self.client = Client.new(host or Config:get('host'), port or Config:get('port'))
 	self.tree = Tree.new()
 	self.processor = Processor.new(self.tree)
 
@@ -31,7 +34,7 @@ function Core.new(client)
 	return self
 end
 
-function Core:init(): Promise.Promise
+function Core:init(): Promise.TypedPromise<nil>
 	return Promise.new(function(resolve, reject)
 		local project = self.client:fetchDetails():expect()
 		local promptOptions = {
@@ -64,7 +67,7 @@ function Core:init(): Promise.Promise
 
 		self:setStatus('Connected')
 
-		return resolve('Core initialized successfully')
+		return resolve()
 	end)
 end
 

@@ -3,21 +3,26 @@ local Argon = script:FindFirstAncestor('Argon')
 local Promise = require(Argon.Packages.Promise)
 
 local Util = require(Argon.Util)
-local Config = require(Argon.Config)
+local Types = require(Argon.Core.Types)
 
 local Http = require(script.Http)
 local Error = require(script.Error)
 local generateId = require(script.generateId)
 
-local Client = {}
+type ProjectDetails = {
+	[string]: any,
+}
 
-function Client.new()
-	local self = setmetatable({}, { __index = Client })
+local Client = {}
+Client.__index = Client
+
+function Client.new(host: string, port: number)
+	local self = setmetatable({}, Client)
 
 	self.isConnected = false
 	self.clientId = generateId()
-	self.host = Config:get('host')
-	self.port = Config:get('port')
+	self.host = host
+	self.port = port
 
 	return self
 end
@@ -26,7 +31,7 @@ function Client:getUrl(): string
 	return `http://{self.host}:{self.port}/`
 end
 
-function Client:fetchDetails(): Promise.Promise
+function Client:fetchDetails(): Promise.TypedPromise<ProjectDetails>
 	local url = self:getUrl() .. 'details'
 
 	return Http.get(url):andThen(function(response)
@@ -62,7 +67,7 @@ function Client:unsubscribe(): Promise.Promise
 		end)
 end
 
-function Client:read(): Promise.Promise
+function Client:read(): Promise.TypedPromise<Types.Changes>
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
 	return Http.get(url):andThen(function(response)
@@ -70,7 +75,7 @@ function Client:read(): Promise.Promise
 	end)
 end
 
-function Client:readAll(): Promise.Promise
+function Client:readAll(): Promise.TypedPromise<Types.Changes>
 	local url = self:getUrl() .. `readAll?clientId={self.clientId}`
 
 	return Http.get(url):andThen(function()
@@ -88,14 +93,6 @@ function Client:readAll(): Promise.Promise
 
 		return queue
 	end)
-end
-
-function Client:setHost(host: string)
-	self.host = host
-end
-
-function Client:setPort(port: number)
-	self.port = port
 end
 
 return Client

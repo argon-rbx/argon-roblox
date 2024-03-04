@@ -22,8 +22,22 @@ function Util.join(table1: { any }, table2: { any }): { any }
 	return table1
 end
 
+function Util.deepCopy(table: { any }): { any }
+	local copy = {}
+
+	for key, value in pairs(table) do
+		if type(value) == 'table' then
+			copy[key] = Util.deepCopy(value)
+		else
+			copy[key] = value
+		end
+	end
+
+	return copy
+end
+
 function Util.arrayToString(array: { any }): string
-	local str = '['
+	local str = '{'
 
 	for _, value in ipairs(array) do
 		str ..= tostring(value) .. ', '
@@ -31,11 +45,35 @@ function Util.arrayToString(array: { any }): string
 
 	str = str:sub(1, -3)
 
-	return str .. ']'
+	return str .. '}'
+end
+
+function Util.dictionaryToString(dictionary: { any }): string
+	if Util.len(dictionary) == 0 then
+		return '{}'
+	end
+
+	local function pretty(value: any): string
+		if type(value) == 'table' then
+			return Util.dictionaryToString(value)
+		elseif type(value) == 'string' then
+			return `"{value}"`
+		else
+			return tostring(value)
+		end
+	end
+
+	local str = '{\n'
+
+	for key, value in pairs(dictionary) do
+		str ..= `\t[{pretty(key)}] = {pretty(value)},\n`
+	end
+
+	return str .. '}'
 end
 
 --- Find the key of the provided value in the dictionary
-function Util.findDictionary(dictionary: { [any]: any }, value: any): any?
+function Util.find(dictionary: { [any]: any }, value: any): any?
 	for k, v in pairs(dictionary) do
 		if v == value then
 			return k

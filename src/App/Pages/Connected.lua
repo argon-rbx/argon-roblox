@@ -39,7 +39,7 @@ return function(app, project: { [string]: any }): { Instance }
 				Text {
 					Position = UDim2.fromScale(0, 0.6),
 					Size = UDim2.fromScale(0.8, 0.4),
-					Text = `{app.client.host}:{app.client.port}`,
+					Text = `{app.host}:{app.port}`,
 					TextSize = Theme.TextSize - 4,
 					Font = Theme.Fonts.Mono,
 					Scaled = true,

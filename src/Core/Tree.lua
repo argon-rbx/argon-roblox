@@ -1,14 +1,15 @@
 local Types = require(script.Parent.Types)
 
 local Tree = {}
+Tree.__index = Tree
 
 function Tree.new()
-	local self = setmetatable({}, { __index = Tree })
+	local self = {
+		instanceMap = {},
+		idMap = {},
+	}
 
-	self.instanceMap = {}
-	self.idMap = {}
-
-	return self
+	return setmetatable(self, Tree)
 end
 
 function Tree:insert(instance: Instance, id: Types.Ref)
@@ -16,11 +17,11 @@ function Tree:insert(instance: Instance, id: Types.Ref)
 	self.idMap[instance] = id
 end
 
-function Tree:getByInstance(instance: Instance): Types.Ref?
+function Tree:getId(instance: Instance): Types.Ref?
 	return self.idMap[instance]
 end
 
-function Tree:getById(id: Types.Ref): Instance?
+function Tree:getInstance(id: Types.Ref): Instance?
 	return self.instanceMap[id]
 end
 

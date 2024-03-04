@@ -6,6 +6,15 @@ local Promise = require(Argon.Packages.Promise)
 
 local Error = require(script.Parent.Error)
 
+type Response = {
+	Body: string,
+	Headers: { [string]: string },
+	StatusCode: number,
+	StatusMessage: string,
+	Success: boolean,
+	json: () -> { [string]: any },
+}
+
 local function methodify(response: { [string]: any }): any
 	return setmetatable(response, {
 		__index = {
@@ -16,7 +25,7 @@ local function methodify(response: { [string]: any }): any
 	})
 end
 
-local function request(method: string, url: string, body: { [string]: any }?): Promise.Promise
+local function request(method: string, url: string, body: { [string]: any }?): Promise.TypedPromise<Response>
 	return Promise.new(function(resolve, reject)
 		local success, response = pcall(function()
 			return HttpService:RequestAsync({

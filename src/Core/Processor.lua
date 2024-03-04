@@ -2,27 +2,33 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
+local Util = require(Argon.Util)
+
 local Types = require(script.Parent.Types)
+local Changes = require(script.Parent.Changes)
 
 local Processor = {}
+Processor.__index = Processor
 
 function Processor.new(tree)
-	local self = setmetatable({}, { __index = Processor })
+	local self = {
+		tree = tree,
+	}
 
-	self.tree = tree
-
-	return self
+	return setmetatable(self, Processor)
 end
 
-function Processor:initialize(changes: Types.Changes): Promise.Promise
+function Processor:initialize(initialChanges: Types.Changes): Promise.TypedPromise<Types.Changes>
 	return Promise.new(function(resolve, reject)
-		for i, change in pairs(changes) do
-			local snapshot = change.Create :: Types.Snapshot
+		local changes = Changes.new()
+
+		for i, change in pairs(initialChanges) do
+			local snapshot = change.Create :: Types.AddedSnapshot
 
 			-- Skip the first change, as it's the root and needs to be processed differently
 			if i == 1 then
 				if snapshot.name ~= 'ROOT' then
-					reject('First change must be the root')
+					return reject('First change must be the root')
 				end
 
 				self.tree:insert(game, snapshot.id)
@@ -30,26 +36,44 @@ function Processor:initialize(changes: Types.Changes): Promise.Promise
 				continue
 			end
 
-			self:hydrate(snapshot)
+			-- Hydrate initial changes
+			do
+				local parent = self.tree:getInstance(snapshot.parent)
+
+				-- If parent doesn't exist it means that snapshot is a child of a new instance
+				if parent then
+					for _, child in parent:GetChildren() do
+						if child.Name == snapshot.name and child.ClassName == snapshot.class then
+							if self.tree:getId(child) then
+								continue
+							end
+
+							self.tree:insert(child, snapshot.id)
+							break
+						end
+					end
+				end
+			end
+
+			-- Diff local instances with incoming snapshots
+			do
+				local instance = self.tree:getInstance(snapshot.id)
+
+				-- Incoming snapshot does not exist locally
+				if not instance then
+					changes:add(snapshot)
+					continue
+				end
+
+				-- print(initialChanges[i].Create)
+
+				print(instance)
+			end
 		end
 
-		print(self.tree)
+		print(changes)
 
-		resolve('Changes processed successfully')
-	end)
-end
-
-function Processor:hydrate(snapshot: Types.Snapshot): Promise.Promise
-	return Promise.new(function(resolve, reject)
-		local parent = self.tree:getById(snapshot.parent)
-
-		if not parent then
-			return reject(`Failed to hydrate snapshot: {snapshot} - parent does not exist`)
-		end
-
-		-- TODO
-
-		return resolve('Hydrated successfully')
+		return resolve()
 	end)
 end
 

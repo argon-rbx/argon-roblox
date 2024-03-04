@@ -12,7 +12,6 @@ local Signal = require(Argon.Packages.Signal)
 local manifest = require(Argon.manifest)
 local Config = require(Argon.Config)
 local Util = require(Argon.Util)
-local Client = require(Argon.Client)
 local Core = require(Argon.Core)
 local CoreError = require(Argon.Core.Error)
 
@@ -54,9 +53,11 @@ App.__index = App
 function App.new()
 	local self = setmetatable({}, App)
 
-	self.client = Client.new()
-	self.core = Core.new(self.client)
-
+	self.core = nil
+	self.helpWidget = nil
+	self.settingsWidget = nil
+	self.host = Config:get('host')
+	self.port = Config:get('port')
 	self.pages = Value({})
 
 	local isOpen = Value(false)
@@ -89,16 +90,10 @@ function App.new()
 	plugin.Unloading:Connect(Observer(isOpen):onChange(function()
 		toolbarButton:SetActive(peek(isOpen))
 	end))
+
 	toolbarButton:SetActive(peek(isOpen))
 
 	self:setPage(NotConnected(self))
-
-	self.core:setPromptHandler(function(message, options)
-		return self:prompt(message, options)
-	end)
-	self.core:setStatusChangeHandler(function(status)
-		self:onStatusChange(status)
-	end)
 
 	if Config:get('autoConnect') then
 		self:connect()
@@ -248,26 +243,36 @@ end
 function App:connect()
 	-- self:setPage(Connecting(self))
 
+	self.core = Core.new()
+
+	self.core:setPromptHandler(function(message, options)
+		return self:prompt(message, options)
+	end)
+	self.core:setStatusChangeHandler(function(status)
+		self:onStatusChange(status)
+	end)
+
 	self.core:init():catch(function(err)
 		if err == CoreError.GameId or err == CoreError.PlaceIds then
 			self:home()
 			return
 		end
 
-		self:setPage(Error(self, err.message))
+		self:setPage(Error(self, err.message or tostring(err)))
 	end)
 end
 
 function App:disconnect()
 	self.core:stop()
+	self.core = nil
 end
 
 function App:setHost(host: string)
-	self.client:setHost(host)
+	self.host = host
 end
 
 function App:setPort(port: number)
-	self.client:setPort(port)
+	self.port = port
 end
 
 return App

@@ -3,7 +3,7 @@ export type Properties = {
 	[string]: any,
 }
 
-export type Snapshot = {
+export type AddedSnapshot = {
 	id: Ref,
 	parent: Ref,
 	name: string,
@@ -11,7 +11,7 @@ export type Snapshot = {
 	properties: Properties,
 }
 
-export type ModifiedSnapshot = {
+export type UpdatedSnapshot = {
 	id: Ref,
 	name: string?,
 	class: string?,
@@ -22,10 +22,10 @@ export type RemovedSnapshot = {
 	id: Ref,
 }
 
-export type Addition = { ['Create']: Snapshot }
-export type Modification = { ['Update']: ModifiedSnapshot }
+export type Addition = { ['Create']: AddedSnapshot }
+export type Update = { ['Update']: UpdatedSnapshot }
 export type Removal = { ['Remove']: RemovedSnapshot }
 
-export type Changes = { Addition | Modification | Removal }
+export type Changes = { Addition | Update | Removal }
 
 return nil

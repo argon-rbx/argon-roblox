@@ -23,7 +23,7 @@ local Box = require(Components.Box)
 local Value = Fusion.Value
 local Children = Fusion.Children
 
-local function getConfigValue(key: string): string
+local function loadConfigValue(key: string): string
 	local config = Config:get(key)
 	local default = Config:getDefault(key)
 
@@ -35,8 +35,8 @@ local function getConfigValue(key: string): string
 end
 
 return function(app): { Instance }
-	local hostInput = Value(getConfigValue('host'))
-	local portInput = Value(getConfigValue('port'))
+	local hostInput = Value(loadConfigValue('host'))
+	local portInput = Value(loadConfigValue('port'))
 
 	return {
 		List {},
