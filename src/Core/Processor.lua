@@ -2,6 +2,7 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
 local Dom = require(Argon.Dom)
+local equals = require(Argon.Helpers.equals)
 
 local Types = require(script.Parent.Types)
 local Changes = require(script.Parent.Changes)
@@ -55,19 +56,44 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 
 	local instance = self.tree:getInstance(snapshot.id)
 
+	-- Check if snapshot is new
 	if not instance then
 		changes:add(snapshot)
 		return changes
 	end
 
-	local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
+	-- Diff properties, find updated ones
+	do
+		local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
+		local updatedProperties = {}
 
-	for property, default in pairs(defaultProperties) do
-		if snapshot.properties[property] == nil then
-			local updatedProperties = {}
+		for property, default in pairs(defaultProperties) do
+			local value = snapshot.properties[property]
 
-			if snapshot.properties[property] then
-				print('TODO')
+			if value then
+				local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+				if not readSuccess then
+					warn(`Failed to read property {property} on {instance:GetFullName()}`)
+					continue
+				end
+
+				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+
+				if not decodeSuccess then
+					warn(
+						`Failed to decode snapshot property {property} from properties {Util.stringify(
+							snapshot.properties
+						)}`
+					)
+					continue
+				end
+
+				if not equals(instanceValue, snapshotValue) then
+					updatedProperties[property] = value
+				end
+
+				-- If snapshot does not have the property we want it to be default
 			else
 				local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
@@ -78,20 +104,21 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 
 				local _, defaultValue = Dom.EncodedValue.decode(default)
 
-				print(property)
-				print(instanceValue, defaultValue)
-				print(instanceValue == defaultValue)
+				if not equals(instanceValue, defaultValue) then
+					updatedProperties[property] = default
+				end
 			end
+		end
 
-			if Util.len(updatedProperties) > 0 then
-				changes:update({
-					id = snapshot.id,
-					properties = updatedProperties,
-				})
-			end
+		if Util.len(updatedProperties) > 0 then
+			changes:update({
+				id = snapshot.id,
+				properties = updatedProperties,
+			})
 		end
 	end
 
+	-- Diff snapshot children, find new ones
 	for _, child in snapshot.children do
 		local childInstance = self.tree:getInstance(child.id)
 
@@ -100,6 +127,7 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 		end
 	end
 
+	-- Diff instance children, find removed ones
 	for _, child in instance:GetChildren() do
 		local childId = self.tree:getId(child)
 

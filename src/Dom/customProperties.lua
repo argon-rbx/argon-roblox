@@ -1,5 +1,5 @@
-local CollectionService = game:GetService("CollectionService")
-local ScriptEditorService = game:GetService("ScriptEditorService")
+local CollectionService = game:GetService('CollectionService')
+local ScriptEditorService = game:GetService('ScriptEditorService')
 
 --- A list of `Enum.Material` values that are used for Terrain.MaterialColors
 local TERRAIN_MATERIAL_COLORS = {
@@ -46,9 +46,9 @@ return {
 						#attributeName <= 100
 						-- ...must only contain alphanumeric characters, periods, hyphens,
 						-- underscores, or forward slashes...
-						and attributeName:match("[^%w%.%-_/]") == nil
+						and attributeName:match('[^%w%.%-_/]') == nil
 						-- ... and must not use the RBX prefix, which is reserved by Roblox.
-						and attributeName:sub(1, 3) ~= "RBX"
+						and attributeName:sub(1, 3) ~= 'RBX'
 
 					if isNameValid then
 						instance:SetAttribute(attributeName, attributeValue)

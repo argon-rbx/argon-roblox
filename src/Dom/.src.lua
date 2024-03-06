@@ -48,7 +48,7 @@ local function getDefaultProperties(className)
 	for property, default in pairs(class.DefaultProperties) do
 		local descriptor = findCanonicalPropertyDescriptor(className, property)
 
-		if descriptor and descriptor.scriptability ~= 'None' then
+		if descriptor and (descriptor.scriptability == 'ReadWrite' or descriptor.scriptability == 'Custom') then
 			properties[property] = default
 		end
 	end

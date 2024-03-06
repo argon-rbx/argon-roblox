@@ -58,40 +58,39 @@ function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean):
 	return nil
 end
 
-function Util.arrayToString(array: { any }): string
-	local str = '{'
-
-	for _, value in ipairs(array) do
-		str ..= tostring(value) .. ', '
-	end
-
-	str = str:sub(1, -3)
-
-	return str .. '}'
-end
-
-function Util.dictionaryToString(dictionary: { any }): string
-	if Util.len(dictionary) == 0 then
-		return '{}'
-	end
-
-	local function pretty(value: any): string
-		if type(value) == 'table' then
-			return Util.dictionaryToString(value)
-		elseif type(value) == 'string' then
-			return `"{value}"`
-		else
-			return tostring(value)
+function Util.stringify(value: any): string
+	if type(value) == 'table' then
+		if Util.len(value) == 0 then
+			return '{}'
 		end
+
+		local first = next(value)
+
+		if type(first) == 'number' then
+			local str = '{'
+
+			for _, v in ipairs(value) do
+				str ..= Util.stringify(v) .. ', '
+			end
+
+			str = str:sub(1, -3)
+			return str .. '}'
+		else
+			local str = '{\n'
+
+			for k, v in pairs(value) do
+				str ..= `\t[{Util.stringify(k)}] = {Util.stringify(v)},\n`
+			end
+
+			return str .. '}'
+		end
+	elseif type(value) == 'string' then
+		return `"{value}"`
+	elseif typeof(value) == 'Instance' then
+		return value:GetFullName()
+	else
+		return tostring(value)
 	end
-
-	local str = '{\n'
-
-	for key, value in pairs(dictionary) do
-		str ..= `\t[{pretty(key)}] = {pretty(value)},\n`
-	end
-
-	return str .. '}'
 end
 
 --- Generate a GUID, example: 04AEBFEA-87FC-480F-A98B-E5E221007A90
