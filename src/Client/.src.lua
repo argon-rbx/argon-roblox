@@ -2,7 +2,6 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
-local Util = require(Argon.Util)
 local Types = require(Argon.Core.Types)
 
 local Http = require(script.Http)
@@ -67,7 +66,7 @@ function Client:unsubscribe(): Promise.Promise
 		end)
 end
 
-function Client:read(): Promise.TypedPromise<Types.Changes>
+function Client:read(): Promise.TypedPromise<Types.ChangeQueue>
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
 	return Http.get(url):andThen(function(response)
@@ -75,23 +74,11 @@ function Client:read(): Promise.TypedPromise<Types.Changes>
 	end)
 end
 
-function Client:readAll(): Promise.TypedPromise<Types.Changes>
-	local url = self:getUrl() .. `readAll?clientId={self.clientId}`
+function Client:getSnapshot(): Promise.TypedPromise<Types.ChangeQueue>
+	local url = self:getUrl() .. `snapshot?clientId={self.clientId}`
 
-	return Http.get(url):andThen(function()
-		local queue = {}
-
-		while true do
-			local chunk = self:read():expect()
-
-			if #chunk == 0 then
-				break
-			end
-
-			Util.join(queue, chunk)
-		end
-
-		return queue
+	return Http.get(url):andThen(function(response)
+		return response:json()
 	end)
 end
 

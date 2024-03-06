@@ -61,9 +61,11 @@ function Core:init(): Promise.TypedPromise<nil>
 		self.client:subscribe():expect()
 		self.project = project
 
-		local initialChanges = self.client:readAll():expect()
+		local snapshot = self.client:getSnapshot():expect()
+		local initialChanges = self.processor:initialize(snapshot)
 
-		self.processor:initialize(initialChanges)
+		print('---')
+		print(initialChanges)
 
 		self:setStatus('Connected')
 

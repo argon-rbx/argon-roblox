@@ -22,6 +22,7 @@ function Util.join(table1: { any }, table2: { any }): { any }
 	return table1
 end
 
+--- Copy table and all of its subtables
 function Util.deepCopy(table: { any }): { any }
 	local copy = {}
 
@@ -34,6 +35,27 @@ function Util.deepCopy(table: { any }): { any }
 	end
 
 	return copy
+end
+
+--- Find the key of the provided value in the table
+function Util.find(table: { any }, value: any): any?
+	for k, v in pairs(table) do
+		if v == value then
+			return k
+		end
+	end
+
+	return nil
+end
+
+function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean): (any?, any?)
+	for key, value in pairs(table) do
+		if filter(value, key) then
+			return value, key
+		end
+	end
+
+	return nil
 end
 
 function Util.arrayToString(array: { any }): string
@@ -72,23 +94,12 @@ function Util.dictionaryToString(dictionary: { any }): string
 	return str .. '}'
 end
 
---- Find the key of the provided value in the dictionary
-function Util.find(dictionary: { [any]: any }, value: any): any?
-	for k, v in pairs(dictionary) do
-		if v == value then
-			return k
-		end
-	end
-
-	return nil
-end
-
 --- Generate a GUID, example: 04AEBFEA-87FC-480F-A98B-E5E221007A90
 function Util.generateGUID(): string
 	return HttpService:GenerateGUID(false)
 end
 
---- Cast the value to the provided type
+--- Cast the value to the provided type (number, string, boolean, any)
 function Util.cast(value: any, target: any): any
 	if type(value) == target then
 		return value

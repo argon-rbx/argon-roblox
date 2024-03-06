@@ -1,8 +1,7 @@
 local Argon = script:FindFirstAncestor('Argon')
 
-local Promise = require(Argon.Packages.Promise)
-
 local Util = require(Argon.Util)
+local Dom = require(Argon.Dom)
 
 local Types = require(script.Parent.Types)
 local Changes = require(script.Parent.Changes)
@@ -18,63 +17,104 @@ function Processor.new(tree)
 	return setmetatable(self, Processor)
 end
 
-function Processor:initialize(initialChanges: Types.Changes): Promise.TypedPromise<Types.Changes>
-	return Promise.new(function(resolve, reject)
-		local changes = Changes.new()
+function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
+	local function hydrate(snapshot: Types.Snapshot, instance: Instance)
+		self.tree:insert(instance, snapshot.id)
 
-		for i, change in pairs(initialChanges) do
-			local snapshot = change.Create :: Types.AddedSnapshot
+		local children = instance:GetChildren()
+		local hydrated = table.create(#children, false)
 
-			-- Skip the first change, as it's the root and needs to be processed differently
-			if i == 1 then
-				if snapshot.name ~= 'ROOT' then
-					return reject('First change must be the root')
-				end
-
-				self.tree:insert(game, snapshot.id)
-
-				continue
-			end
-
-			-- Hydrate initial changes
-			do
-				local parent = self.tree:getInstance(snapshot.parent)
-
-				-- If parent doesn't exist it means that snapshot is a child of a new instance
-				if parent then
-					for _, child in parent:GetChildren() do
-						if child.Name == snapshot.name and child.ClassName == snapshot.class then
-							if self.tree:getId(child) then
-								continue
-							end
-
-							self.tree:insert(child, snapshot.id)
-							break
-						end
-					end
-				end
-			end
-
-			-- Diff local instances with incoming snapshots
-			do
-				local instance = self.tree:getInstance(snapshot.id)
-
-				-- Incoming snapshot does not exist locally
-				if not instance then
-					changes:add(snapshot)
+		for _, snapshotChild in ipairs(snapshot.children) do
+			for index, child in children do
+				if hydrated[index] then
 					continue
 				end
 
-				-- print(initialChanges[i].Create)
-
-				print(instance)
+				if child.Name == snapshotChild.name and child.ClassName == snapshotChild.class then
+					hydrate(snapshotChild, child)
+					hydrated[index] = true
+					break
+				end
 			end
 		end
+	end
 
-		print(changes)
+	hydrate(snapshot, game)
 
-		return resolve()
-	end)
+	local changes = Changes.new()
+
+	for _, child in ipairs(snapshot.children) do
+		changes:join(self:diff(child))
+	end
+
+	return changes
+end
+
+function Processor:diff(snapshot: Types.Snapshot): Types.Changes
+	local changes = Changes.new()
+
+	local instance = self.tree:getInstance(snapshot.id)
+
+	if not instance then
+		changes:add(snapshot)
+		return changes
+	end
+
+	local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
+
+	for property, default in pairs(defaultProperties) do
+		if snapshot.properties[property] == nil then
+			local updatedProperties = {}
+
+			if snapshot.properties[property] then
+				print('TODO')
+			else
+				local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+				if not readSuccess then
+					warn(`Failed to read property {property} on {instance:GetFullName()}`)
+					continue
+				end
+
+				local _, defaultValue = Dom.EncodedValue.decode(default)
+
+				print(property)
+				print(instanceValue, defaultValue)
+				print(instanceValue == defaultValue)
+			end
+
+			if Util.len(updatedProperties) > 0 then
+				changes:update({
+					id = snapshot.id,
+					properties = updatedProperties,
+				})
+			end
+		end
+	end
+
+	for _, child in snapshot.children do
+		local childInstance = self.tree:getInstance(child.id)
+
+		if not childInstance then
+			changes:add(child)
+		end
+	end
+
+	for _, child in instance:GetChildren() do
+		local childId = self.tree:getId(child)
+
+		if childId then
+			local childSnapshot = Util.filter(snapshot.children, function(child)
+				return child.id == childId
+			end)
+
+			changes:join(self:diff(childSnapshot))
+		else
+			changes:remove(child)
+		end
+	end
+
+	return changes
 end
 
 return Processor

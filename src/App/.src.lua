@@ -163,7 +163,7 @@ function App:setPage(page)
 			return
 		end
 
-		for _, v in page:GetDescendants() do
+		for _, v in ipairs(page:GetDescendants()) do
 			if v:IsA('GuiButton') then
 				v.Active = false
 			end
