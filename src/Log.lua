@@ -5,9 +5,9 @@ local Util = require(Argon.Util)
 local function format(...): string
 	local args = ''
 
-	for arg in ipairs({ ... }) do
-		if type(arg) == 'table' and arg.messsage then
-			args ..= ' ' .. arg.message
+	for _, arg in ipairs({ ... }) do
+		if type(arg) == 'table' and arg.message then
+			args ..= ' ' .. Util.truncate(arg.message, 200)
 		else
 			args ..= ' ' .. Util.stringify(arg)
 		end
@@ -48,7 +48,7 @@ end
 
 function Log.warn(...)
 	if Log.__current >= Log.Level.Warn then
-		warn('WARN:', format(...))
+		warn('WARN:' .. format(...))
 	end
 end
 

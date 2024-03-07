@@ -48,6 +48,7 @@ function Util.find(table: { any }, value: any): any?
 	return nil
 end
 
+--- Find the value and key of the first element that passes the filter
 function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean): (any?, any?)
 	for key, value in pairs(table) do
 		if filter(value, key) then
@@ -58,6 +59,7 @@ function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean):
 	return nil
 end
 
+--- Stringify the value
 function Util.stringify(value: any): string
 	if type(value) == 'table' then
 		if Util.len(value) == 0 then
@@ -92,6 +94,15 @@ function Util.stringify(value: any): string
 	else
 		return tostring(value)
 	end
+end
+
+--- Truncate the string to the provided length
+function Util.truncate(value: string, length: number): string
+	if #value > length then
+		return value:sub(1, length) .. '... *Truncated*'
+	end
+
+	return value
 end
 
 --- Generate a GUID, example: 04AEBFEA-87FC-480F-A98B-E5E221007A90

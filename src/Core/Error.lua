@@ -1,3 +1,7 @@
+local Argon = script:FindFirstAncestor('Argon')
+
+local Util = require(Argon.Util)
+
 export type Error = {
 	message: string,
 	kind: string,
@@ -35,7 +39,7 @@ function Error.new(err: Error, ...): Error
 	err = table.clone(err)
 
 	for i, v in pairs({ ... }) do
-		err.message = err.message:gsub('$' .. i, v)
+		err.message = err.message:gsub('$' .. i, Util.stringify(v))
 	end
 
 	return err

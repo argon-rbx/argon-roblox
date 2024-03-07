@@ -53,7 +53,7 @@ function Core:init(): Promise.TypedPromise<nil>
 		end
 
 		if project.placeIds and not table.find(project.placeIds, game.PlaceId) then
-			local err = Error.new(Error.PlaceIds, game.PlaceId, Util.stringify(project.placeIds))
+			local err = Error.new(Error.PlaceIds, game.PlaceId, project.placeIds)
 
 			if self.prompt(err.message, promptOptions) == 'Cancel' then
 				return reject(err)
