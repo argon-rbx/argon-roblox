@@ -17,8 +17,11 @@ function Changes.new()
 	return setmetatable(self, Changes)
 end
 
-function Changes:add(snapshot: Types.AddedSnapshot)
-	table.insert(self.additions, Util.deepCopy(snapshot))
+function Changes:add(snapshot: Types.Snapshot, parent: Types.Ref?)
+	local addedSnapshot = Util.deepCopy(snapshot)
+	addedSnapshot.parent = parent or addedSnapshot.parent
+
+	table.insert(self.additions, addedSnapshot)
 end
 
 function Changes:update(snapshot: Types.UpdatedSnapshot)
@@ -41,6 +44,10 @@ function Changes:join(other: Types.Changes)
 	for _, removal in ipairs(other.removals) do
 		self:remove(removal)
 	end
+end
+
+function Changes:total()
+	return #self.additions + #self.updates + #self.removals
 end
 
 return Changes

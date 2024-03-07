@@ -36,8 +36,6 @@ export type Addition = { ['Add']: AddedSnapshot }
 export type Update = { ['Update']: UpdatedSnapshot }
 export type Removal = { ['Remove']: RemovedSnapshot }
 
-export type ChangeQueue = { Addition | Update | Removal }
-
 export type Changes = {
 	additions: { AddedSnapshot },
 	updates: { UpdatedSnapshot },

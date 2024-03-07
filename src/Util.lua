@@ -79,13 +79,14 @@ function Util.stringify(value: any): string
 			local str = '{\n'
 
 			for k, v in pairs(value) do
-				str ..= `\t[{Util.stringify(k)}] = {Util.stringify(v)},\n`
+				local key = type(k) == 'string' and `"{k}"` or Util.stringify(k)
+				local val = type(v) == 'string' and `"{v}"` or Util.stringify(v)
+
+				str ..= `\t[{key}] = {val},\n`
 			end
 
 			return str .. '}'
 		end
-	elseif type(value) == 'string' then
-		return `"{value}"`
 	elseif typeof(value) == 'Instance' then
 		return value:GetFullName()
 	else

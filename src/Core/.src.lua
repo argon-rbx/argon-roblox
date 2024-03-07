@@ -12,6 +12,8 @@ local Error = require(script.Error)
 
 export type Status = 'Connected' | 'Disconnected' | 'Error'
 
+local CHANGES_TRESHOLD = 10
+
 local Core = {}
 Core.__index = Core
 
@@ -25,7 +27,7 @@ function Core.new(host: string?, port: string?)
 	self.tree = Tree.new()
 	self.processor = Processor.new(self.tree)
 
-	self.promt = function(_message: string, options: { string }): string
+	self.prompt = function(_message: string, options: { string }): string
 		return options[1]
 	end
 
@@ -63,6 +65,33 @@ function Core:init(): Promise.TypedPromise<nil>
 
 		local snapshot = self.client:getSnapshot():expect()
 		local initialChanges = self.processor:initialize(snapshot)
+
+		if initialChanges:total() > CHANGES_TRESHOLD then
+			local err = Error.new(
+				Error.TooManyChanges,
+				#initialChanges.additions,
+				#initialChanges.updates,
+				#initialChanges.removals
+			)
+
+			if self.prompt(err.message, promptOptions) == 'Cancel' then
+				return reject(err)
+			end
+		end
+
+		print('---')
+
+		for _, addition in ipairs(initialChanges.additions) do
+			self.processor:applyAddition(addition)
+		end
+
+		for _, update in ipairs(initialChanges.updates) do
+			self.processor:applyUpdate(update)
+		end
+
+		for _, removal in ipairs(initialChanges.removals) do
+			self.processor:applyRemoval(removal)
+		end
 
 		print('---')
 		print(initialChanges)

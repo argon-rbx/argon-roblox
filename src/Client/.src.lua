@@ -66,7 +66,7 @@ function Client:unsubscribe(): Promise.Promise
 		end)
 end
 
-function Client:read(): Promise.TypedPromise<Types.ChangeQueue>
+function Client:read(): Promise.TypedPromise<Types.Changes>
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
 	return Http.get(url):andThen(function(response)
@@ -74,7 +74,7 @@ function Client:read(): Promise.TypedPromise<Types.ChangeQueue>
 	end)
 end
 
-function Client:getSnapshot(): Promise.TypedPromise<Types.ChangeQueue>
+function Client:getSnapshot(): Promise.TypedPromise<Types.Changes>
 	local url = self:getUrl() .. `snapshot?clientId={self.clientId}`
 
 	return Http.get(url):andThen(function(response)

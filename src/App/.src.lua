@@ -253,7 +253,7 @@ function App:connect()
 	end)
 
 	self.core:init():catch(function(err)
-		if err == CoreError.GameId or err == CoreError.PlaceIds then
+		if err == CoreError.GameId or err == CoreError.PlaceIds or err == CoreError.TooManyChanges then
 			self:home()
 			return
 		end

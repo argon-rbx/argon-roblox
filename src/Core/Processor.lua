@@ -2,9 +2,11 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
 local Dom = require(Argon.Dom)
+local Log = require(Argon.Log)
 local equals = require(Argon.Helpers.equals)
 
 local Types = require(script.Parent.Types)
+local Error = require(script.Parent.Error)
 local Changes = require(script.Parent.Changes)
 
 local Processor = {}
@@ -45,20 +47,20 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 	local changes = Changes.new()
 
 	for _, child in ipairs(snapshot.children) do
-		changes:join(self:diff(child))
+		changes:join(self:diff(child, snapshot.id))
 	end
 
 	return changes
 end
 
-function Processor:diff(snapshot: Types.Snapshot): Types.Changes
+function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Changes
 	local changes = Changes.new()
 
 	local instance = self.tree:getInstance(snapshot.id)
 
 	-- Check if snapshot is new
 	if not instance then
-		changes:add(snapshot)
+		changes:add(snapshot, parent)
 		return changes
 	end
 
@@ -74,18 +76,18 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 				local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 				if not readSuccess then
-					warn(`Failed to read property {property} on {instance:GetFullName()}`)
+					local err = Error.new(Error.ReadFailed, property, instance)
+					Log.warn(err)
+
 					continue
 				end
 
 				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
 
 				if not decodeSuccess then
-					warn(
-						`Failed to decode snapshot property {property} from properties {Util.stringify(
-							snapshot.properties
-						)}`
-					)
+					local err = Error.new(Error.DecodeFailed, property, value)
+					Log.warn(err)
+
 					continue
 				end
 
@@ -98,7 +100,9 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 				local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 				if not readSuccess then
-					warn(`Failed to read property {property} on {instance:GetFullName()}`)
+					local err = Error.new(Error.ReadFailed, property, instance)
+					Log.warn(err)
+
 					continue
 				end
 
@@ -123,7 +127,7 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 		local childInstance = self.tree:getInstance(child.id)
 
 		if not childInstance then
-			changes:add(child)
+			changes:add(child, snapshot.id)
 		end
 	end
 
@@ -136,13 +140,115 @@ function Processor:diff(snapshot: Types.Snapshot): Types.Changes
 				return child.id == childId
 			end)
 
-			changes:join(self:diff(childSnapshot))
+			changes:join(self:diff(childSnapshot, snapshot.id))
 		else
 			changes:remove(child)
 		end
 	end
 
 	return changes
+end
+
+function Processor:applyAddition(snapshot: Types.AddedSnapshot)
+	local parent = self.tree:getInstance(snapshot.parent)
+
+	local instance = Instance.new(snapshot.class)
+	instance.Name = snapshot.name
+
+	for property, value in pairs(snapshot.properties) do
+		local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
+
+		if not decodeSuccess then
+			local err = Error.new(Error.DecodeFailed, property, value)
+			Log.warn(err)
+
+			continue
+		end
+
+		local writeSuccess = Dom.writeProperty(instance, property, decodedValue)
+
+		if not writeSuccess then
+			local err = Error.new(Error.WriteFailed, property, instance, decodedValue)
+			Log.warn(err)
+
+			continue
+		end
+	end
+
+	instance.Parent = parent
+	self.tree:insert(instance, snapshot.id)
+
+	for _, child in ipairs(snapshot.children) do
+		child.parent = snapshot.id
+
+		self:applyAddition(child)
+	end
+end
+
+function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
+	local instance = self.tree:getInstance(snapshot.id)
+	local defaultProperties = Dom.getDefaultProperties(snapshot.class or instance.ClassName)
+
+	if snapshot.class then
+		local newInstance = Instance.new(snapshot.class)
+		instance.Name = instance.Name
+
+		-- TODO: copy properties
+
+		instance = newInstance
+	end
+
+	if snapshot.name then
+		instance.Name = snapshot.name
+	end
+
+	if snapshot.properties then
+		for property, default in pairs(defaultProperties) do
+			local value = snapshot.properties[property]
+
+			if value then
+				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+
+				if not decodeSuccess then
+					local err = Error.new(Error.DecodeFailed, property, value)
+					Log.warn(err)
+
+					continue
+				end
+
+				local writeSuccess = Dom.writeProperty(instance, property, snapshotValue)
+
+				if not writeSuccess then
+					local err = Error.new(Error.WriteFailed, property, instance, snapshotValue)
+					Log.warn(err)
+
+					continue
+				end
+			else
+				local _, defaultValue = Dom.EncodedValue.decode(default)
+				local writeSuccess = Dom.writeProperty(instance, property, defaultValue)
+
+				if not writeSuccess then
+					local err = Error.new(Error.WriteFailed, property, instance, defaultValue)
+					Log.warn(err)
+
+					continue
+				end
+			end
+		end
+	end
+end
+
+function Processor:applyRemoval(object: Types.Ref | Instance)
+	if typeof(object) == 'Instance' then
+		self.tree:removeByInstance(object)
+		object:Destroy()
+	else
+		local instance = self.tree:getInstance(object)
+
+		self.tree:removeById(object)
+		instance:Destroy()
+	end
 end
 
 return Processor

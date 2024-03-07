@@ -20,7 +20,7 @@ local Config = {
 		openInEditor = false,
 		twoWaySync = false,
 	},
-	configs = {},
+	__configs = {},
 }
 
 function Config.load()
@@ -28,9 +28,9 @@ function Config.load()
 		local config = plugin:GetSetting(key)
 
 		if config and type(config) == 'table' then
-			Config.configs[level] = config
+			Config.__configs[level] = config
 		else
-			Config.configs[level] = {}
+			Config.__configs[level] = {}
 		end
 	end
 end
@@ -43,10 +43,10 @@ function Config:get(key: string, level: Level?): any
 	end
 
 	if level then
-		return self.configs[level][key]
+		return self.__configs[level][key]
 	end
 
-	for _, config in pairs(self.configs) do
+	for _, config in pairs(self.__configs) do
 		if config[key] ~= nil then
 			return config[key]
 		end
@@ -75,12 +75,12 @@ function Config:set(key: string, value: any, level: Level)
 	value = Util.cast(value, type(default))
 
 	if value == default then
-		self.configs[level][key] = nil
+		self.__configs[level][key] = nil
 	else
-		self.configs[level][key] = value
+		self.__configs[level][key] = value
 	end
 
-	local config = self.configs[level]
+	local config = self.__configs[level]
 
 	if Util.len(config) == 0 then
 		plugin:SetSetting(CONFIGS[level], nil)
@@ -90,7 +90,7 @@ function Config:set(key: string, value: any, level: Level)
 end
 
 function Config:restoreDefaults(level: Level)
-	self.configs[level] = {}
+	self.__configs[level] = {}
 	plugin:SetSetting(CONFIGS[level], nil)
 end
 
