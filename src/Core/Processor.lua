@@ -84,7 +84,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Chan
 
 				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
 
-				if decodeSuccess then
+				if not decodeSuccess then
 					local err = Error.new(Error.DecodeFailed, property, value)
 					Log.warn(err)
 

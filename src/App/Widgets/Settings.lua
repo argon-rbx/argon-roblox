@@ -61,6 +61,11 @@ local SETTINGS_DATA = {
 		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
 		Index = 5,
 	},
+	syncInterval = {
+		Name = 'Sync Interval',
+		Description = 'The interval between each sync request in seconds',
+		Index = 6,
+	},
 }
 
 local LEVELS = { 'Global', 'Game', 'Place' }
@@ -78,7 +83,7 @@ local function Cell(props: Props): Frame
 
 	local valueComponent
 
-	if props.Setting == 'host' or props.Setting == 'port' then
+	if props.Setting == 'host' or props.Setting == 'port' or props.Setting == 'syncInterval' then
 		local isHost = props.Setting == 'host'
 		local filter = isHost and filterHost or filterPort
 		local userInput = false

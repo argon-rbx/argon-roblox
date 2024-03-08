@@ -231,19 +231,27 @@ function App:prompt(message: string, options: { string }): string
 end
 
 function App:onStatusChange(status: Core.Status)
-	if status == 'Connected' then
+	if status == Core.Status.Conntected then
 		self:setPage(Connected(self, self.core.project))
-	elseif status == 'Disconnected' then
+	elseif status == Core.Status.Disconnected then
 		self:home()
-	elseif status == 'Error' then
+	elseif status == Core.Status.Error then
 		self:setPage(Error(self, 'TODO'))
 	end
 end
 
 function App:connect()
-	-- self:setPage(Connecting(self))
+	local errored = false
 
 	self.core = Core.new()
+
+	task.spawn(function()
+		task.wait(0.15)
+
+		if self.core.status ~= Core.Status.Conntected and not errored then
+			self:setPage(Connecting(self))
+		end
+	end)
 
 	self.core:setPromptHandler(function(message, options)
 		return self:prompt(message, options)
@@ -252,7 +260,9 @@ function App:connect()
 		self:onStatusChange(status)
 	end)
 
-	self.core:init():catch(function(err)
+	self.core:run():catch(function(err)
+		errored = true
+
 		if err == CoreError.GameId or err == CoreError.PlaceIds or err == CoreError.TooManyChanges then
 			self:home()
 			return

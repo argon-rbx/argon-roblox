@@ -14,6 +14,8 @@ local Error = {
 	GameId = 'Current GameId: $1 does not match the server game_id: $2',
 	PlaceIds = 'Current PlaceId: $1 is not inluded in the server place_ids list: $2',
 	TooManyChanges = 'There are $1 additions, $2 updates, $3 deletions compared to the server',
+	-- Core errors
+	UnknownEvent = 'Received an unknown event from the server: $1, with data: $2',
 	-- Process errors
 	DecodeFailed = 'Failed to decode snapshot property: $1 with value: $2',
 	ReadFailed = 'Failed to read property: $1 from instance: $2',

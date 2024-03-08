@@ -21,7 +21,7 @@ return function(app): { Instance }
 	-- this prevents flickering in case the loading is too fast
 	-- (most of the time as users usually connect to local server)
 	task.spawn(function()
-		wait(0.1)
+		task.wait(0.1)
 		visible:set(true)
 	end)
 

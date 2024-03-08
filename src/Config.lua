@@ -19,6 +19,7 @@ local Config = {
 		autoConnect = true,
 		openInEditor = false,
 		twoWaySync = false,
+		syncInterval = 0.2,
 	},
 	__configs = {},
 }

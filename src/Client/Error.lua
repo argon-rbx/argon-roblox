@@ -49,7 +49,7 @@ end
 function Error.fromMessage(message: string): Error
 	for kind, err in pairs(Error) do
 		if type(err) == 'table' and message:find(kind) and kind ~= 'Unknown' then
-			return Error.__new(message, kind)
+			return Error.__new(err.message, kind)
 		end
 	end
 
