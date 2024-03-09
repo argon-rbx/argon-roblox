@@ -19,7 +19,7 @@ type Props = {
 	Value: string,
 }
 
-local function Cell(props: Props): Frame
+local function Entry(props: Props): Frame
 	return Box {
 		Size = UDim2.fromScale(1, 0),
 		[Children] = {
@@ -49,31 +49,31 @@ return function(app, details: { [string]: any }): ScrollingFrame
 			Padding {
 				Padding = Theme.WidgetPadding,
 			},
-			Cell {
+			Entry {
 				Name = 'Name',
 				Value = details.name,
 			},
-			Cell {
+			Entry {
 				Name = 'Game ID',
 				Value = details.gameId or 'Any',
 			},
-			Cell {
+			Entry {
 				Name = 'Place IDs',
 				Value = details.placeIds or 'Any',
 			},
-			Cell {
+			Entry {
 				Name = 'Synced Directories',
 				Value = 'TODO',
 			},
-			Cell {
+			Entry {
 				Name = 'Server Version',
 				Value = details.version,
 			},
-			Cell {
+			Entry {
 				Name = 'Host',
 				Value = app.client.host,
 			},
-			Cell {
+			Entry {
 				Name = 'Port',
 				Value = app.client.port,
 			},

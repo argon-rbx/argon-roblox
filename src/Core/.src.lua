@@ -14,14 +14,14 @@ export type Status = number
 
 local CHANGES_TRESHOLD = 10
 
-local Core = {}
-Core.__index = Core
-
-Core.Status = {
-	Disconnected = 0,
-	Conntected = 1,
-	Error = 2,
+local Core = {
+	Status = {
+		Disconnected = 0,
+		Conntected = 1,
+		Error = 2,
+	},
 }
+Core.__index = Core
 
 function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
@@ -30,7 +30,7 @@ function Core.new(host: string?, port: string?)
 	self.shouldSync = false
 	self.status = Core.Status.Disconnected
 
-	self.client = Client.new(host or Config:get('host'), port or Config:get('port'))
+	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
 	self.tree = Tree.new()
 	self.processor = Processor.new(self.tree)
 
@@ -143,7 +143,7 @@ function Core:__startSyncLoop()
 				end
 			end
 
-			task.wait(Config:get('syncInterval'))
+			task.wait(Config:get('SyncInterval'))
 		end
 
 		resolve()

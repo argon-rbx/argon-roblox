@@ -56,8 +56,8 @@ function App.new()
 	self.core = nil
 	self.helpWidget = nil
 	self.settingsWidget = nil
-	self.host = Config:get('host')
-	self.port = Config:get('port')
+	self.host = Config:get('Host')
+	self.port = Config:get('Port')
 	self.pages = Value({})
 
 	local isOpen = Value(false)
@@ -77,7 +77,7 @@ function App.new()
 
 	Widget {
 		Name = 'Argon',
-		InitialDockTo = Enum.InitialDockState.Float,
+		InitialDockTo = Enum.InitialDockState.Left,
 		MinimumSize = Vector2.new(300, 190),
 		Enabled = isOpen,
 		[OnChange 'Enabled'] = function(isEnabled)
@@ -95,7 +95,7 @@ function App.new()
 
 	self:setPage(NotConnected(self))
 
-	if Config:get('autoConnect') then
+	if Config:get('AutoConnect') then
 		self:connect()
 	end
 

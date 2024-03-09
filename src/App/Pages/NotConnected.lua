@@ -23,9 +23,9 @@ local Box = require(Components.Box)
 local Value = Fusion.Value
 local Children = Fusion.Children
 
-local function loadConfigValue(key: string): string
-	local config = Config:get(key)
-	local default = Config:getDefault(key)
+local function loadConfigValue(setting: Config.Setting): string
+	local config = Config:get(setting)
+	local default = Config:getDefault(setting)
 
 	if config == nil or config == default then
 		return ''
@@ -35,8 +35,8 @@ local function loadConfigValue(key: string): string
 end
 
 return function(app): { Instance }
-	local hostInput = Value(loadConfigValue('host'))
-	local portInput = Value(loadConfigValue('port'))
+	local hostInput = Value(loadConfigValue('Host'))
+	local portInput = Value(loadConfigValue('Port'))
 
 	return {
 		List {},
@@ -55,7 +55,7 @@ return function(app): { Instance }
 					end,
 
 					Finished = function(host)
-						app:setHost(host ~= '' and host or Config:getDefault('host'))
+						app:setHost(host ~= '' and host or Config:getDefault('Host'))
 					end,
 				},
 				Input {
@@ -71,7 +71,7 @@ return function(app): { Instance }
 					end,
 
 					Finished = function(port)
-						app:setPort(port ~= '' and tonumber(port) or Config:getDefault('port'))
+						app:setPort(port ~= '' and tonumber(port) or Config:getDefault('Port'))
 					end,
 
 					[Children] = {

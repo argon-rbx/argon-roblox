@@ -6,7 +6,10 @@ local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
+
+local GlobalUtil = require(Argon.Util)
 local Config = require(Argon.Config)
+local Log = require(Argon.Log)
 
 local Theme = require(App.Theme)
 local default = require(Util.default)
@@ -32,95 +35,149 @@ local Observer = Fusion.Observer
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local OnChange = Fusion.OnChange
-local ForPairs = Fusion.ForPairs
+local ForValues = Fusion.ForValues
 local peek = Fusion.peek
 
 local SETTINGS_DATA = {
-	host = {
+	{
+		Setting = 'Host',
 		Name = 'Server Host',
 		Description = 'The host of the server that you want to connect to',
-		Index = 1,
 	},
-	port = {
+	{
+		Setting = 'Port',
 		Name = 'Server Port',
 		Description = 'The port of the server that you want to connect to',
-		Index = 2,
 	},
-	autoConnect = {
+	{
+		Setting = 'AutoConnect',
 		Name = 'Auto Connect',
 		Description = 'Automatically attempt to connect to the server when you open a new place',
-		Index = 3,
 	},
-	openInEditor = {
+	{
+		Setting = 'OpenInEditor',
 		Name = 'Open In Editor',
 		Description = 'Open scripts in your OS default editor instead of the Roblox Studio one',
-		Index = 4,
 	},
-	twoWaySync = {
+	{
+		Setting = 'TwoWaySync',
 		Name = 'Two-Way Sync',
 		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
-		Index = 5,
 	},
-	syncInterval = {
+	{
+		Setting = 'TwoWaySyncProperties',
+		Name = 'Sync Properties',
+		Description = 'Whether all properties should be synced back to the server',
+		Requires = 'TwoWaySync',
+	},
+	{
+		Setting = 'LogLevel',
+		Name = 'Log Level',
+		Description = 'The level of logging that you want to see in the output',
+		Options = GlobalUtil.keys(Log.Level),
+	},
+	{
+		Setting = 'SyncInterval',
 		Name = 'Sync Interval',
 		Description = 'The interval between each sync request in seconds',
-		Index = 6,
 	},
 }
 
 local LEVELS = { 'Global', 'Game', 'Place' }
 
-type Props = {
-	Setting: string,
-	Level: Fusion.Value<Config.Level>,
-	Binding: Fusion.Value<any>,
+type SettingData = {
+	Setting: Config.Setting,
+	Name: string,
+	Description: string,
+	Requires: Config.Setting?,
+	Options: { string }?,
 }
 
-local function Cell(props: Props): Frame
-	local data = SETTINGS_DATA[props.Setting] or {}
+type Props = {
+	Data: SettingData,
+	Level: Fusion.Value<Config.Level>,
+	Binding: Fusion.Value<any>,
+	Requires: Fusion.Value<boolean>?,
+}
+
+local function Entry(props: Props): Frame
+	local setting = props.Data.Setting
 	local absoluteSize = Value(Vector2.new())
-	local valueType = type(peek(props.Binding))
 
 	local valueComponent
 
-	if props.Setting == 'host' or props.Setting == 'port' or props.Setting == 'syncInterval' then
-		local isHost = props.Setting == 'host'
-		local filter = isHost and filterHost or filterPort
+	if setting == 'Host' or setting == 'Port' or setting == 'SyncInterval' then
+		local size
+		if setting == 'Host' then
+			size = UDim2.new(0.31, 0, 0, Theme.CompSizeY - 6)
+		elseif setting == 'Port' then
+			size = UDim2.fromOffset(70, Theme.CompSizeY - 6)
+		else
+			size = UDim2.fromOffset(53, Theme.CompSizeY - 6)
+		end
+
+		local onChanged
+		if setting == 'Host' then
+			onChanged = filterHost
+		elseif setting == 'Port' then
+			onChanged = filterPort
+		else
+			onChanged = function(text)
+				return text:sub(1, 4):gsub('[^%d%.]', '')
+			end
+		end
+
+		local onFinished
+		if setting == 'SyncInterval' then
+			onFinished = function(text)
+				local number = tonumber(text)
+
+				if not number then
+					return Config:getDefault(setting)
+				end
+
+				return math.clamp(number, 0.15, 60)
+			end
+		else
+			onFinished = function(text)
+				return text ~= '' and text or Config:getDefault(setting)
+			end
+		end
+
 		local userInput = false
 
 		local disconnect = Observer(props.Binding):onChange(function()
 			local value = peek(props.Binding)
 
-			if not userInput and value == Config:getDefault(props.Setting) then
+			if not userInput and value == Config:getDefault(setting) then
 				props.Binding:set('')
 			end
 
 			userInput = false
 		end)
 
-		if peek(props.Binding) == Config:getDefault(props.Setting) then
+		if peek(props.Binding) == Config:getDefault(setting) then
 			props.Binding:set('')
 		end
 
 		valueComponent = Box {
-			Size = isHost and UDim2.new(0.31, 0, 0, Theme.CompSizeY - 6) or UDim2.fromOffset(70, Theme.CompSizeY - 6),
+			Size = size,
 			[Children] = {
 				Input {
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
-					Scaled = isHost,
-					PlaceholderText = Config:getDefault(props.Setting),
+					Scaled = setting == 'Host',
+					PlaceholderText = Config:getDefault(setting),
 
 					Changed = function(text)
 						userInput = true
-						props.Binding:set(filter(text))
+						props.Binding:set(onChanged(text))
 					end,
 					Finished = function(text)
-						Config:set(
-							props.Setting,
-							text ~= '' and text or Config:getDefault(props.Setting),
-							peek(props.Level)
-						)
+						text = onFinished(text)
+
+						props.Binding:set(text)
+						Config:set(setting, text, peek(props.Level))
 					end,
 
 					[Children] = {
@@ -132,25 +189,29 @@ local function Cell(props: Props): Frame
 				},
 			},
 		}
-	elseif valueType == 'string' then
-		-- TODO: dropdown when needed
+	elseif props.Data.Options then
+		-- TODO: dropdown component
+		print(props.Data.Options)
 		valueComponent = Container {}
 	else
 		valueComponent = Checkbox {
 			Value = props.Binding,
 			Changed = function(value)
-				Config:set(props.Setting, value, peek(props.Level))
+				Config:set(setting, value, peek(props.Level))
 			end,
 		}
 	end
 
 	return Box {
 		Size = UDim2.fromScale(1, 0),
-		LayoutOrder = data.Index or math.huge,
+		Visible = Computed(function(use)
+			return default(use(props.Requires), true)
+		end),
+
 		[Children] = {
 			Padding {},
 			Text {
-				Text = data.Name or props.Setting,
+				Text = props.Data.Name,
 				Font = Theme.Fonts.Bold,
 			},
 			Container {
@@ -166,7 +227,7 @@ local function Cell(props: Props): Frame
 							Text {
 								TextWrapped = true,
 								AutomaticSize = Enum.AutomaticSize.None,
-								Text = data.Description or 'No description',
+								Text = props.Data.Description,
 								TextSize = Theme.TextSize - 4,
 								Color = Theme.Colors.TextDimmed,
 								Position = UDim2.fromOffset(0, 22),
@@ -175,7 +236,7 @@ local function Cell(props: Props): Frame
 									local absoluteSize = use(absoluteSize)
 
 									local size = TextService:GetTextSize(
-										data.Description or 'No description',
+										props.Data.Description,
 										Theme.TextSize - 4,
 										Theme.Fonts.Enum,
 										Vector2.new(absoluteSize.X, math.huge)
@@ -221,15 +282,17 @@ return function(): ScrollingFrame
 					end
 				end,
 			},
-			ForPairs(Config.DEFAULTS, function(_, setting)
+			ForValues(SETTINGS_DATA, function(_, data)
+				local setting = data.Setting
 				local binding = Value(default(Config:get(setting, peek(level)), Config:getDefault(setting)))
 
 				bindings[setting] = binding
 
-				return setting, Cell {
-					Setting = setting,
+				return Entry {
+					Data = data,
 					Level = level,
 					Binding = binding,
+					Requires = bindings[data.Requires],
 				}
 			end, Fusion.cleanup),
 			Container {

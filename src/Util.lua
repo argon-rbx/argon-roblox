@@ -59,6 +59,17 @@ function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean):
 	return nil
 end
 
+--- Get an array of keys provided dictionary
+function Util.keys(dictionary: { any }): { any }
+	local keys = {}
+
+	for key in pairs(dictionary) do
+		table.insert(keys, key)
+	end
+
+	return keys
+end
+
 --- Stringify the value
 function Util.stringify(value: any): string
 	if type(value) == 'table' then

@@ -1,6 +1,7 @@
 local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
+local Config = require(Argon.Config)
 
 local function format(...): string
 	local args = ''
@@ -25,7 +26,7 @@ local Log = {
 		Debug = 4,
 		Trace = 5,
 	},
-	__current = 2,
+	__current = Config:getDefault('LogLevel'),
 }
 
 function Log.trace(...)

@@ -5,6 +5,15 @@ local Argon = script:FindFirstAncestor('Argon')
 local Util = require(Argon.Util)
 
 export type Level = 'Place' | 'Game' | 'Global'
+export type Setting =
+	'Host'
+	| 'Port'
+	| 'AutoConnect'
+	| 'OpenInEditor'
+	| 'TwoWaySync'
+	| 'TwoWaySyncProperties'
+	| 'LogLevel'
+	| 'SyncInterval'
 
 local CONFIGS = {
 	Place = 'ArgonConfigPlace_' .. game.PlaceId,
@@ -14,19 +23,21 @@ local CONFIGS = {
 
 local Config = {
 	DEFAULTS = {
-		host = 'localhost',
-		port = 8000,
-		autoConnect = true,
-		openInEditor = false,
-		twoWaySync = false,
-		syncInterval = 0.2,
+		Host = 'localhost',
+		Port = 8000,
+		AutoConnect = true,
+		OpenInEditor = false,
+		TwoWaySync = false,
+		TwoWaySyncProperties = false,
+		LogLevel = 2,
+		SyncInterval = 0.2,
 	},
 	__configs = {},
 }
 
 function Config.load()
-	for level, key in pairs(CONFIGS) do
-		local config = plugin:GetSetting(key)
+	for level, config in pairs(CONFIGS) do
+		config = plugin:GetSetting(config)
 
 		if config and type(config) == 'table' then
 			Config.__configs[level] = config
@@ -36,49 +47,49 @@ function Config.load()
 	end
 end
 
-function Config:get(key: string, level: Level?): any
-	local default = self.DEFAULTS[key]
+function Config:get(setting: Setting, level: Level?): any
+	local default = self.DEFAULTS[setting]
 
 	if default == nil then
-		error(`Setting '{key}' does not exist!`)
+		error(`Setting '{setting}' does not exist!`)
 	end
 
 	if level then
-		return self.__configs[level][key]
+		return self.__configs[level][setting]
 	end
 
 	for _, config in pairs(self.__configs) do
-		if config[key] ~= nil then
-			return config[key]
+		if config[setting] ~= nil then
+			return config[setting]
 		end
 	end
 
 	return default
 end
 
-function Config:getDefault(key: string): any
-	local default = self.DEFAULTS[key]
+function Config:getDefault(settings: Setting): any
+	local default = self.DEFAULTS[settings]
 
 	if default == nil then
-		error(`Setting '{key}' does not exist!`)
+		error(`Setting '{settings}' does not exist!`)
 	end
 
 	return default
 end
 
-function Config:set(key: string, value: any, level: Level)
-	local default = self.DEFAULTS[key]
+function Config:set(setting: Setting, value: any, level: Level)
+	local default = self.DEFAULTS[setting]
 
 	if default == nil then
-		error(`Setting '{key}' does not exist!`)
+		error(`Setting '{setting}' does not exist!`)
 	end
 
 	value = Util.cast(value, type(default))
 
 	if value == default then
-		self.__configs[level][key] = nil
+		self.__configs[level][setting] = nil
 	else
-		self.__configs[level][key] = value
+		self.__configs[level][setting] = value
 	end
 
 	local config = self.__configs[level]
