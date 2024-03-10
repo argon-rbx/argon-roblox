@@ -33,7 +33,7 @@ type WidgetProps = {
 	OverrideEnabled: boolean?,
 	FloatingSize: Vector2?,
 	MinimumSize: Vector2,
-	Closed: (() -> nil)?,
+	Closed: (() -> ())?,
 	[any]: any,
 }
 

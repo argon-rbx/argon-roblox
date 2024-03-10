@@ -7,6 +7,7 @@ local Fusion = require(Argon.Packages.Fusion)
 local Theme = require(App.Theme)
 
 local TextButton = require(Components.TextButton)
+local ScrollingContainer = require(Components.ScrollingContainer)
 local Padding = require(Components.Padding)
 local Text = require(Components.Text)
 local List = require(Components.List)
@@ -19,15 +20,20 @@ return function(app, message: string): { Instance }
 		List {
 			HorizontalAlignment = Enum.HorizontalAlignment.Right,
 		},
+
 		Box {
-			Size = UDim2.fromScale(1, 0),
+			Size = UDim2.fromScale(1, 0.55),
 			[Children] = {
-				Padding {},
-				Text {
-					Text = message,
-					TextWrapped = true,
-					Font = Theme.Fonts.Mono,
-					TextSize = Theme.TextSize - 2,
+				ScrollingContainer {
+					[Children] = {
+						Padding {},
+						Text {
+							Text = message,
+							TextWrapped = true,
+							Font = Theme.Fonts.Mono,
+							TextSize = Theme.TextSize - 2,
+						},
+					},
 				},
 			},
 		},

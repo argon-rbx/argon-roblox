@@ -14,7 +14,7 @@ local Error = {
 	AlreadySubscribed = 'Client with this ID: $1, already subscribed to the server',
 	NotSubscribed = 'Client with this ID: $1, was not subscribed to the server',
 	-- HttpService
-	ConnectFail = 'Failed to connect to the Argon server! Make sure the server is running and the address is correct',
+	ConnectFail = 'Failed to connect to the Argon server! Make sure the server is running and the address is correct correct correct correct correct correct correct correct correct correct correct ',
 	DnsResolve = 'Host name is corrupted or not found',
 }
 

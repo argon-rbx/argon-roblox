@@ -23,7 +23,7 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
-	Changed: ((value: boolean) -> nil)?,
+	Changed: ((value: boolean) -> ())?,
 	Value: Fusion.CanBeState<boolean>?,
 	[any]: any,
 }

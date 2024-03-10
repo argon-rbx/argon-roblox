@@ -56,8 +56,11 @@ function App.new()
 	self.core = nil
 	self.helpWidget = nil
 	self.settingsWidget = nil
+
 	self.host = Config:get('Host')
 	self.port = Config:get('Port')
+
+	self.lastSync = Value(os.time())
 	self.pages = Value({})
 
 	local isOpen = Value(false)
@@ -77,7 +80,7 @@ function App.new()
 
 	Widget {
 		Name = 'Argon',
-		InitialDockTo = Enum.InitialDockState.Left,
+		InitialDockTo = Enum.InitialDockState.Float,
 		MinimumSize = Vector2.new(300, 190),
 		Enabled = isOpen,
 		[OnChange 'Enabled'] = function(isEnabled)
@@ -222,59 +225,68 @@ function App:help()
 	}
 end
 
-function App:prompt(message: string, options: { string }): string
-	local signal = Signal.new()
-
-	self:setPage(Prompt(message, options, signal))
-
-	return signal:Wait()
-end
-
-function App:onStatusChange(status: Core.Status)
-	if status == Core.Status.Conntected then
-		self:setPage(Connected(self, self.core.project))
-	elseif status == Core.Status.Disconnected then
-		self:home()
-	elseif status == Core.Status.Error then
-		self:setPage(Error(self, 'TODO'))
-	end
-end
-
 function App:connect()
 	local errored = false
+	local project = nil
 
 	self.core = Core.new()
 
 	task.spawn(function()
 		task.wait(0.15)
 
-		if self.core.status ~= Core.Status.Conntected and not errored then
+		if not self:isConnected() and not errored then
 			self:setPage(Connecting(self))
 		end
 	end)
 
-	self.core:setPromptHandler(function(message, options)
-		return self:prompt(message, options)
+	self.core:onPrompt(function(message, changes)
+		if changes then
+			-- TODO
+			return true
+		else
+			local options = { 'Accept', 'Cancel' }
+			local signal = Signal.new()
+
+			self:setPage(Prompt(message, options, signal))
+
+			return signal:Wait()
+		end
 	end)
-	self.core:setStatusChangeHandler(function(status)
-		self:onStatusChange(status)
+
+	self.core:onReady(function(projectDetails)
+		project = projectDetails
+		self.lastSync:set(os.time())
+
+		self:setPage(Connected(self, project))
+	end)
+
+	self.core:onSync(function()
+		self.lastSync:set(os.time())
 	end)
 
 	self.core:run():catch(function(err)
 		errored = true
 
 		if err == CoreError.GameId or err == CoreError.PlaceIds or err == CoreError.TooManyChanges then
+			self:disconnect()
 			self:home()
 			return
 		end
 
 		self:setPage(Error(self, err.message or tostring(err)))
+		self:disconnect()
 	end)
 end
 
 function App:disconnect()
-	self.core:stop()
-	self.core = nil
+	if self.core then
+		self.core:stop()
+		self.core = nil
+	end
+end
+
+function App:isConnected()
+	return self.core and self.core.isConnected
 end
 
 function App:setHost(host: string)

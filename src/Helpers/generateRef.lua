@@ -1,4 +1,6 @@
-local Types = require(script.Parent.Types)
+local Argon = script:FindFirstAncestor('Argon')
+
+local Types = require(Argon.Core.Types)
 
 local LENGTH = 38
 

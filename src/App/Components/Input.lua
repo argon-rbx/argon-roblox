@@ -27,8 +27,8 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
-	Changed: ((text: string) -> nil)?,
-	Finished: ((text: string) -> nil)?,
+	Changed: ((text: string) -> ())?,
+	Finished: ((text: string) -> ())?,
 	Font: Fusion.CanBeState<Font>?,
 	Color: Fusion.CanBeState<Color3>?,
 	PlaceholderColor: Fusion.CanBeState<Color3>?,

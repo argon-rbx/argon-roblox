@@ -3,6 +3,7 @@ local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
+local Log = require(Argon.Log)
 
 export type Level = 'Place' | 'Game' | 'Global'
 export type Setting =
@@ -15,6 +16,17 @@ export type Setting =
 	| 'LogLevel'
 	| 'SyncInterval'
 
+local DEFAULTS = {
+	Host = 'localhost',
+	Port = 8000,
+	AutoConnect = true,
+	OpenInEditor = false,
+	TwoWaySync = false,
+	TwoWaySyncProperties = false,
+	LogLevel = 'Warn',
+	SyncInterval = 0.2,
+}
+
 local CONFIGS = {
 	Place = 'ArgonConfigPlace_' .. game.PlaceId,
 	Game = 'ArgonConfigGame_' .. game.GameId,
@@ -22,17 +34,8 @@ local CONFIGS = {
 }
 
 local Config = {
-	DEFAULTS = {
-		Host = 'localhost',
-		Port = 8000,
-		AutoConnect = true,
-		OpenInEditor = false,
-		TwoWaySync = false,
-		TwoWaySyncProperties = false,
-		LogLevel = 'Warn',
-		SyncInterval = 0.2,
-	},
 	__configs = {},
+	__callbacks = {},
 }
 
 function Config.load()
@@ -48,10 +51,10 @@ function Config.load()
 end
 
 function Config:get(setting: Setting, level: Level?): any
-	local default = self.DEFAULTS[setting]
+	local default = DEFAULTS[setting]
 
 	if default == nil then
-		error(`Setting '{setting}' does not exist!`)
+		Log.error(`Setting '{setting}' does not exist!`)
 	end
 
 	if level then
@@ -68,29 +71,31 @@ function Config:get(setting: Setting, level: Level?): any
 end
 
 function Config:getDefault(settings: Setting): any
-	local default = self.DEFAULTS[settings]
+	local default = DEFAULTS[settings]
 
 	if default == nil then
-		error(`Setting '{settings}' does not exist!`)
+		Log.error(`Setting '{settings}' does not exist!`)
 	end
 
 	return default
 end
 
 function Config:set(setting: Setting, value: any, level: Level)
-	local default = self.DEFAULTS[setting]
+	local default = DEFAULTS[setting]
 
 	if default == nil then
-		error(`Setting '{setting}' does not exist!`)
+		Log.error(`Setting '{setting}' does not exist!`)
 	end
 
 	value = Util.cast(value, type(default))
 
-	if value == default then
-		self.__configs[level][setting] = nil
-	else
-		self.__configs[level][setting] = value
+	if value ~= self.__configs[level][setting] then
+		for _, callback in pairs(self.__callbacks[setting]) do
+			callback(value)
+		end
 	end
+
+	self.__configs[level][setting] = if value == default then nil else value
 
 	local config = self.__configs[level]
 
@@ -102,8 +107,28 @@ function Config:set(setting: Setting, value: any, level: Level)
 end
 
 function Config:restoreDefaults(level: Level)
+	for setting, _ in pairs(self.__configs[level]) do
+		for _, callback in pairs(self.__callbacks[setting]) do
+			callback(self:getDefault(setting))
+		end
+	end
+
 	self.__configs[level] = {}
+
 	plugin:SetSetting(CONFIGS[level], nil)
+end
+
+function Config:onChanged(setting: Setting, callback: (value: any) -> ()): () -> ()
+	if not self.__callbacks[setting] then
+		self.__callbacks[setting] = {}
+	end
+
+	local id = Util.generateGUID()
+	self.__callbacks[setting][id] = callback
+
+	return function()
+		self.__callbacks[setting][id] = nil
+	end
 end
 
 return Config

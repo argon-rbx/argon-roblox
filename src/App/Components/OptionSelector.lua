@@ -32,7 +32,7 @@ local BUTTON_COMPONENT_ONLY_PROPS = {
 }
 
 type ButtonProps = {
-	Activated: () -> nil,
+	Activated: () -> (),
 	IsSelected: Fusion.CanBeState<boolean>,
 	IsFirst: boolean,
 	IsLast: boolean,
@@ -126,7 +126,7 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
-	Selected: ((option: string) -> nil)?,
+	Selected: ((option: string) -> ())?,
 	Options: { string },
 	Value: Fusion.CanBeState<boolean>?,
 	[any]: any,

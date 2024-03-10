@@ -1,5 +1,9 @@
 local HttpService = game:GetService('HttpService')
 
+local Argon = script:FindFirstAncestor('Argon')
+
+local Fusion = require(Argon.Packages.Fusion)
+
 local Util = {}
 
 --- Get length of non-numerically indexed table
@@ -136,6 +140,11 @@ function Util.cast(value: any, target: any): any
 	else
 		return value
 	end
+end
+
+--- Clean all provided tasks, connections and instances
+function Util.cleanup(...)
+	Fusion.cleanup(...)
 end
 
 return Util

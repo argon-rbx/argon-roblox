@@ -4,41 +4,45 @@ local Promise = require(Argon.Packages.Promise)
 
 local Client = require(Argon.Client)
 local Config = require(Argon.Config)
+local Util = require(Argon.Util)
 local Log = require(Argon.Log)
 
 local Processor = require(script.Processor)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
-
-export type Status = number
+local Types = require(script.Types)
 
 local CHANGES_TRESHOLD = 10
 
-local Core = {
-	Status = {
-		Disconnected = 0,
-		Conntected = 1,
-		Error = 2,
-	},
-}
+local Core = {}
 Core.__index = Core
 
 function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
 
+	self.toClean = {}
 	self.project = nil
 	self.shouldSync = false
-	self.status = Core.Status.Disconnected
+	self.isConnected = false
 
 	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
 	self.tree = Tree.new()
 	self.processor = Processor.new(self.tree)
 
-	self.prompt = function(_message: string, options: { string }): string
-		return options[1]
+	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
+		return true
 	end
+	self.__ready = function(_project: Types.ProjectDetails) end
+	self.__sync = function(_changes: Types.Changes) end
 
-	self.statusChanged = function(_status: Status) end
+	self.syncInterval = Config:get('SyncInterval')
+
+	table.insert(
+		self.toClean,
+		Config:onChanged('SyncInterval', function(value)
+			self.syncInterval = value
+		end)
+	)
 
 	return self
 end
@@ -46,15 +50,11 @@ end
 function Core:run(): Promise.TypedPromise<nil>
 	return Promise.new(function(_, reject)
 		local project = self.client:fetchDetails():expect()
-		local promptOptions = {
-			'Continue',
-			'Cancel',
-		}
 
 		if project.gameId and project.gameId ~= game.GameId then
 			local err = Error.new(Error.GameId, game.GameId, project.gameId)
 
-			if self.prompt(err.message, promptOptions) == 'Cancel' then
+			if not self.__prompt(err.message) then
 				return reject(err)
 			end
 		end
@@ -62,7 +62,7 @@ function Core:run(): Promise.TypedPromise<nil>
 		if project.placeIds and not table.find(project.placeIds, game.PlaceId) then
 			local err = Error.new(Error.PlaceIds, game.PlaceId, project.placeIds)
 
-			if self.prompt(err.message, promptOptions) == 'Cancel' then
+			if not self.__prompt(err.message) then
 				return reject(err)
 			end
 		end
@@ -81,7 +81,7 @@ function Core:run(): Promise.TypedPromise<nil>
 				#initialChanges.removals
 			)
 
-			if self.prompt(err.message, promptOptions) == 'Cancel' then
+			if not self.__prompt(err.message, initialChanges) then
 				return reject(err)
 			end
 		end
@@ -98,33 +98,40 @@ function Core:run(): Promise.TypedPromise<nil>
 			self.processor:applyRemoval(removal)
 		end
 
-		self:setStatus(Core.Status.Conntected)
+		self.isConnected = true
+		self.__ready(project)
 
 		return self:__startSyncLoop():expect()
 	end)
 end
 
 function Core:stop()
-	self.client:unsubscribe()
-	self:setStatus(Core.Status.Disconnected)
+	self.isConnected = false
+
+	Util.cleanup(self.toClean)
+
+	if self.client.isSubscribed then
+		self.client:unsubscribe():catch(function(err)
+			Log.debug('Failed to unsubscribe from the server', err)
+		end)
+	end
 end
 
-function Core:setStatus(status: Status)
-	self.status = status
-	self.statusChanged(status)
+function Core:onPrompt(callback: (message: string, changes: Types.Changes?) -> boolean)
+	self.__prompt = callback
 end
 
-function Core:setPromptHandler(prompt: (string, { string }) -> string)
-	self.prompt = prompt
+function Core:onReady(callback: (project: Types.ProjectDetails) -> ())
+	self.__ready = callback
 end
 
-function Core:setStatusChangeHandler(statusChanged: (Status) -> ())
-	self.statusChanged = statusChanged
+function Core:onSync(callback: (message: Types.Message) -> ())
+	self.__sync = callback
 end
 
 function Core:__startSyncLoop()
 	return Promise.new(function(resolve)
-		while self.status == Core.Status.Conntected do
+		while self.isConnected do
 			local queue = self.client:read():expect()
 
 			for _, message in ipairs(queue) do
@@ -141,9 +148,11 @@ function Core:__startSyncLoop()
 					local err = Error.new(Error.UnknownEvent, event, data)
 					Log.warn(err)
 				end
+
+				self.__sync(self.message)
 			end
 
-			task.wait(Config:get('SyncInterval'))
+			task.wait(self.syncInterval)
 		end
 
 		resolve()

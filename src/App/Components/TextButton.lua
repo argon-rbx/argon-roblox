@@ -26,7 +26,7 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
-	Activated: (() -> nil)?,
+	Activated: (() -> ())?,
 	Solid: Fusion.CanBeState<boolean>?,
 	[any]: any,
 }

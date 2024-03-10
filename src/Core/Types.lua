@@ -32,14 +32,20 @@ export type RemovedSnapshot = {
 	id: Ref,
 }
 
-export type Addition = { ['Add']: AddedSnapshot }
-export type Update = { ['Update']: UpdatedSnapshot }
-export type Removal = { ['Remove']: RemovedSnapshot }
-
 export type Changes = {
 	additions: { AddedSnapshot },
 	updates: { UpdatedSnapshot },
 	removals: { Ref | Instance },
+}
+
+export type Addition = { ['Add']: AddedSnapshot }
+export type Update = { ['Update']: UpdatedSnapshot }
+export type Removal = { ['Remove']: RemovedSnapshot }
+
+export type Message = Addition | Update | Removal
+
+export type ProjectDetails = {
+	[string]: any,
 }
 
 return nil

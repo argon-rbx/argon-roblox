@@ -69,6 +69,7 @@ return function(app, project: { [string]: any }): { Instance }
 					Solid = true,
 
 					Activated = function()
+						app:home()
 						app:disconnect()
 					end,
 				},
