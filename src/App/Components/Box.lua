@@ -17,11 +17,15 @@ local Children = Fusion.Children
 local COMPONENT_ONLY_PROPS = {
 	'BackgroundColor',
 	'BorderColor',
+	'BackgroundTransparency',
+	'BorderTransparency',
 }
 
 type Props = {
 	BackgroundColor: Fusion.CanBeState<Color3>?,
 	BorderColor: Fusion.CanBeState<Color3>?,
+	BackgroundTransparency: Fusion.CanBeState<number>?,
+	BorderTransparency: Fusion.CanBeState<number>?,
 	[any]: any,
 }
 
@@ -29,10 +33,12 @@ return function(props: Props): Frame
 	return Hydrate(Container {
 		Size = UDim2.fromOffset(120, Theme.CompSizeY),
 		BackgroundColor3 = props.BackgroundColor or Theme.Colors.Background,
-		BackgroundTransparency = 0,
+		BackgroundTransparency = props.BackgroundTransparency or 0,
 
 		[Children] = {
-			Border {},
+			Border {
+				Transparency = props.BorderTransparency,
+			},
 		},
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

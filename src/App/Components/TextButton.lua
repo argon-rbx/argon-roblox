@@ -1,5 +1,3 @@
-local TextService = game:GetService('TextService')
-
 local Argon = script:FindFirstAncestor('Argon')
 local App = Argon.App
 local Components = App.Components
@@ -10,6 +8,7 @@ local Fusion = require(Argon.Packages.Fusion)
 local Theme = require(App.Theme)
 local animate = require(Util.animate)
 local stripProps = require(Util.stripProps)
+local getTextSize = require(Util.getTextSize)
 local getState = require(Util.getState)
 
 local Border = require(Components.Border)
@@ -48,20 +47,20 @@ return function(props: Props): TextButton
 		state
 	)
 
+	local size = props.Size
+		or Computed(function(use)
+			local text = use(props.Text)
+			local size = getTextSize(text)
+
+			return UDim2.fromOffset(size.X + 22, Theme.CompSizeY)
+		end)
+
 	return Hydrate(New 'TextButton' {
 		Text = 'Button',
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
 		TextSize = Theme.TextSize,
-
-		Size = Computed(function(use)
-			local text = use(props.Text)
-			local size =
-				TextService:GetTextSize(text, Theme.TextSize, Theme.Fonts.Enum, Vector2.new(math.huge, math.huge))
-
-			return UDim2.fromOffset(size.X + 22, Theme.CompSizeY)
-		end),
-
+		Size = size,
 		BackgroundColor3 = color,
 		TextColor3 = animate(Theme.Colors.Text, state),
 

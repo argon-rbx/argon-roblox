@@ -29,7 +29,7 @@ local Config = {
 		OpenInEditor = false,
 		TwoWaySync = false,
 		TwoWaySyncProperties = false,
-		LogLevel = 2,
+		LogLevel = 'Warn',
 		SyncInterval = 0.2,
 	},
 	__configs = {},

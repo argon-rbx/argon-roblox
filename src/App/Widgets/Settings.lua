@@ -1,5 +1,3 @@
-local TextService = game:GetService('TextService')
-
 local Argon = script:FindFirstAncestor('Argon')
 local App = Argon.App
 local Components = App.Components
@@ -7,20 +5,20 @@ local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local GlobalUtil = require(Argon.Util)
 local Config = require(Argon.Config)
-local Log = require(Argon.Log)
 
 local Theme = require(App.Theme)
 local default = require(Util.default)
 local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
+local getTextSize = require(Util.getTextSize)
 
 local ScrollingContainer = require(Components.ScrollingContainer)
 local OptionSelector = require(Components.OptionSelector)
 local TextButton = require(Components.TextButton)
 local Container = require(Components.Container)
 local Checkbox = require(Components.Checkbox)
+local Dropdown = require(Components.Dropdown)
 local Padding = require(Components.Padding)
 local Input = require(Components.Input)
 local List = require(Components.List)
@@ -73,8 +71,8 @@ local SETTINGS_DATA = {
 	{
 		Setting = 'LogLevel',
 		Name = 'Log Level',
-		Description = 'The level of logging that you want to see in the output',
-		Options = GlobalUtil.keys(Log.Level),
+		Description = 'The level of logging you want to see in the output',
+		Options = { 'Off', 'Error', 'Warn', 'Info', 'Debug', 'Trace' },
 	},
 	{
 		Setting = 'SyncInterval',
@@ -190,9 +188,13 @@ local function Entry(props: Props): Frame
 			},
 		}
 	elseif props.Data.Options then
-		-- TODO: dropdown component
-		print(props.Data.Options)
-		valueComponent = Container {}
+		valueComponent = Dropdown {
+			Options = props.Data.Options,
+			Value = props.Binding,
+			Selected = function(value)
+				Config:set(setting, value, peek(props.Level))
+			end,
+		}
 	else
 		valueComponent = Checkbox {
 			Value = props.Binding,
@@ -203,6 +205,7 @@ local function Entry(props: Props): Frame
 	end
 
 	return Box {
+		ZIndex = props.Data.Options and 2 or 1,
 		Size = UDim2.fromScale(1, 0),
 		Visible = Computed(function(use)
 			return default(use(props.Requires), true)
@@ -235,7 +238,7 @@ local function Entry(props: Props): Frame
 								Size = Computed(function(use)
 									local absoluteSize = use(absoluteSize)
 
-									local size = TextService:GetTextSize(
+									local size = getTextSize(
 										props.Data.Description,
 										Theme.TextSize - 4,
 										Theme.Fonts.Enum,

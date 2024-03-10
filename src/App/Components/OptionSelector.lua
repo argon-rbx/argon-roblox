@@ -1,5 +1,3 @@
-local TextService = game:GetService('TextService')
-
 local Argon = script:FindFirstAncestor('Argon')
 local App = Argon.App
 local Components = App.Components
@@ -11,6 +9,7 @@ local Theme = require(App.Theme)
 local animate = require(Util.animate)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
+local isState = require(Util.isState)
 
 local List = require(Components.List)
 local Box = require(Components.Box)
@@ -27,14 +26,14 @@ local peek = Fusion.peek
 
 local BUTTON_COMPONENT_ONLY_PROPS = {
 	'Activated',
-	'Solid',
+	'IsSelected',
 	'IsFirst',
 	'IsLast',
 }
 
 type ButtonProps = {
-	Activated: (() -> nil)?,
-	Solid: Fusion.CanBeState<boolean>?,
+	Activated: () -> nil,
+	IsSelected: Fusion.CanBeState<boolean>,
 	IsFirst: boolean,
 	IsLast: boolean,
 	[any]: any,
@@ -52,25 +51,17 @@ local function Button(props: ButtonProps): TextButton
 
 	local color = animate(
 		Computed(function(use)
-			return use(props.Solid) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
+			return use(props.IsSelected) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
 		end),
 		state
 	)
 
 	return Hydrate(New 'TextButton' {
 		Text = 'Button',
+		Size = UDim2.fromScale(1, 1),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
 		TextSize = Theme.TextSize,
-
-		Size = Computed(function(use)
-			local text = use(props.Text)
-			local size =
-				TextService:GetTextSize(text, Theme.TextSize, Theme.Fonts.Enum, Vector2.new(math.huge, math.huge))
-
-			return UDim2.fromOffset(size.X + 20, Theme.CompSizeY)
-		end),
-
 		BackgroundColor3 = color,
 		TextColor3 = animate(Theme.Colors.Text, state),
 
@@ -131,18 +122,18 @@ end
 local COMPONENT_ONLY_PROPS = {
 	'Selected',
 	'Options',
-	'Initial',
+	'Value',
 }
 
 type Props = {
 	Selected: ((option: string) -> nil)?,
 	Options: { string },
-	Initial: string?,
+	Value: Fusion.CanBeState<boolean>?,
 	[any]: any,
 }
 
 return function(props: Props)
-	local current = Value(props.Initial or props.Options[1])
+	local value = isState(props.Value) and props.Value or Value(props.Value or props.Options[1])
 
 	return Hydrate(Box {
 		Size = UDim2.new(1, 0, 0, Theme.CompSizeY - 8),
@@ -156,18 +147,17 @@ return function(props: Props)
 			},
 			ForValues(props.Options, function(_, option)
 				return Button {
-					Size = UDim2.fromScale(1, 1),
 					Text = option,
-					Solid = Computed(function(use)
-						return use(current) == option
+					IsSelected = Computed(function(use)
+						return use(value) == option
 					end),
 
 					Activated = function()
-						if option == peek(current) then
+						if option == peek(value) then
 							return
 						end
 
-						current:set(option)
+						value:set(option)
 
 						if props.Selected then
 							props.Selected(option)

@@ -29,20 +29,20 @@ type Props = {
 }
 
 return function(props: Props): TextButton
-	local isChecked = isState(props.Value) and props.Value or Value(props.Value or false)
+	local value = isState(props.Value) and props.Value or Value(props.Value or false)
 
 	return Hydrate(IconButton {
 		Size = UDim2.fromOffset(Theme.CompSizeY - 6, Theme.CompSizeY - 6),
-		Solid = isChecked,
+		Solid = value,
 		Icon = Computed(function(use)
-			return use(isChecked) and Assets.Icons.Checkmark or ''
+			return use(value) and Assets.Icons.Checkmark or ''
 		end),
 
 		Activated = function()
-			isChecked:set(not peek(isChecked))
+			value:set(not peek(value))
 
 			if props.Changed then
-				props.Changed(peek(isChecked))
+				props.Changed(peek(value))
 			end
 		end,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
