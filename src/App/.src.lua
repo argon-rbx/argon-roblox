@@ -2,18 +2,21 @@ local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 
 local Argon = script:FindFirstAncestor('Argon')
 local Packages = Argon.Packages
+local Helpers = Argon.Helpers
+
 local Components = script.Components
 local Widgets = script.Widgets
 local Pages = script.Pages
 
 local Fusion = require(Packages.Fusion)
-local Signal = require(Argon.Packages.Signal)
+local Signal = require(Packages.Signal)
 
 local manifest = require(Argon.manifest)
 local Config = require(Argon.Config)
 local Util = require(Argon.Util)
 local Core = require(Argon.Core)
 local CoreError = require(Argon.Core.Error)
+local describeChanges = require(Helpers.describeChanges)
 
 local Assets = require(script.Assets)
 local Theme = require(script.Theme)
@@ -61,6 +64,7 @@ function App.new()
 	self.port = Config:get('Port')
 
 	self.lastSync = Value(os.time())
+	self.rootSize = Value(Vector2.new(300, 190))
 	self.pages = Value({})
 
 	local isOpen = Value(false)
@@ -81,10 +85,14 @@ function App.new()
 	Widget {
 		Name = 'Argon',
 		InitialDockTo = Enum.InitialDockState.Float,
-		MinimumSize = Vector2.new(300, 190),
+		MinimumSize = peek(self.rootSize),
 		Enabled = isOpen,
+
 		[OnChange 'Enabled'] = function(isEnabled)
 			isOpen:set(isEnabled)
+		end,
+		[OnChange 'AbsoluteSize'] = function(size)
+			self.rootSize:set(size)
 		end,
 
 		[Children] = self.pages,
@@ -96,7 +104,7 @@ function App.new()
 
 	toolbarButton:SetActive(peek(isOpen))
 
-	self:setPage(NotConnected(self))
+	self:home()
 
 	if Config:get('AutoConnect') then
 		self:connect()
@@ -135,6 +143,7 @@ function App:setPage(page)
 				List {
 					VerticalAlignment = Enum.VerticalAlignment.Center,
 					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					Padding = 8,
 				},
 				Padding {
 					Padding = Theme.WidgetPadding,
@@ -186,7 +195,9 @@ function App:setPage(page)
 end
 
 function App:home()
-	self:setPage(NotConnected(self))
+	self:setPage(NotConnected {
+		App = self,
+	})
 end
 
 function App:settings()
@@ -227,6 +238,7 @@ end
 
 function App:connect()
 	local errored = false
+	local prompting = false
 	local project = nil
 
 	self.core = Core.new()
@@ -234,22 +246,52 @@ function App:connect()
 	task.spawn(function()
 		task.wait(0.15)
 
-		if not self:isConnected() and not errored then
-			self:setPage(Connecting(self))
+		if not self:isConnected() and not errored and not prompting then
+			self:setPage(Connecting {
+				App = self,
+			})
 		end
 	end)
 
 	self.core:onPrompt(function(message, changes)
+		prompting = true
+
+		local signal = Signal.new()
+
 		if changes then
-			-- TODO
-			return true
+			local options = { 'Accept', 'Diff', 'Cancel' }
+			message = describeChanges(changes)
+
+			self:setPage(Prompt {
+				App = self,
+				Message = message,
+				Options = options,
+				Signal = signal,
+			})
+
+			local result = signal:Wait()
+
+			while result == 'Diff' do
+				warn('This feature is not yet implemented')
+				result = signal:Wait()
+			end
+
+			prompting = false
+			return result == 'Accept'
 		else
-			local options = { 'Accept', 'Cancel' }
-			local signal = Signal.new()
+			local options = { 'Continue', 'Cancel' }
 
-			self:setPage(Prompt(message, options, signal))
+			self:setPage(Prompt {
+				App = self,
+				Message = message,
+				Options = options,
+				Signal = signal,
+			})
 
-			return signal:Wait()
+			local result = signal:Wait()
+
+			prompting = false
+			return result == 'Continue'
 		end
 	end)
 
@@ -257,10 +299,13 @@ function App:connect()
 		project = projectDetails
 		self.lastSync:set(os.time())
 
-		self:setPage(Connected(self, project))
+		self:setPage(Connected {
+			App = self,
+			Project = project,
+		})
 	end)
 
-	self.core:onSync(function()
+	self.core:onSync(function(_message)
 		self.lastSync:set(os.time())
 	end)
 
@@ -268,12 +313,16 @@ function App:connect()
 		errored = true
 
 		if err == CoreError.GameId or err == CoreError.PlaceIds or err == CoreError.TooManyChanges then
-			self:disconnect()
 			self:home()
+			self:disconnect()
 			return
 		end
 
-		self:setPage(Error(self, err.message or tostring(err)))
+		self:setPage(Error {
+			App = self,
+			Message = err.message or tostring(err),
+		})
+
 		self:disconnect()
 	end)
 end

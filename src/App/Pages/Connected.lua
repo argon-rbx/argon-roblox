@@ -5,6 +5,8 @@ local Widgets = App.Widgets
 
 local Fusion = require(Argon.Packages.Fusion)
 
+local Types = require(Argon.Core.Types)
+
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
 
@@ -25,14 +27,19 @@ local Children = Fusion.Children
 local Cleanup = Fusion.Cleanup
 local peek = Fusion.peek
 
-return function(app, project: { [string]: any }): { Instance }
+type Props = {
+	App: { [string]: any },
+	Project: Types.ProjectDetails,
+}
+
+return function(props: Props): { Instance }
 	local syncedText = Value('just now')
 	local widget = nil
 
 	local function updateSyncedText()
 		return task.spawn(function()
 			while true do
-				local elapsed = os.time() - peek(app.lastSync)
+				local elapsed = os.time() - peek(props.App.lastSync)
 				local interval = 1
 				local text
 
@@ -42,13 +49,13 @@ return function(app, project: { [string]: any }): { Instance }
 					text = math.floor(elapsed) .. 's ago'
 				elseif elapsed < 3600 then
 					interval = 60
-					text = math.floor(elapsed / interval) .. 'm ago'
+					text = elapsed // interval .. 'm ago'
 				elseif elapsed < 86400 then
 					interval = 3600
-					text = math.floor(elapsed / interval) .. 'h ago'
+					text = elapsed // interval .. 'h ago'
 				else
 					interval = 86400
-					text = math.floor(elapsed / interval) .. 'd ago'
+					text = elapsed // interval .. 'd ago'
 				end
 
 				syncedText:set(text)
@@ -58,7 +65,7 @@ return function(app, project: { [string]: any }): { Instance }
 	end
 
 	local thread = updateSyncedText()
-	local disconnect = Observer(app.lastSync):onChange(function()
+	local disconnect = Observer(props.App.lastSync):onChange(function()
 		task.cancel(thread)
 		thread = updateSyncedText()
 	end)
@@ -71,14 +78,14 @@ return function(app, project: { [string]: any }): { Instance }
 				Padding {},
 				Text {
 					Size = UDim2.fromScale(0.8, 0.6),
-					Text = project.name,
+					Text = props.Project.name,
 					Font = Theme.Fonts.Bold,
 					Scaled = true,
 				},
 				Text {
 					Position = UDim2.fromScale(0, 0.6),
 					Size = UDim2.fromScale(0.8, 0.4),
-					Text = `{app.host}:{app.port}`,
+					Text = `{props.App.host}:{props.App.port}`,
 					TextSize = Theme.TextSize - 4,
 					Font = Theme.Fonts.Mono,
 					Scaled = true,
@@ -110,15 +117,15 @@ return function(app, project: { [string]: any }): { Instance }
 					Solid = true,
 
 					Activated = function()
-						app:home()
-						app:disconnect()
+						props.App:home()
+						props.App:disconnect()
 					end,
 				},
 				IconButton {
 					Icon = Assets.Icons.Settings,
 					LayoutOrder = 1,
 					Activated = function()
-						app:settings()
+						props.App:settings()
 					end,
 				},
 				IconButton {
@@ -137,7 +144,7 @@ return function(app, project: { [string]: any }): { Instance }
 								widget = nil
 							end,
 
-							[Children] = ProjectDetails(app, project),
+							[Children] = ProjectDetails(props.App, props.Project),
 						}
 					end,
 					[Cleanup] = function()

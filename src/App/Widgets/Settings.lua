@@ -241,7 +241,7 @@ local function Entry(props: Props): Frame
 									local size = getTextSize(
 										props.Data.Description,
 										Theme.TextSize - 4,
-										Theme.Fonts.Enum,
+										Theme.Fonts.Enums.Regular,
 										Vector2.new(absoluteSize.X, math.huge)
 									)
 

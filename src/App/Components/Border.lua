@@ -1,9 +1,12 @@
 local Argon = script:FindFirstAncestor('Argon')
 local App = Argon.App
+local Components = App.Components
 
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
+
+local Corner = require(Components.Corner)
 
 local New = Fusion.New
 
@@ -16,9 +19,7 @@ type Props = {
 
 return function(props: Props): { Instance }
 	return {
-		New 'UICorner' {
-			CornerRadius = props.CornerRadius or Theme.CornerRadius,
-		},
+		Corner {},
 		New 'UIStroke' {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			Color = props.Color or Theme.Colors.Border,

@@ -11,20 +11,13 @@ local Spinner = require(Components.Spinner)
 local List = require(Components.List)
 local Box = require(Components.Box)
 
-local Value = Fusion.Value
-
 local Children = Fusion.Children
 
-return function(app): { Instance }
-	local visible = Value(false)
+type Props = {
+	App: { [string]: any },
+}
 
-	-- this prevents flickering in case the loading is too fast
-	-- (most of the time as users usually connect to local server)
-	task.spawn(function()
-		task.wait(0.1)
-		visible:set(true)
-	end)
-
+return function(props: Props): { Instance }
 	return {
 		List {
 			HorizontalAlignment = Enum.HorizontalAlignment.Right,
@@ -37,14 +30,14 @@ return function(app): { Instance }
 				Spinner {
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					Position = UDim2.fromScale(0.5, 0.5),
-					Visible = visible,
 				},
 			},
 		},
 		TextButton {
 			Text = 'Cancel',
 			Activated = function()
-				app:home()
+				props.App:disconnect()
+				props.App:home()
 			end,
 		},
 	}

@@ -42,108 +42,108 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 		end
 	end
 
+	local function diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Changes
+		local changes = Changes.new()
+
+		local instance = self.tree:getInstance(snapshot.id)
+
+		-- Check if snapshot is new
+		if not instance then
+			changes:add(snapshot, parent)
+			return changes
+		end
+
+		-- Diff properties, find updated ones
+		do
+			local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
+			local updatedProperties = {}
+
+			for property, default in pairs(defaultProperties) do
+				local value = snapshot.properties[property]
+
+				if value then
+					local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+					if not readSuccess then
+						local err = Error.new(Error.ReadFailed, property, instance)
+						Log.warn(err)
+
+						continue
+					end
+
+					local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+
+					if not decodeSuccess then
+						local err = Error.new(Error.DecodeFailed, property, value)
+						Log.warn(err)
+
+						continue
+					end
+
+					if not equals(instanceValue, snapshotValue) then
+						updatedProperties[property] = value
+					end
+
+				-- If snapshot does not have the property we want it to be default
+				else
+					local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+					if not readSuccess then
+						local err = Error.new(Error.ReadFailed, property, instance)
+						Log.warn(err)
+
+						continue
+					end
+
+					local _, defaultValue = Dom.EncodedValue.decode(default)
+
+					if not equals(instanceValue, defaultValue) then
+						updatedProperties[property] = default
+					end
+				end
+			end
+
+			if Util.len(updatedProperties) > 0 then
+				changes:update({
+					id = snapshot.id,
+					properties = updatedProperties,
+				})
+			end
+		end
+
+		-- Diff snapshot children, find new ones
+		for _, child in snapshot.children do
+			local childInstance = self.tree:getInstance(child.id)
+
+			if not childInstance then
+				changes:add(child, snapshot.id)
+			end
+		end
+
+		-- Diff instance children, find removed ones
+		for _, child in instance:GetChildren() do
+			local childId = self.tree:getId(child)
+
+			if childId then
+				local childSnapshot = Util.filter(snapshot.children, function(child)
+					return child.id == childId
+				end)
+
+				changes:join(diff(childSnapshot, snapshot.id))
+			else
+				changes:remove(child)
+			end
+		end
+
+		return changes
+	end
+
 	hydrate(snapshot, game)
 
 	local changes = Changes.new()
 
 	for _, child in ipairs(snapshot.children) do
-		changes:join(self:diff(child, snapshot.id))
-	end
-
-	return changes
-end
-
-function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Changes
-	local changes = Changes.new()
-
-	local instance = self.tree:getInstance(snapshot.id)
-
-	-- Check if snapshot is new
-	if not instance then
-		changes:add(snapshot, parent)
-		return changes
-	end
-
-	-- Diff properties, find updated ones
-	do
-		local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
-		local updatedProperties = {}
-
-		for property, default in pairs(defaultProperties) do
-			local value = snapshot.properties[property]
-
-			if value then
-				local readSuccess, instanceValue = Dom.readProperty(instance, property)
-
-				if not readSuccess then
-					local err = Error.new(Error.ReadFailed, property, instance)
-					Log.warn(err)
-
-					continue
-				end
-
-				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
-
-				if not decodeSuccess then
-					local err = Error.new(Error.DecodeFailed, property, value)
-					Log.warn(err)
-
-					continue
-				end
-
-				if not equals(instanceValue, snapshotValue) then
-					updatedProperties[property] = value
-				end
-
-				-- If snapshot does not have the property we want it to be default
-			else
-				local readSuccess, instanceValue = Dom.readProperty(instance, property)
-
-				if not readSuccess then
-					local err = Error.new(Error.ReadFailed, property, instance)
-					Log.warn(err)
-
-					continue
-				end
-
-				local _, defaultValue = Dom.EncodedValue.decode(default)
-
-				if not equals(instanceValue, defaultValue) then
-					updatedProperties[property] = default
-				end
-			end
-		end
-
-		if Util.len(updatedProperties) > 0 then
-			changes:update({
-				id = snapshot.id,
-				properties = updatedProperties,
-			})
-		end
-	end
-
-	-- Diff snapshot children, find new ones
-	for _, child in snapshot.children do
-		local childInstance = self.tree:getInstance(child.id)
-
-		if not childInstance then
-			changes:add(child, snapshot.id)
-		end
-	end
-
-	-- Diff instance children, find removed ones
-	for _, child in instance:GetChildren() do
-		local childId = self.tree:getId(child)
-
-		if childId then
-			local childSnapshot = Util.filter(snapshot.children, function(child)
-				return child.id == childId
-			end)
-
-			changes:join(self:diff(childSnapshot, snapshot.id))
-		else
-			changes:remove(child)
-		end
+		changes:join(diff(child, snapshot.id))
 	end
 
 	return changes
@@ -170,8 +170,6 @@ function Processor:applyAddition(snapshot: Types.AddedSnapshot)
 		if not writeSuccess then
 			local err = Error.new(Error.WriteFailed, property, instance, decodedValue)
 			Log.warn(err)
-
-			continue
 		end
 	end
 
@@ -193,7 +191,27 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 		local newInstance = Instance.new(snapshot.class)
 		instance.Name = instance.Name
 
-		-- TODO: copy properties
+		for property in pairs(defaultProperties) do
+			local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+			if readSuccess then
+				local writeSuccess = Dom.writeProperty(newInstance, property, instanceValue)
+
+				if not writeSuccess then
+					local err = Error.new(Error.WriteFailed, property, newInstance, instanceValue)
+					Log.warn(err)
+				end
+			end
+		end
+
+		for _, child in ipairs(instance:GetChildren()) do
+			child.Parent = newInstance
+		end
+
+		newInstance.Parent = instance.Parent
+
+		instance:Destroy()
+		self.tree:update(snapshot.id, newInstance)
 
 		instance = newInstance
 	end
@@ -221,8 +239,6 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 				if not writeSuccess then
 					local err = Error.new(Error.WriteFailed, property, instance, snapshotValue)
 					Log.warn(err)
-
-					continue
 				end
 			else
 				local _, defaultValue = Dom.EncodedValue.decode(default)
@@ -231,8 +247,6 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 				if not writeSuccess then
 					local err = Error.new(Error.WriteFailed, property, instance, defaultValue)
 					Log.warn(err)
-
-					continue
 				end
 			end
 		end

@@ -12,17 +12,16 @@ local New = Fusion.New
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'Padding',
+	'Radius',
 }
 
 type Props = {
-	Padding: number?,
+	Radius: number?,
 	[any]: any,
 }
 
-return function(props: Props): UIListLayout
-	return Hydrate(New 'UIListLayout' {
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, props.Padding or Theme.ListSpacing),
+return function(props: Props): UICorner
+	return Hydrate(New 'UICorner' {
+		CornerRadius = UDim.new(0, props.Radius or Theme.CornerRadius),
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

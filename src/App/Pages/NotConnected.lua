@@ -34,7 +34,11 @@ local function loadConfigValue(setting: Config.Setting): string
 	end
 end
 
-return function(app): { Instance }
+type Props = {
+	App: { [string]: any },
+}
+
+return function(props: Props): { Instance }
 	local hostInput = Value(loadConfigValue('Host'))
 	local portInput = Value(loadConfigValue('Port'))
 
@@ -55,7 +59,7 @@ return function(app): { Instance }
 					end,
 
 					Finished = function(host)
-						app:setHost(host ~= '' and host or Config:getDefault('Host'))
+						props.App:setHost(host ~= '' and host or Config:getDefault('Host'))
 					end,
 				},
 				Input {
@@ -71,7 +75,7 @@ return function(app): { Instance }
 					end,
 
 					Finished = function(port)
-						app:setPort(port ~= '' and tonumber(port) or Config:getDefault('Port'))
+						props.App:setPort(port ~= '' and tonumber(port) or Config:getDefault('Port'))
 					end,
 
 					[Children] = {
@@ -102,20 +106,20 @@ return function(app): { Instance }
 					LayoutOrder = 2,
 					Text = 'Connect',
 					Activated = function()
-						app:connect()
+						props.App:connect()
 					end,
 				},
 				IconButton {
 					Icon = Assets.Icons.Settings,
 					LayoutOrder = 1,
 					Activated = function()
-						app:settings()
+						props.App:settings()
 					end,
 				},
 				IconButton {
 					Icon = Assets.Icons.Help,
 					Activated = function()
-						app:help()
+						props.App:help()
 					end,
 				},
 			},

@@ -17,6 +17,19 @@ function Tree:insert(instance: Instance, id: Types.Ref)
 	self.idMap[instance] = id
 end
 
+function Tree:update(id: Types.Ref, instance: Instance)
+	local old = self.instanceMap[id]
+
+	if not old then
+		return -- should we error here?
+	end
+
+	self.idMap[old] = nil
+
+	self.instanceMap[id] = instance
+	self.idMap[instance] = id
+end
+
 function Tree:getId(instance: Instance): Types.Ref?
 	return self.idMap[instance]
 end

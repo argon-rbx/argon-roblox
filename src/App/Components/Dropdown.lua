@@ -18,6 +18,7 @@ local isState = require(Util.isState)
 local TextButton = require(Components.TextButton)
 local Container = require(Components.Container)
 local Padding = require(Components.Padding)
+local Corner = require(Components.Corner)
 local Image = require(Components.Image)
 local List = require(Components.List)
 local Box = require(Components.Box)
@@ -112,9 +113,7 @@ local function Button(props: ButtonProps): TextButton
 			},
 			if props.IsFirst
 				then {
-					New 'UICorner' {
-						CornerRadius = Theme.CornerRadius,
-					},
+					Corner {},
 					New 'Frame' {
 						AnchorPoint = Vector2.new(0.5, 1),
 						Position = UDim2.fromScale(0.5, 1),
@@ -124,9 +123,7 @@ local function Button(props: ButtonProps): TextButton
 					},
 				}
 				elseif props.IsLast then {
-					New 'UICorner' {
-						CornerRadius = Theme.CornerRadius,
-					},
+					Corner {},
 					New 'Frame' {
 						AnchorPoint = Vector2.new(0.5, 0),
 						Position = UDim2.fromScale(0.5, 0),
@@ -153,7 +150,7 @@ type Props = {
 	[any]: any,
 }
 
-return function(props: Props)
+return function(props: Props): TextButton
 	local value = isState(props.Value) and props.Value or Value(props.Value or props.Options[1])
 	local isOpen = Value(false)
 

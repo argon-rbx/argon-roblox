@@ -11,6 +11,7 @@ local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
 local isState = require(Util.isState)
 
+local Corner = require(Components.Corner)
 local List = require(Components.List)
 local Box = require(Components.Box)
 
@@ -91,9 +92,7 @@ local function Button(props: ButtonProps): TextButton
 
 		[Children] = if props.IsFirst
 			then {
-				New 'UICorner' {
-					CornerRadius = Theme.CornerRadius,
-				},
+				Corner {},
 				New 'Frame' {
 					AnchorPoint = Vector2.new(1, 0),
 					-- temporary fix as scale with `UIFlexAlignment` combination is currently broken
@@ -106,9 +105,7 @@ local function Button(props: ButtonProps): TextButton
 				},
 			}
 			elseif props.IsLast then {
-				New 'UICorner' {
-					CornerRadius = Theme.CornerRadius,
-				},
+				Corner {},
 				New 'Frame' {
 					Size = UDim2.fromScale(0.1, 1),
 					BackgroundColor3 = color,
@@ -132,7 +129,7 @@ type Props = {
 	[any]: any,
 }
 
-return function(props: Props)
+return function(props: Props): Frame
 	local value = isState(props.Value) and props.Value or Value(props.Value or props.Options[1])
 
 	return Hydrate(Box {

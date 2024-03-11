@@ -2,8 +2,13 @@ local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 local Studio = settings().Studio
 
 local Argon = script:FindFirstAncestor('Argon')
+local App = Argon.App
+local Components = App.Components
+local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
+
+local isState = require(Util.isState)
 
 local Value = Fusion.Value
 
@@ -28,6 +33,11 @@ local COLOR_MAP = {
 		Dark = Color3.fromRGB(160, 160, 160),
 		Light = Color3.fromRGB(90, 90, 90),
 	},
+	Diff = {
+		Add = Color3.fromRGB(80, 220, 100),
+		Update = Color3.fromRGB(100, 200, 230),
+		Remove = Color3.fromRGB(230, 100, 100),
+	},
 }
 
 local Theme = {
@@ -37,19 +47,26 @@ local Theme = {
 		Border = Value(COLOR_MAP.Border.Dark),
 		Text = Value(COLOR_MAP.Text.Dark),
 		TextDimmed = Value(COLOR_MAP.TextDimmed.Dark),
+		Diff = COLOR_MAP.Diff,
 	},
 
 	Fonts = {
-		Enum = Enum.Font.Ubuntu, -- required for TextService:GetTextSize()
 		Regular = Font.fromName('Ubuntu'),
 		Bold = Font.fromName('Ubuntu', Enum.FontWeight.Bold),
 		Italic = Font.fromName('Ubuntu', Enum.FontWeight.Regular, Enum.FontStyle.Italic),
 		Mono = Font.fromName('RobotoMono'),
+		-- required for TextService:GetTextSize()
+		Enums = {
+			Regular = Enum.Font.Ubuntu,
+			Bold = Enum.Font.Ubuntu,
+			Italic = Enum.Font.Ubuntu,
+			Mono = Enum.Font.RobotoMono,
+		},
 	},
 
-	CornerRadius = UDim.new(0, 6),
-	ListSpacing = UDim.new(0, 12),
-	Padding = UDim.new(0, 8),
+	CornerRadius = 6,
+	ListSpacing = 12,
+	Padding = 8,
 
 	BorderThickness = 1,
 	WidgetPadding = 16,
@@ -71,7 +88,9 @@ do
 		Theme.IsDark:set(isDark)
 
 		for key, color in pairs(Theme.Colors) do
-			color:set(COLOR_MAP[key][asString])
+			if isState(color) then
+				color:set(COLOR_MAP[key][asString])
+			end
 		end
 	end
 
@@ -83,6 +102,12 @@ do
 		connection:Disconnect()
 		connection = nil
 	end)
+
+	-- :P
+	local now = DateTime.now():ToLocalTime()
+	if now.Month == 4 and now.Day == 1 then
+		Theme.CornerRadius = 0
+	end
 end
 
 return Theme

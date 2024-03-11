@@ -143,13 +143,13 @@ function Core:__startSyncLoop()
 				elseif event == 'Update' then
 					self.processor:applyUpdate(data)
 				elseif event == 'Remove' then
-					self.processor:applyRemoval(data)
+					self.processor:applyRemoval(data.id)
 				else
 					local err = Error.new(Error.UnknownEvent, event, data)
 					Log.warn(err)
 				end
 
-				self.__sync(self.message)
+				self.__sync(message)
 			end
 
 			task.wait(self.syncInterval)
