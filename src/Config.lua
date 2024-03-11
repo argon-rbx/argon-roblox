@@ -89,7 +89,7 @@ function Config:set(setting: Setting, value: any, level: Level)
 
 	value = Util.cast(value, type(default))
 
-	if value ~= self.__configs[level][setting] then
+	if value ~= self.__configs[level][setting] and self.__callbacks[setting] then
 		for _, callback in pairs(self.__callbacks[setting]) do
 			callback(value)
 		end
