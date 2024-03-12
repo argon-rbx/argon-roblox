@@ -206,7 +206,6 @@ return function(props: Props): TextButton
 
 				[Children] = {
 					Box {
-						ZIndex = 5,
 						ClipsDescendants = true,
 						AutomaticSize = Enum.AutomaticSize.None,
 						BorderTransparency = transparency,

@@ -58,26 +58,21 @@ local SETTINGS_DATA = {
 		Description = 'Open scripts in your OS default editor instead of the Roblox Studio one',
 	},
 	{
-		Setting = 'TwoWaySync',
-		Name = 'Two-Way Sync',
-		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
-	},
-	{
-		Setting = 'TwoWaySyncProperties',
-		Name = 'Sync Properties',
-		Description = 'Whether all properties should be synced back to the server',
-		Requires = 'TwoWaySync',
-	},
-	{
 		Setting = 'LogLevel',
 		Name = 'Log Level',
 		Description = 'The level of logging you want to see in the output',
 		Options = { 'Off', 'Error', 'Warn', 'Info', 'Debug', 'Trace' },
 	},
 	{
-		Setting = 'SyncInterval',
-		Name = 'Sync Interval',
-		Description = 'The interval between each sync request in seconds',
+		Setting = 'TwoWaySync',
+		Name = 'Two-Way Sync (WIP)',
+		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
+	},
+	{
+		Setting = 'TwoWaySyncProperties',
+		Name = 'Sync Properties (WIP)',
+		Description = 'Whether all properties should be synced back to the server',
+		Requires = 'TwoWaySync',
 	},
 }
 
@@ -104,42 +99,19 @@ local function Entry(props: Props): Frame
 
 	local valueComponent
 
-	if setting == 'Host' or setting == 'Port' or setting == 'SyncInterval' then
+	if setting == 'Host' or setting == 'Port' then
 		local size
 		if setting == 'Host' then
 			size = UDim2.new(0.31, 0, 0, Theme.CompSizeY - 6)
-		elseif setting == 'Port' then
-			size = UDim2.fromOffset(70, Theme.CompSizeY - 6)
 		else
-			size = UDim2.fromOffset(53, Theme.CompSizeY - 6)
+			size = UDim2.fromOffset(70, Theme.CompSizeY - 6)
 		end
 
 		local onChanged
 		if setting == 'Host' then
 			onChanged = filterHost
-		elseif setting == 'Port' then
+		else
 			onChanged = filterPort
-		else
-			onChanged = function(text)
-				return text:sub(1, 4):gsub('[^%d%.]', '')
-			end
-		end
-
-		local onFinished
-		if setting == 'SyncInterval' then
-			onFinished = function(text)
-				local number = tonumber(text)
-
-				if not number then
-					return Config:getDefault(setting)
-				end
-
-				return math.clamp(number, 0.15, 60)
-			end
-		else
-			onFinished = function(text)
-				return text ~= '' and text or Config:getDefault(setting)
-			end
 		end
 
 		local userInput = false
@@ -172,7 +144,9 @@ local function Entry(props: Props): Frame
 						props.Binding:set(onChanged(text))
 					end,
 					Finished = function(text)
-						text = onFinished(text)
+						text = function()
+							return text ~= '' and text or Config:getDefault(setting)
+						end
 
 						props.Binding:set(text)
 						Config:set(setting, text, peek(props.Level))

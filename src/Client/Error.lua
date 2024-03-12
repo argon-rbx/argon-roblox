@@ -16,6 +16,7 @@ local Error = {
 	-- HttpService
 	ConnectFail = 'Failed to connect! Make sure the server is running and the address is correct',
 	DnsResolve = 'Host name is corrupted or not found',
+	Timedout = 'HTTP request timed out',
 }
 
 function Error.__new(message: string, kind: string, data: any?): Error
@@ -53,7 +54,7 @@ function Error.fromMessage(message: string): Error
 		end
 	end
 
-	return Error.__new(message, 'Unknown')
+	return Error.__new(Error.Unknown.message:gsub('$1', message), 'Unknown')
 end
 
 -- Convert all strings to Error objects

@@ -149,6 +149,20 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 	return changes
 end
 
+function Processor:applyChanges(changes: Types.Changes)
+	for _, addition in ipairs(changes.additions) do
+		self:applyAddition(addition)
+	end
+
+	for _, update in ipairs(changes.updates) do
+		self:applyUpdate(update)
+	end
+
+	for _, removal in ipairs(changes.removals) do
+		self:applyRemoval(removal)
+	end
+end
+
 function Processor:applyAddition(snapshot: Types.AddedSnapshot)
 	local parent = self.tree:getInstance(snapshot.parent)
 

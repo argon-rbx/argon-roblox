@@ -6,15 +6,7 @@ local Util = require(Argon.Util)
 local Log = require(Argon.Log)
 
 export type Level = 'Place' | 'Game' | 'Global'
-export type Setting =
-	'Host'
-	| 'Port'
-	| 'AutoConnect'
-	| 'OpenInEditor'
-	| 'TwoWaySync'
-	| 'TwoWaySyncProperties'
-	| 'LogLevel'
-	| 'SyncInterval'
+export type Setting = 'Host' | 'Port' | 'AutoConnect' | 'OpenInEditor' | 'TwoWaySync' | 'TwoWaySyncProperties' | 'LogLevel'
 
 local DEFAULTS = {
 	Host = 'localhost',
@@ -24,7 +16,6 @@ local DEFAULTS = {
 	TwoWaySync = false,
 	TwoWaySyncProperties = false,
 	LogLevel = 'Warn',
-	SyncInterval = 0.2,
 }
 
 local CONFIGS = {

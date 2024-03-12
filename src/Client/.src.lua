@@ -68,9 +68,17 @@ end
 function Client:read(): Promise.TypedPromise<Types.Changes>
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
-	return Http.get(url):andThen(function(response)
-		return response:json().queue
-	end)
+	return Http.get(url)
+		:andThen(function(response)
+			return response:json()
+		end)
+		:catch(function(err)
+			if err == Error.Timedout then
+				return self:read()
+			else
+				return Promise.reject(err)
+			end
+		end)
 end
 
 function Client:getSnapshot(): Promise.TypedPromise<Types.Changes>

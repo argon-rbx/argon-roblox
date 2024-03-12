@@ -143,7 +143,7 @@ function Util.cast(value: any, target: any): any
 end
 
 --- Clean all provided tasks, connections and instances
-function Util.cleanup(...)
+function Util.clean(...)
 	Fusion.cleanup(...)
 end
 

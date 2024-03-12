@@ -305,7 +305,7 @@ function App:connect()
 		})
 	end)
 
-	self.core:onSync(function(_message)
+	self.core:onSync(function(_changes)
 		self.lastSync:set(os.time())
 	end)
 

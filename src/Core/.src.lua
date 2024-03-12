@@ -4,7 +4,6 @@ local Promise = require(Argon.Packages.Promise)
 
 local Client = require(Argon.Client)
 local Config = require(Argon.Config)
-local Util = require(Argon.Util)
 local Log = require(Argon.Log)
 
 local Processor = require(script.Processor)
@@ -20,7 +19,6 @@ Core.__index = Core
 function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
 
-	self.toClean = {}
 	self.project = nil
 	self.shouldSync = false
 	self.isConnected = false
@@ -34,15 +32,6 @@ function Core.new(host: string?, port: string?)
 	end
 	self.__ready = function(_project: Types.ProjectDetails) end
 	self.__sync = function(_changes: Types.Changes) end
-
-	self.syncInterval = Config:get('SyncInterval')
-
-	table.insert(
-		self.toClean,
-		Config:onChanged('SyncInterval', function(value)
-			self.syncInterval = value
-		end)
-	)
 
 	return self
 end
@@ -86,17 +75,7 @@ function Core:run(): Promise.TypedPromise<nil>
 			end
 		end
 
-		for _, addition in ipairs(initialChanges.additions) do
-			self.processor:applyAddition(addition)
-		end
-
-		for _, update in ipairs(initialChanges.updates) do
-			self.processor:applyUpdate(update)
-		end
-
-		for _, removal in ipairs(initialChanges.removals) do
-			self.processor:applyRemoval(removal)
-		end
+		self.processor:applyChanges(initialChanges)
 
 		self.isConnected = true
 		self.__ready(project)
@@ -107,8 +86,6 @@ end
 
 function Core:stop()
 	self.isConnected = false
-
-	Util.cleanup(self.toClean)
 
 	if self.client.isSubscribed then
 		self.client:unsubscribe():catch(function(err)
@@ -125,34 +102,35 @@ function Core:onReady(callback: (project: Types.ProjectDetails) -> ())
 	self.__ready = callback
 end
 
-function Core:onSync(callback: (message: Types.Message) -> ())
+function Core:onSync(callback: (changes: Types.Changes) -> ())
 	self.__sync = callback
 end
 
 function Core:__startSyncLoop()
 	return Promise.new(function(resolve)
 		while self.isConnected do
-			local queue = self.client:read():expect()
+			local message = self.client:read():expect()
 
-			for _, message in ipairs(queue) do
-				local event = next(message)
-				local data = message[event]
-
-				if event == 'Add' then
-					self.processor:applyAddition(data)
-				elseif event == 'Update' then
-					self.processor:applyUpdate(data)
-				elseif event == 'Remove' then
-					self.processor:applyRemoval(data.id)
-				else
-					local err = Error.new(Error.UnknownEvent, event, data)
-					Log.warn(err)
-				end
-
-				self.__sync(message)
+			-- We disconnect from the server
+			if not message then
+				break
 			end
 
-			task.wait(self.syncInterval)
+			local event = next(message)
+			local data = message[event]
+
+			if event == 'SyncChanges' then
+				self.processor:applyChanges(data)
+			elseif event == 'SyncDetails' then
+				print('SyncDetails') -- TODO
+			elseif event == 'ExecuteCode' then
+				print('ExecuteCode') -- TODO
+			else
+				local err = Error.new(Error.UnknownEvent, event, data)
+				Log.warn(err)
+			end
+
+			self.__sync(message)
 		end
 
 		resolve()
