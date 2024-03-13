@@ -15,7 +15,6 @@ local manifest = require(Argon.manifest)
 local Config = require(Argon.Config)
 local Util = require(Argon.Util)
 local Core = require(Argon.Core)
-local CoreError = require(Argon.Core.Error)
 local describeChanges = require(Helpers.describeChanges)
 
 local Assets = require(script.Assets)
@@ -59,6 +58,7 @@ function App.new()
 	self.core = nil
 	self.helpWidget = nil
 	self.settingsWidget = nil
+	self.canceled = false
 
 	self.host = Config:get('Host')
 	self.port = Config:get('Port')
@@ -242,6 +242,7 @@ function App:connect()
 	local project = nil
 
 	self.core = Core.new()
+	self.canceled = false
 
 	task.spawn(function()
 		task.wait(0.15)
@@ -312,8 +313,7 @@ function App:connect()
 	self.core:run():catch(function(err)
 		errored = true
 
-		if err == CoreError.GameId or err == CoreError.PlaceIds or err == CoreError.TooManyChanges then
-			self:home()
+		if Core.wasExitGraceful(err) or self.canceled then
 			self:disconnect()
 			return
 		end
@@ -327,15 +327,19 @@ function App:connect()
 	end)
 end
 
-function App:disconnect()
+function App:disconnect(cancel: boolean?)
 	if self.core then
+		if cancel then
+			self.canceled = true
+		end
+
 		self.core:stop()
 		self.core = nil
 	end
 end
 
 function App:isConnected()
-	return self.core and self.core.isConnected
+	return self.core and self.core.state == Core.Status.Connected
 end
 
 function App:setHost(host: string)

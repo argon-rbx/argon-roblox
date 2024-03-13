@@ -36,7 +36,7 @@ return function(props: Props): { Instance }
 		TextButton {
 			Text = 'Cancel',
 			Activated = function()
-				props.App:disconnect()
+				props.App:disconnect(true)
 				props.App:home()
 			end,
 		},

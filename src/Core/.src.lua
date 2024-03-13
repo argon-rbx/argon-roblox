@@ -5,6 +5,7 @@ local Promise = require(Argon.Packages.Promise)
 local Client = require(Argon.Client)
 local Config = require(Argon.Config)
 local Log = require(Argon.Log)
+local Executor = require(Argon.Executor)
 
 local Processor = require(script.Processor)
 local Tree = require(script.Tree)
@@ -13,19 +14,25 @@ local Types = require(script.Types)
 
 local CHANGES_TRESHOLD = 10
 
-local Core = {}
+local Core = {
+	Status = {
+		Disconnected = 0,
+		Connecting = 1,
+		Connected = 2,
+	},
+}
 Core.__index = Core
 
 function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
 
 	self.project = nil
-	self.shouldSync = false
-	self.isConnected = false
+	self.state = 0
 
 	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
 	self.tree = Tree.new()
 	self.processor = Processor.new(self.tree)
+	self.executor = Executor.new()
 
 	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
 		return true
@@ -38,12 +45,14 @@ end
 
 function Core:run(): Promise.TypedPromise<nil>
 	return Promise.new(function(_, reject)
+		self.state = Core.Status.Connecting
+
 		local project = self.client:fetchDetails():expect()
 
 		if project.gameId and project.gameId ~= game.GameId then
 			local err = Error.new(Error.GameId, game.GameId, project.gameId)
 
-			if not self.__prompt(err.message) then
+			if not self.__prompt(err.message) or self.state ~= Core.Status.Connecting then
 				return reject(err)
 			end
 		end
@@ -51,7 +60,7 @@ function Core:run(): Promise.TypedPromise<nil>
 		if project.placeIds and not table.find(project.placeIds, game.PlaceId) then
 			local err = Error.new(Error.PlaceIds, game.PlaceId, project.placeIds)
 
-			if not self.__prompt(err.message) then
+			if not self.__prompt(err.message) or self.state ~= Core.Status.Connecting then
 				return reject(err)
 			end
 		end
@@ -61,6 +70,10 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		local snapshot = self.client:getSnapshot():expect()
 		local initialChanges = self.processor:initialize(snapshot)
+
+		if self.state ~= Core.Status.Connecting then
+			return reject(Error.new(Error.Terminated))
+		end
 
 		if initialChanges:total() > CHANGES_TRESHOLD then
 			local err = Error.new(
@@ -77,7 +90,7 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		self.processor:applyChanges(initialChanges)
 
-		self.isConnected = true
+		self.state = Core.Status.Connected
 		self.__ready(project)
 
 		return self:__startSyncLoop():expect()
@@ -85,7 +98,7 @@ function Core:run(): Promise.TypedPromise<nil>
 end
 
 function Core:stop()
-	self.isConnected = false
+	self.state = Core.Status.Disconnected
 
 	if self.client.isSubscribed then
 		self.client:unsubscribe():catch(function(err)
@@ -108,7 +121,7 @@ end
 
 function Core:__startSyncLoop()
 	return Promise.new(function(resolve)
-		while self.isConnected do
+		while self.state == Core.Status.Connected do
 			local message = self.client:read():expect()
 
 			-- We disconnect from the server
@@ -121,20 +134,24 @@ function Core:__startSyncLoop()
 
 			if event == 'SyncChanges' then
 				self.processor:applyChanges(data)
+				self.__sync(message)
 			elseif event == 'SyncDetails' then
 				print('SyncDetails') -- TODO
+				self.__sync(message)
 			elseif event == 'ExecuteCode' then
-				print('ExecuteCode') -- TODO
+				self.executor:execute(data.code)
 			else
 				local err = Error.new(Error.UnknownEvent, event, data)
 				Log.warn(err)
 			end
-
-			self.__sync(message)
 		end
 
 		resolve()
 	end)
+end
+
+function Core.wasExitGraceful(err: Error.Error)
+	return err == Error.GameId or err == Error.PlaceIds or err == Error.TooManyChanges or err == Error.Terminated
 end
 
 return Core
