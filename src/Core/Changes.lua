@@ -1,8 +1,7 @@
 local Argon = script:FindFirstAncestor('Argon')
 
 local Util = require(Argon.Util)
-
-local Types = require(script.Parent.Types)
+local Types = require(Argon.Types)
 
 local Changes = {}
 Changes.__index = Changes

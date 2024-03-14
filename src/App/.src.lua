@@ -100,6 +100,7 @@ function App.new()
 
 	plugin.Unloading:Connect(Observer(isOpen):onChange(function()
 		toolbarButton:SetActive(peek(isOpen))
+		self:disconnect()
 	end))
 
 	toolbarButton:SetActive(peek(isOpen))
@@ -181,7 +182,7 @@ function App:setPage(page)
 			end
 		end
 
-		page.ZIndex = math.huge
+		page.ZIndex = 2
 
 		transparency:set(1)
 		size:set(UDim2.fromScale(2, 1.2))
@@ -237,8 +238,7 @@ function App:help()
 end
 
 function App:connect()
-	local errored = false
-	local prompting = false
+	local loading = true
 	local project = nil
 
 	self.core = Core.new()
@@ -247,7 +247,7 @@ function App:connect()
 	task.spawn(function()
 		task.wait(0.15)
 
-		if not self:isConnected() and not errored and not prompting then
+		if not self:isConnected() and loading then
 			self:setPage(Connecting {
 				App = self,
 			})
@@ -255,7 +255,7 @@ function App:connect()
 	end)
 
 	self.core:onPrompt(function(message, changes)
-		prompting = true
+		loading = false
 
 		local signal = Signal.new()
 
@@ -277,7 +277,6 @@ function App:connect()
 				result = signal:Wait()
 			end
 
-			prompting = false
 			return result == 'Accept'
 		else
 			local options = { 'Continue', 'Cancel' }
@@ -289,15 +288,14 @@ function App:connect()
 				Signal = signal,
 			})
 
-			local result = signal:Wait()
-
-			prompting = false
-			return result == 'Continue'
+			return signal:Wait() == 'Continue'
 		end
 	end)
 
 	self.core:onReady(function(projectDetails)
+		loading = false
 		project = projectDetails
+
 		self.lastSync:set(os.time())
 
 		self:setPage(Connected {
@@ -311,7 +309,7 @@ function App:connect()
 	end)
 
 	self.core:run():catch(function(err)
-		errored = true
+		loading = false
 
 		if Core.wasExitGraceful(err) or self.canceled then
 			self:disconnect()
@@ -339,7 +337,7 @@ function App:disconnect(cancel: boolean?)
 end
 
 function App:isConnected()
-	return self.core and self.core.state == Core.Status.Connected
+	return self.core and self.core.status == Core.Status.Connected
 end
 
 function App:setHost(host: string)

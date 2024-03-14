@@ -1,9 +1,5 @@
 local HttpService = game:GetService('HttpService')
 
-local Argon = script:FindFirstAncestor('Argon')
-
-local Fusion = require(Argon.Packages.Fusion)
-
 local Util = {}
 
 --- Get length of non-numerically indexed table
@@ -142,9 +138,31 @@ function Util.cast(value: any, target: any): any
 	end
 end
 
---- Clean all provided tasks, connections and instances
+--- Clean all provided connections and instances
 function Util.clean(...)
-	Fusion.cleanup(...)
+	local function clean(object: any)
+		local kind = typeof(object)
+
+		if kind == 'function' then
+			object()
+		elseif kind == 'RBXScriptConnection' then
+			object:Disconnect()
+		elseif kind == 'Instance' then
+			object:Destroy()
+		elseif kind == 'table' then
+			if typeof(object.Destroy) == 'function' then
+				object:Destroy()
+			else
+				for _, object in pairs(object) do
+					clean(object)
+				end
+			end
+		end
+	end
+
+	for _, arg in ipairs({ ... }) do
+		clean(arg)
+	end
 end
 
 return Util

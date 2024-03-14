@@ -13,6 +13,7 @@ local List = require(Components.List)
 local Box = require(Components.Box)
 
 local Children = Fusion.Children
+local peek = Fusion.peek
 
 type Props = {
 	Name: string,
@@ -71,11 +72,11 @@ return function(app, details: { [string]: any }): ScrollingFrame
 			},
 			Entry {
 				Name = 'Host',
-				Value = app.client.host,
+				Value = peek(app.host),
 			},
 			Entry {
 				Name = 'Port',
-				Value = app.client.port,
+				Value = peek(app.port),
 			},
 		},
 	}

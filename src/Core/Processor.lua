@@ -1,11 +1,11 @@
 local Argon = script:FindFirstAncestor('Argon')
 
-local Util = require(Argon.Util)
 local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
+local Util = require(Argon.Util)
+local Types = require(Argon.Types)
 local equals = require(Argon.Helpers.equals)
 
-local Types = require(script.Parent.Types)
 local Error = require(script.Parent.Error)
 local Changes = require(script.Parent.Changes)
 
@@ -138,7 +138,11 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 		return changes
 	end
 
+	Log.trace('Hydrating initial snapshot..')
+
 	hydrate(snapshot, game)
+
+	Log.trace('Diffing initial snapshot..')
 
 	local changes = Changes.new()
 
@@ -150,6 +154,8 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 end
 
 function Processor:applyChanges(changes: Types.Changes)
+	Log.trace('Applying changes..')
+
 	for _, addition in ipairs(changes.additions) do
 		self:applyAddition(addition)
 	end
@@ -164,6 +170,8 @@ function Processor:applyChanges(changes: Types.Changes)
 end
 
 function Processor:applyAddition(snapshot: Types.AddedSnapshot)
+	Log.trace('Applying addition of', snapshot)
+
 	local parent = self.tree:getInstance(snapshot.parent)
 
 	local instance = Instance.new(snapshot.class)
@@ -198,6 +206,8 @@ function Processor:applyAddition(snapshot: Types.AddedSnapshot)
 end
 
 function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
+	Log.trace('Applying update of', snapshot)
+
 	local instance = self.tree:getInstance(snapshot.id)
 	local defaultProperties = Dom.getDefaultProperties(snapshot.class or instance.ClassName)
 
@@ -268,6 +278,8 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 end
 
 function Processor:applyRemoval(object: Types.Ref | Instance)
+	Log.trace('Applying removal of', object)
+
 	if typeof(object) == 'Instance' then
 		self.tree:removeByInstance(object)
 		object:Destroy()

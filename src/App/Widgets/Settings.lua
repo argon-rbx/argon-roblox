@@ -274,7 +274,7 @@ return function(): ScrollingFrame
 			end, Fusion.cleanup),
 			Container {
 				Size = UDim2.fromScale(1, 0),
-				LayoutOrder = math.huge,
+				LayoutOrder = #SETTINGS_DATA + 1,
 				[Children] = {
 					TextButton {
 						AnchorPoint = Vector2.new(1, 0),

@@ -1,7 +1,7 @@
 local Argon = script:FindFirstAncestor('Argon')
 local App = Argon.App
 
-local Types = require(Argon.Core.Types)
+local Types = require(Argon.Types)
 local Theme = require(App.Theme)
 
 local function s(len: number): string

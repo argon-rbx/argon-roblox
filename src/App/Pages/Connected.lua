@@ -5,7 +5,7 @@ local Widgets = App.Widgets
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local Types = require(Argon.Core.Types)
+local Types = require(Argon.Types)
 
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)

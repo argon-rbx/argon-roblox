@@ -24,15 +24,17 @@ local Error = {
 	InstanceNotFound = 'Instance: $1 does not exist in the tree',
 }
 
+local function eq(self: Error, other: Error): boolean
+	return self.kind == other.kind
+end
+
 function Error.__new(message: string, kind: string, data: any?): Error
 	local err = setmetatable({
 		message = message,
 		kind = kind,
 		data = data,
 	}, {
-		__eq = function(self, other: Error): boolean
-			return self.kind == other.kind
-		end,
+		__eq = eq,
 	})
 
 	return err

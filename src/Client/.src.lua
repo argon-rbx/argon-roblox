@@ -2,7 +2,7 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Promise = require(Argon.Packages.Promise)
 
-local Types = require(Argon.Core.Types)
+local Types = require(Argon.Types)
 
 local Http = require(script.Http)
 local Error = require(script.Error)
@@ -46,8 +46,12 @@ function Client:subscribe(): Promise.Promise
 		:andThen(function()
 			self.isSubscribed = true
 		end)
-		:catch(function()
-			return Promise.reject(Error.new(Error.AlreadySubscribed, self.clientId))
+		:catch(function(err)
+			if err == Error.Unknown then
+				return Promise.reject(Error.new(Error.AlreadySubscribed, self.clientId))
+			else
+				return Promise.reject(err)
+			end
 		end)
 end
 
@@ -60,8 +64,12 @@ function Client:unsubscribe(): Promise.Promise
 		:andThen(function()
 			self.isSubscribed = false
 		end)
-		:catch(function()
-			return Promise.reject(Error.new(Error.NotSubscribed, self.clientId))
+		:catch(function(err)
+			if err == Error.Unknown then
+				return Promise.reject(Error.new(Error.NotSubscribed, self.clientId))
+			else
+				return Promise.reject(err)
+			end
 		end)
 end
 
@@ -82,11 +90,20 @@ function Client:read(): Promise.TypedPromise<Types.Changes>
 end
 
 function Client:getSnapshot(): Promise.TypedPromise<Types.Changes>
-	local url = self:getUrl() .. `snapshot?clientId={self.clientId}`
+	local url = self:getUrl() .. 'snapshot'
 
 	return Http.get(url):andThen(function(response)
 		return response:json()
 	end)
+end
+
+function Client:open(instance: Types.Ref, line: number?): Promise.Promise
+	local url = self:getUrl() .. 'open'
+
+	return Http.post(url, {
+		instance = instance,
+		line = line or 1,
+	})
 end
 
 return Client

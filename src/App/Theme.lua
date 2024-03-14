@@ -98,7 +98,7 @@ do
 
 	local connection = Studio.ThemeChanged:Connect(updateTheme)
 
-	plugin.Unloading:Connect(function()
+	plugin.Unloading:Once(function()
 		connection:Disconnect()
 		connection = nil
 	end)
