@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Aftman
+        uses: ok-nick/setup-aftman@v0.4.2
+
+      - name: Lint
+        run: selene src
+
+      - name: Format
+        run: stylua src --check
