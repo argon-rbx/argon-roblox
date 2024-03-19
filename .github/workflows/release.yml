@@ -41,6 +41,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Read Changelog
         id: read-changes
@@ -64,6 +66,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Aftman
         uses: ok-nick/setup-aftman@v0.4.2
