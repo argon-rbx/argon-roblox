@@ -277,6 +277,11 @@ function App:connect()
 				result = signal:Wait()
 			end
 
+			if result == 'Cancel' then
+				self:disconnect(true)
+				self:home()
+			end
+
 			return result == 'Accept'
 		else
 			local options = { 'Continue', 'Cancel' }

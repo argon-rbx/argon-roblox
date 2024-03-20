@@ -144,9 +144,7 @@ local function Entry(props: Props): Frame
 						props.Binding:set(onChanged(text))
 					end,
 					Finished = function(text)
-						text = function()
-							return text ~= '' and text or Config:getDefault(setting)
-						end
+						text = text ~= '' and text or Config:getDefault(setting)
 
 						props.Binding:set(text)
 						Config:set(setting, text, peek(props.Level))

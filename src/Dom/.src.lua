@@ -56,6 +56,16 @@ local function getDefaultProperties(className)
 	return properties
 end
 
+local function isCreatable(className)
+	local class = database.Classes[className]
+
+	if not class then
+		return nil
+	end
+
+	return table.find(class.Tags, 'NotCreatable') == nil
+end
+
 local function readProperty(instance, propertyName)
 	local descriptor = findCanonicalPropertyDescriptor(instance.ClassName, propertyName)
 
@@ -81,6 +91,7 @@ local function writeProperty(instance, propertyName, value)
 end
 
 return {
+	isCreatable = isCreatable,
 	readProperty = readProperty,
 	writeProperty = writeProperty,
 	findCanonicalPropertyDescriptor = findCanonicalPropertyDescriptor,

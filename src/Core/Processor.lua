@@ -130,7 +130,7 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 				end)
 
 				changes:join(diff(childSnapshot, snapshot.id))
-			else
+			elseif Dom.isCreatable(child.ClassName) then
 				changes:remove(child)
 			end
 		end

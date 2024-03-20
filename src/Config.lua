@@ -99,8 +99,10 @@ end
 
 function Config:restoreDefaults(level: Level)
 	for setting, _ in pairs(self.__configs[level]) do
-		for _, callback in pairs(self.__callbacks[setting]) do
-			callback(self:getDefault(setting))
+		if self.__callbacks[setting] then
+			for _, callback in pairs(self.__callbacks[setting]) do
+				callback(self:getDefault(setting))
+			end
 		end
 	end
 
