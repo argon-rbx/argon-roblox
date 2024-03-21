@@ -1,0 +1,11 @@
+{
+  "name": "Argon",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Argon": {
+        "$path": "default.project.json"
+      }
+    }
+  }
+}

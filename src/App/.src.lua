@@ -58,7 +58,7 @@ function App.new()
 	self.core = nil
 	self.helpWidget = nil
 	self.settingsWidget = nil
-	self.canceled = false
+	self.onCanceled = Signal.new()
 
 	self.host = Config:get('Host')
 	self.port = Config:get('Port')
@@ -240,9 +240,9 @@ end
 function App:connect()
 	local loading = true
 	local project = nil
+	local canceled = false
 
 	self.core = Core.new()
-	self.canceled = false
 
 	task.spawn(function()
 		task.wait(0.15)
@@ -252,6 +252,10 @@ function App:connect()
 				App = self,
 			})
 		end
+	end)
+
+	self.onCanceled:Once(function()
+		canceled = true
 	end)
 
 	self.core:onPrompt(function(message, changes)
@@ -316,7 +320,7 @@ function App:connect()
 	self.core:run():catch(function(err)
 		loading = false
 
-		if Core.wasExitGraceful(err) or self.canceled then
+		if Core.wasExitGraceful(err) or canceled then
 			self:disconnect()
 			return
 		end
@@ -333,7 +337,7 @@ end
 function App:disconnect(cancel: boolean?)
 	if self.core then
 		if cancel then
-			self.canceled = true
+			self.onCanceled:Fire()
 		end
 
 		self.core:stop()

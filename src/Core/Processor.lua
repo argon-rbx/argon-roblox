@@ -213,7 +213,7 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 
 	if snapshot.class then
 		local newInstance = Instance.new(snapshot.class)
-		instance.Name = instance.Name
+		newInstance.Name = instance.Name
 
 		for property in pairs(defaultProperties) do
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
