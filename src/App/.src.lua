@@ -198,6 +198,8 @@ end
 function App:home()
 	self:setPage(NotConnected {
 		App = self,
+		Host = self.host,
+		Port = self.port,
 	})
 end
 
@@ -242,7 +244,7 @@ function App:connect()
 	local project = nil
 	local canceled = false
 
-	self.core = Core.new()
+	self.core = Core.new(self.host, self.port)
 
 	task.spawn(function()
 		task.wait(0.15)
