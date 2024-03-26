@@ -84,7 +84,7 @@ function Core:run(): Promise.TypedPromise<nil>
 			end
 		end
 
-		if project.placeIds and not table.find(project.placeIds, game.PlaceId) then
+		if #project.placeIds > 0 and not table.find(project.placeIds, game.PlaceId) then
 			local err = Error.new(Error.PlaceIds, game.PlaceId, project.placeIds)
 
 			if not self.__prompt(err.message) or self.status ~= Core.Status.Connecting then
