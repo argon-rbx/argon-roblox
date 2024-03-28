@@ -1,0 +1,3 @@
+#!/bin/bash
+
+wally install && argon sourcemap --output sourcemap.json && wally-package-types --sourcemap sourcemap.json Packages
