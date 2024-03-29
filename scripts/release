@@ -3,7 +3,7 @@
 bold=$(tput bold)
 normal=$(tput sgr0)
 
-current=$(curl https://api.github.com/repos/argon-rbx/argon/releases/latest -s | grep -i "tag_name" | awk -F '"' '{print $4}')
+current=$(curl https://api.github.com/repos/argon-rbx/argon-roblox/releases/latest -s | grep -i "tag_name" | awk -F '"' '{print $4}')
 
 echo $current | tr -d '\n' | pbcopy 2> /dev/null
 

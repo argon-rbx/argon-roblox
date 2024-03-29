@@ -33,7 +33,7 @@ function Client:fetchDetails(): Promise.TypedPromise<Types.ProjectDetails>
 	local url = self:getUrl() .. 'details'
 
 	return Http.get(url):andThen(function(response)
-		return response:json()
+		return response:decode()
 	end)
 end
 
@@ -78,7 +78,7 @@ function Client:read(): Promise.TypedPromise<Types.Changes>
 
 	return Http.get(url)
 		:andThen(function(response)
-			return response:json()
+			return response:decode()
 		end)
 		:catch(function(err)
 			if err == Error.Timedout then
@@ -93,7 +93,7 @@ function Client:getSnapshot(): Promise.TypedPromise<Types.Changes>
 	local url = self:getUrl() .. 'snapshot'
 
 	return Http.get(url):andThen(function(response)
-		return response:json()
+		return response:decode()
 	end)
 end
 

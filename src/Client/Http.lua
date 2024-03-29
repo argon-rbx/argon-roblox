@@ -5,6 +5,7 @@ local Argon = script:FindFirstAncestor('Argon')
 local Promise = require(Argon.Packages.Promise)
 
 local Error = require(script.Parent.Error)
+local Msgpack = require(script.Parent.Msgpack)
 
 type Response = {
 	Body: string,
@@ -18,8 +19,8 @@ type Response = {
 local function methodify(response: { [string]: any }): any
 	return setmetatable(response, {
 		__index = {
-			json = function(self)
-				return HttpService:JSONDecode(self.Body)
+			decode = function(self)
+				return Msgpack.decode(self.Body)
 			end,
 		},
 	})
@@ -32,9 +33,9 @@ local function request(method: string, url: string, body: { [string]: any }?): P
 				Url = url,
 				Method = method,
 				Headers = {
-					['Content-Type'] = 'application/json',
+					['Content-Type'] = 'application/msgpack',
 				},
-				Body = body and HttpService:JSONEncode(body) or nil,
+				Body = body and Msgpack.encode(body) or nil,
 			})
 		end)
 
