@@ -62,9 +62,11 @@ local function Button(props: ButtonProps): TextButton
 		Size = UDim2.fromScale(1, 1),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
-		TextSize = Theme.TextSize,
+		TextSize = Theme.TextSize.Large,
 		BackgroundColor3 = color,
-		TextColor3 = animate(Theme.Colors.Text, state),
+		TextColor3 = Computed(function(use)
+			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
+		end),
 
 		[OnEvent 'InputBegan'] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -133,14 +135,14 @@ return function(props: Props): Frame
 	local value = isState(props.Value) and props.Value or Value(props.Value or props.Options[1])
 
 	return Hydrate(Box {
-		Size = UDim2.new(1, 0, 0, Theme.CompSizeY - 8),
+		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Small),
 		AutomaticSize = Enum.AutomaticSize.None,
 
 		[Children] = {
 			List {
 				FillDirection = Enum.FillDirection.Horizontal,
 				HorizontalFlex = Enum.UIFlexAlignment.Fill,
-				Padding = 0,
+				Spacing = 0,
 			},
 			ForValues(props.Options, function(_, option)
 				return Button {

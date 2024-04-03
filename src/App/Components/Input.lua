@@ -45,7 +45,7 @@ return function(props: Props): TextBox
 		PlaceholderColor3 = props.PlaceholderColor or Theme.Colors.TextDimmed,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		AutomaticSize = props.Scaled and Enum.AutomaticSize.None or Enum.AutomaticSize.XY,
-		TextSize = Theme.TextSize,
+		TextSize = Theme.TextSize.Large,
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
 		TextScaled = props.Scaled,
@@ -66,7 +66,7 @@ return function(props: Props): TextBox
 		[Out 'Text'] = text,
 
 		[Children] = props.Scaled and New('UITextSizeConstraint') {
-			MaxTextSize = props.TextSize or Theme.TextSize,
+			MaxTextSize = props.TextSize or Theme.TextSize.Large,
 		} or nil,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

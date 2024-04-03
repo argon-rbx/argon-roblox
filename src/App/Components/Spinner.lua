@@ -35,7 +35,7 @@ return function(props: Props): ImageLabel
 	end)
 
 	return Hydrate(Image {
-		Size = UDim2.fromOffset(Theme.CompSizeY - 6, Theme.CompSizeY - 6),
+		Size = UDim2.fromOffset(Theme.CompSizeY.Medium, Theme.CompSizeY.Medium),
 		Image = Assets.Icons.Spinner,
 		Rotation = Tween(
 			rotation,

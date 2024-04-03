@@ -31,7 +31,7 @@ type Props = {
 
 return function(props: Props): Frame
 	return Hydrate(Container {
-		Size = UDim2.fromOffset(120, Theme.CompSizeY),
+		Size = UDim2.fromOffset(120, Theme.CompSizeY.Large),
 		BackgroundColor3 = props.BackgroundColor or Theme.Colors.Background,
 		BackgroundTransparency = props.BackgroundTransparency or 0,
 

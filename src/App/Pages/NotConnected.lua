@@ -36,7 +36,7 @@ return function(props: Props): { Instance }
 	return {
 		List {},
 		Box {
-			Size = UDim2.new(1, 0, 0, Theme.CompSizeY),
+			Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large),
 			[Children] = {
 				Input {
 					Size = UDim2.fromScale(0.75, 1),

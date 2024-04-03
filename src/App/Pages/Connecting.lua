@@ -25,7 +25,7 @@ return function(props: Props): { Instance }
 		Box {
 			AnchorPoint = Vector2.new(0.5, 0),
 			Position = UDim2.fromScale(0.5, 0),
-			Size = UDim2.new(1, 0, 0, Theme.CompSizeY * 1.5),
+			Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large * 1.5),
 			[Children] = {
 				Spinner {
 					AnchorPoint = Vector2.new(0.5, 0.5),

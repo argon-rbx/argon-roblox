@@ -22,7 +22,7 @@ local function Entry(body: { any })
 		[Children] = {
 			Padding {},
 			List {
-				Padding = 6,
+				Spacing = 6,
 			},
 			body,
 		},
@@ -40,7 +40,7 @@ local function Paragraph(text: string)
 	return Text {
 		Text = text,
 		TextWrapped = true,
-		TextSize = Theme.TextSize - 4,
+		TextSize = Theme.TextSize.Small,
 		Color = Theme.Colors.TextDimmed,
 	}
 end
@@ -51,7 +51,7 @@ local function Link(text: string, url: string)
 		[Children] = {
 			List {
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = 8,
+				Spacing = 8,
 			},
 			Text {
 				Font = Theme.Fonts.Bold,
@@ -64,7 +64,7 @@ local function Link(text: string, url: string)
 					Input {
 						Text = url,
 						TextEditable = false,
-						TextSize = Theme.TextSize,
+						TextSize = Theme.TextSize.Large,
 					},
 				},
 			},
@@ -76,7 +76,7 @@ return function(): ScrollingFrame
 	return ScrollingContainer {
 		[Children] = {
 			List {
-				Padding = 22,
+				Spacing = 22,
 			},
 			Padding {
 				Padding = Theme.WidgetPadding,

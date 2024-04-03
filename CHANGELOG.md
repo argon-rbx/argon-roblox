@@ -9,11 +9,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Ability to re-release the same version when needed
+- UI icon pre-loader
 - Helper scripts
 
 ### Improved
 
 - Argon network protocol now uses MessagePack instead of JSON
+- Argon UI now supports custom Studio themes
 
 ## [2.0.0-pre5] - 2024-03-22
 

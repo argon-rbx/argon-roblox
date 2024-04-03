@@ -73,7 +73,7 @@ return function(props: Props): { Instance }
 	return {
 		List {},
 		Box {
-			Size = UDim2.new(1, 0, 0, Theme.CompSizeY * 1.5),
+			Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large * 1.5),
 			[Children] = {
 				Padding {},
 				Text {
@@ -86,7 +86,7 @@ return function(props: Props): { Instance }
 					Position = UDim2.fromScale(0, 0.6),
 					Size = UDim2.fromScale(0.8, 0.4),
 					Text = `{props.App.host}:{props.App.port}`,
-					TextSize = Theme.TextSize - 4,
+					TextSize = Theme.TextSize.Small,
 					Font = Theme.Fonts.Mono,
 					Scaled = true,
 				},
@@ -98,7 +98,7 @@ return function(props: Props): { Instance }
 					end),
 					Font = Theme.Fonts.Italic,
 					Color = Theme.Colors.TextDimmed,
-					TextSize = Theme.TextSize - 4,
+					TextSize = Theme.TextSize.Small,
 					TextXAlignment = Enum.TextXAlignment.Right,
 					LineHeight = 1.2,
 				},

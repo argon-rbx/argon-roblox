@@ -102,9 +102,9 @@ local function Entry(props: Props): Frame
 	if setting == 'Host' or setting == 'Port' then
 		local size
 		if setting == 'Host' then
-			size = UDim2.new(0.31, 0, 0, Theme.CompSizeY - 6)
+			size = UDim2.new(0.31, 0, 0, Theme.CompSizeY.Medium)
 		else
-			size = UDim2.fromOffset(70, Theme.CompSizeY - 6)
+			size = UDim2.fromOffset(70, Theme.CompSizeY.Medium)
 		end
 
 		local onChanged
@@ -203,7 +203,7 @@ local function Entry(props: Props): Frame
 								TextWrapped = true,
 								AutomaticSize = Enum.AutomaticSize.None,
 								Text = props.Data.Description,
-								TextSize = Theme.TextSize - 4,
+								TextSize = Theme.TextSize.Small,
 								Color = Theme.Colors.TextDimmed,
 								Position = UDim2.fromOffset(0, 22),
 
@@ -212,7 +212,7 @@ local function Entry(props: Props): Frame
 
 									local size = getTextSize(
 										props.Data.Description,
-										Theme.TextSize - 4,
+										Theme.TextSize.Small,
 										Theme.Fonts.Enums.Regular,
 										Vector2.new(absoluteSize.X, math.huge)
 									)

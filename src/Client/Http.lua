@@ -13,7 +13,7 @@ type Response = {
 	StatusCode: number,
 	StatusMessage: string,
 	Success: boolean,
-	json: () -> { [string]: any },
+	decode: () -> { [string]: any },
 }
 
 local function methodify(response: { [string]: any }): any

@@ -52,17 +52,19 @@ return function(props: Props): TextButton
 			local text = use(props.Text)
 			local size = getTextSize(text)
 
-			return UDim2.fromOffset(size.X + 22, Theme.CompSizeY)
+			return UDim2.fromOffset(size.X + 22, Theme.CompSizeY.Large)
 		end)
 
 	return Hydrate(New 'TextButton' {
 		Text = 'Button',
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
-		TextSize = Theme.TextSize,
+		TextSize = Theme.TextSize.Large,
 		Size = size,
 		BackgroundColor3 = color,
-		TextColor3 = animate(Theme.Colors.Text, state),
+		TextColor3 = Computed(function(use)
+			return use(props.Solid) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
+		end),
 
 		[OnEvent 'InputBegan'] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then

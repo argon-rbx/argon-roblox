@@ -12,7 +12,7 @@ return function(text: string, fontSize: number?, font: Enum.Font?, frameSize: Ve
 
 	return TextService:GetTextSize(
 		text,
-		fontSize or Theme.TextSize,
+		fontSize or Theme.TextSize.Large,
 		font or Theme.Fonts.Enums.Regular,
 		frameSize or Vector2.new(math.huge, math.huge)
 	)

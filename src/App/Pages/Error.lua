@@ -41,7 +41,7 @@ return function(props: Props): { Instance }
 
 				local size = getTextSize(
 					props.Message,
-					Theme.TextSize - 2,
+					Theme.TextSize.Medium,
 					Theme.Fonts.Enums.Mono,
 					Vector2.new(absoluteSize.X - Theme.Padding * 2 - 2, math.huge)
 				)
@@ -65,7 +65,7 @@ return function(props: Props): { Instance }
 							RichText = true,
 							TextWrapped = true,
 							Font = Theme.Fonts.Mono,
-							TextSize = Theme.TextSize - 2,
+							TextSize = Theme.TextSize.Medium,
 						},
 					},
 				},

@@ -12,17 +12,17 @@ local New = Fusion.New
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'Padding',
+	'Spacing',
 }
 
 type Props = {
-	Padding: number?,
+	Spacing: number?,
 	[any]: any,
 }
 
 return function(props: Props): UIListLayout
 	return Hydrate(New 'UIListLayout' {
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, props.Padding or Theme.ListSpacing),
+		Padding = UDim.new(0, props.Spacing or Theme.ListSpacing),
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

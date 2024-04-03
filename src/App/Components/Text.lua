@@ -29,7 +29,7 @@ return function(props: Props): TextLabel
 	return Hydrate(New('TextLabel') {
 		FontFace = props.Font or Theme.Fonts.Regular,
 		TextColor3 = props.Color or Theme.Colors.Text,
-		TextSize = Theme.TextSize,
+		TextSize = Theme.TextSize.Large,
 		AutomaticSize = props.Scaled and Enum.AutomaticSize.None or Enum.AutomaticSize.XY,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		BorderSizePixel = 0,
@@ -37,7 +37,7 @@ return function(props: Props): TextLabel
 		TextScaled = props.Scaled,
 
 		[Children] = props.Scaled and New('UITextSizeConstraint') {
-			MaxTextSize = props.TextSize or Theme.TextSize,
+			MaxTextSize = props.TextSize or Theme.TextSize.Large,
 		} or nil,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

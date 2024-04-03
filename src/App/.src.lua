@@ -18,6 +18,7 @@ local Core = require(Argon.Core)
 local describeChanges = require(Helpers.describeChanges)
 
 local Assets = require(script.Assets)
+local Loader = require(script.Loader)
 local Theme = require(script.Theme)
 
 local Toolbar = require(Components.Plugin.Toolbar)
@@ -53,6 +54,8 @@ local App = {}
 App.__index = App
 
 function App.new()
+	Loader.load()
+
 	local self = setmetatable({}, App)
 
 	self.core = nil
@@ -144,7 +147,7 @@ function App:setPage(page)
 				List {
 					VerticalAlignment = Enum.VerticalAlignment.Center,
 					HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					Padding = 8,
+					Spacing = 8,
 				},
 				Padding {
 					Padding = Theme.WidgetPadding,
@@ -153,15 +156,16 @@ function App:setPage(page)
 					Size = UDim2.fromScale(1, 0),
 					[Children] = {
 						Image {
-							Size = UDim2.fromOffset(160, 40),
+							Size = UDim2.fromOffset(155, 35),
 							Image = Assets.Argon.Banner,
+							ImageColor3 = Theme.Colors.Brand,
 						},
 						Text {
 							AnchorPoint = Vector2.new(1, 1),
-							Position = UDim2.new(1, -5, 1, -2),
+							Position = UDim2.new(1, -3, 1, 0),
 							Text = `v{manifest.package.version}`,
 							Color = Theme.Colors.TextDimmed,
-							TextSize = Theme.TextSize - 4,
+							TextSize = Theme.TextSize.Small,
 						},
 					},
 				},

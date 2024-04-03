@@ -32,8 +32,9 @@ return function(props: Props): TextButton
 	local value = isState(props.Value) and props.Value or Value(props.Value or false)
 
 	return Hydrate(IconButton {
-		Size = UDim2.fromOffset(Theme.CompSizeY - 6, Theme.CompSizeY - 6),
+		Size = UDim2.fromOffset(Theme.CompSizeY.Medium, Theme.CompSizeY.Medium),
 		Solid = value,
+		Blending = false,
 		Icon = Computed(function(use)
 			return use(value) and Assets.Icons.Checkmark or ''
 		end),

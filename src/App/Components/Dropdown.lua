@@ -73,10 +73,12 @@ local function Button(props: ButtonProps): TextButton
 		Size = UDim2.fromScale(1, 1),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
-		TextSize = Theme.TextSize,
+		TextSize = Theme.TextSize.Large,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		BackgroundColor3 = color,
-		TextColor3 = animate(Theme.Colors.Text, state),
+		TextColor3 = Computed(function(use)
+			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
+		end),
 		TextTransparency = props.Transparency,
 		BackgroundTransparency = props.Transparency,
 
@@ -168,7 +170,7 @@ return function(props: Props): TextButton
 			end
 		end
 
-		size = UDim2.fromOffset(maxSize.X + 50, Theme.CompSizeY - 6)
+		size = UDim2.fromOffset(maxSize.X + 50, Theme.CompSizeY.Medium)
 	end
 
 	local transparency = Spring(
@@ -197,6 +199,7 @@ return function(props: Props): TextButton
 				Position = UDim2.fromScale(1, 0.5),
 				Size = UDim2.fromOffset(16, 16),
 				Image = Assets.Icons.Dropdown,
+				ImageColor3 = Theme.Colors.Text,
 			},
 			Container {
 				AnchorPoint = Vector2.new(0.5, 0),
@@ -230,7 +233,7 @@ return function(props: Props): TextButton
 						[Children] = {
 							List {
 								VerticalFlex = Enum.UIFlexAlignment.Fill,
-								Padding = 0,
+								Spacing = 0,
 							},
 							ForValues(props.Options, function(_, option)
 								return Button {

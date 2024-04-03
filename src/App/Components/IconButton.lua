@@ -9,6 +9,7 @@ local Theme = require(App.Theme)
 local animate = require(Util.animate)
 local stripProps = require(Util.stripProps)
 local getState = require(Util.getState)
+local default = require(Util.default)
 
 local Border = require(Components.Border)
 local Image = require(Components.Image)
@@ -24,12 +25,14 @@ local COMPONENT_ONLY_PROPS = {
 	'Activated',
 	'Solid',
 	'Icon',
+	'Blending',
 }
 
 type Props = {
 	Activated: (() -> ())?,
 	Solid: Fusion.CanBeState<boolean>?,
 	Icon: Fusion.CanBeState<string>?,
+	Blending: boolean?,
 	[any]: any,
 }
 
@@ -50,7 +53,7 @@ return function(props: Props): TextButton
 	)
 
 	return Hydrate(New 'TextButton' {
-		Size = UDim2.fromOffset(Theme.CompSizeY, Theme.CompSizeY),
+		Size = UDim2.fromOffset(Theme.CompSizeY.Large, Theme.CompSizeY.Large),
 		Text = '',
 		AutoButtonColor = false,
 		BackgroundColor3 = color,
@@ -86,7 +89,12 @@ return function(props: Props): TextButton
 				Position = UDim2.fromScale(0.5, 0.5),
 				Size = UDim2.fromScale(0.55, 0.55),
 				SizeConstraint = Enum.SizeConstraint.RelativeYY,
-				ImageColor3 = animate(Theme.Colors.Text, state),
+				ImageTransparency = default(props.Blending, true) and Computed(function(use)
+					return use(Theme.IsDark) and 0.1 or 0.2
+				end) or 0,
+				ImageColor3 = Computed(function(use)
+					return use(props.Solid) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
+				end),
 				Image = props.Icon,
 			},
 		},

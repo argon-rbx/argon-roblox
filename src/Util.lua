@@ -37,6 +37,21 @@ function Util.deepCopy(table: { any }): { any }
 	return copy
 end
 
+--- Convert dictionary to array, ignoring keys
+function Util.dictionaryToArray(dictionary: { [string]: any }, lastArray: { string }?): { string }
+	local array = lastArray or {}
+
+	for _, value in pairs(dictionary) do
+		if type(value) == 'table' then
+			Util.dictionaryToArray(value, array)
+		else
+			table.insert(array, value)
+		end
+	end
+
+	return array
+end
+
 --- Find the key of the provided value in the table
 function Util.find(table: { any }, value: any): any?
 	for k, v in pairs(table) do
