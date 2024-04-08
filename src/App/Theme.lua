@@ -24,9 +24,9 @@ local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Co
 		TextBranded = isDark and Studio.Theme:GetColor(Enum.StudioStyleGuideColor.BrightText) or background,
 
 		Diff = {
-			Add = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.DiffTextAdditionBackground),
-			Update = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.DiffLineNumSeparatorBackground),
-			Remove = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.DiffTextDeletionBackground),
+			Add = Color3.fromRGB(80, 220, 100),
+			Update = Color3.fromRGB(100, 200, 230),
+			Remove = Color3.fromRGB(230, 100, 100),
 		},
 	}
 end

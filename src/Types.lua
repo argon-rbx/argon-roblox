@@ -1,11 +1,21 @@
+-- General structs
+
 export type Ref = string
 export type ClassName = string
+
 export type Properties = {
 	[string]: any,
 }
 
+export type Meta = {
+	keepUnknowns: boolean,
+}
+
+-- Snapshots
+
 export type Snapshot = {
 	id: Ref,
+	meta: Meta,
 	name: string,
 	class: ClassName,
 	properties: Properties,
@@ -14,6 +24,7 @@ export type Snapshot = {
 
 export type AddedSnapshot = {
 	id: Ref,
+	meta: Meta,
 	parent: Ref,
 	name: string,
 	class: ClassName,
@@ -23,10 +34,13 @@ export type AddedSnapshot = {
 
 export type UpdatedSnapshot = {
 	id: Ref,
+	meta: Meta?,
 	name: string?,
 	class: ClassName?,
 	properties: Properties?,
 }
+
+-- Other structs
 
 export type Changes = {
 	additions: { AddedSnapshot },
@@ -35,7 +49,27 @@ export type Changes = {
 }
 
 export type ProjectDetails = {
-	[string]: any,
+	name: string,
+	version: string,
+	gameId: number?,
+	placeIds: { number },
+}
+
+-- Messages
+
+export type Message = SyncChanges | SyncDetails | ExecuteCode
+export type MessageKind = 'SyncChanges' | 'SyncDetails' | 'ExecuteCode'
+
+export type SyncChanges = {
+	SyncChanges: Changes,
+}
+
+export type SyncDetails = {
+	SyncDetails: ProjectDetails,
+}
+
+export type ExecuteCode = {
+	code: string,
 }
 
 return nil

@@ -85,7 +85,7 @@ return function(): ScrollingFrame
 			Entry {
 				Header '1. Setting up the project',
 				Paragraph 'First you need to create new Argon project. If you are using CLI run "argon init" command.',
-				Paragraph 'If you are using VS Code extension open command palette (ctrl/cmd + shift + P) and run "Argon: Initialize Project".',
+				Paragraph 'If you are using VS Code extension open command palette (ctrl/cmd + shift + P) and run "Argon: Open Menu" -> "Init".',
 			},
 			Entry {
 				Header '2. Starting the server',

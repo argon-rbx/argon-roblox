@@ -15,7 +15,7 @@ local Processor = require(script.Processor)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
 
-local CHANGES_TRESHOLD = 10
+local CHANGES_TRESHOLD = 5
 
 local Core = {
 	Status = {
@@ -43,7 +43,7 @@ function Core.new(host: string?, port: string?)
 		return true
 	end
 	self.__ready = function(_project: Types.ProjectDetails) end
-	self.__sync = function(_changes: Types.Changes) end
+	self.__sync = function(_kind: Types.MessageKind, _data: any) end
 
 	if Config:get('OpenInEditor') then
 		self:__handleOpenInEditor()
@@ -165,41 +165,40 @@ function Core:onReady(callback: (project: Types.ProjectDetails) -> ())
 	end
 end
 
-function Core:onSync(callback: (changes: Types.Changes) -> ())
-	self.__sync = function(changes)
+function Core:onSync(callback: (kind: Types.MessageKind, data: any) -> ())
+	self.__sync = function(kind, data)
 		if self.status == Core.Status.Disconnecting then
 			return
 		end
 
-		return callback(changes)
+		return callback(kind, data)
 	end
 end
 
 function Core:__startSyncLoop()
 	return Promise.new(function(resolve)
 		while self.status == Core.Status.Connected do
-			local message = self.client:read():expect()
+			local message = self.client:read():expect() :: Types.Message?
 
 			-- We disconnect from the server
 			if not message then
 				break
 			end
 
-			local event = next(message)
-			local data = message[event]
+			local kind = next(message) :: Types.MessageKind
+			local data = message[kind] :: any
 
-			Log.trace('Received event:', event)
+			Log.trace('Received message:', kind)
 
-			if event == 'SyncChanges' then
+			if kind == 'SyncChanges' then
 				self.processor:applyChanges(data)
-				self.__sync(message)
-			elseif event == 'SyncDetails' then
-				print('SyncDetails') -- TODO
-				self.__sync(message)
-			elseif event == 'ExecuteCode' then
+				self.__sync(kind, data)
+			elseif kind == 'SyncDetails' then
+				self.__sync(kind, data)
+			elseif kind == 'ExecuteCode' then
 				self.executor:execute(data.code)
 			else
-				local err = Error.new(Error.UnknownEvent, event, data)
+				local err = Error.new(Error.UnknownEvent, kind, data)
 				Log.warn(err)
 			end
 		end

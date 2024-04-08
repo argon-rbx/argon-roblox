@@ -29,7 +29,7 @@ local peek = Fusion.peek
 
 type Props = {
 	App: { [string]: any },
-	Project: Types.ProjectDetails,
+	Project: Fusion.Value<Types.ProjectDetails>,
 }
 
 return function(props: Props): { Instance }
@@ -78,7 +78,9 @@ return function(props: Props): { Instance }
 				Padding {},
 				Text {
 					Size = UDim2.fromScale(0.8, 0.6),
-					Text = props.Project.name,
+					Text = Computed(function(use)
+						return use(props.Project).name
+					end),
 					Font = Theme.Fonts.Bold,
 					Scaled = true,
 				},

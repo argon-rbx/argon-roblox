@@ -4,6 +4,8 @@ local Components = App.Components
 
 local Fusion = require(Argon.Packages.Fusion)
 
+local Types = require(Argon.Types)
+
 local Theme = require(App.Theme)
 
 local ScrollingContainer = require(Components.ScrollingContainer)
@@ -13,6 +15,7 @@ local List = require(Components.List)
 local Box = require(Components.Box)
 
 local Children = Fusion.Children
+local Computed = Fusion.Computed
 local peek = Fusion.peek
 
 type Props = {
@@ -41,7 +44,8 @@ local function Entry(props: Props): Frame
 	}
 end
 
-return function(app, details: { [string]: any }): ScrollingFrame
+return function(app, details: Fusion.Value<Types.ProjectDetails>): ScrollingFrame
+	print(details)
 	return ScrollingContainer {
 		[Children] = {
 			List {
@@ -52,15 +56,22 @@ return function(app, details: { [string]: any }): ScrollingFrame
 			},
 			Entry {
 				Name = 'Name',
-				Value = details.name,
+				Value = Computed(function(use)
+					return use(details).name
+				end),
 			},
 			Entry {
 				Name = 'Game ID',
-				Value = details.gameId or 'Any',
+				Value = Computed(function(use)
+					return use(details).gameId or 'Any'
+				end),
 			},
 			Entry {
 				Name = 'Place IDs',
-				Value = details.placeIds or 'Any',
+				Value = Computed(function(use)
+					local details = use(details)
+					return #details.placeIds > 0 and table.concat(details.placeIds, ', ') or 'Any'
+				end),
 			},
 			Entry {
 				Name = 'Synced Directories',
@@ -68,7 +79,9 @@ return function(app, details: { [string]: any }): ScrollingFrame
 			},
 			Entry {
 				Name = 'Server Version',
-				Value = details.version,
+				Value = Computed(function(use)
+					return use(details).version
+				end),
 			},
 			Entry {
 				Name = 'Host',

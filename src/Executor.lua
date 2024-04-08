@@ -2,6 +2,9 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Log = require(Argon.Log)
 
+-- Temporary fix for Luau LSP
+local load = loadstring
+
 local Executor = {}
 Executor.__index = Executor
 
@@ -20,7 +23,7 @@ function Executor:execute(code: string)
 	end
 
 	self.thread = task.spawn(function()
-		local success, result = pcall(loadstring(code))
+		local success, result = pcall(load(code))
 
 		if success then
 			Log.trace('Executed code successfully')

@@ -245,7 +245,7 @@ end
 
 function App:connect()
 	local loading = true
-	local project = nil
+	local project = Value({})
 	local canceled = false
 
 	self.core = Core.new(self.host, self.port)
@@ -309,7 +309,7 @@ function App:connect()
 
 	self.core:onReady(function(projectDetails)
 		loading = false
-		project = projectDetails
+		project:set(projectDetails)
 
 		self.lastSync:set(os.time())
 
@@ -319,8 +319,12 @@ function App:connect()
 		})
 	end)
 
-	self.core:onSync(function(_changes)
+	self.core:onSync(function(kind, data)
 		self.lastSync:set(os.time())
+
+		if kind == 'SyncDetails' then
+			project:set(data)
+		end
 	end)
 
 	self.core:run():catch(function(err)

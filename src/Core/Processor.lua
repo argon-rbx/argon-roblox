@@ -22,7 +22,7 @@ end
 
 function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 	local function hydrate(snapshot: Types.Snapshot, instance: Instance)
-		self.tree:insert(instance, snapshot.id)
+		self.tree:insertInstance(instance, snapshot.id)
 
 		local children = instance:GetChildren()
 		local hydrated = table.create(#children, false)
@@ -130,7 +130,8 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 				end)
 
 				changes:join(diff(childSnapshot, snapshot.id))
-			elseif Dom.isCreatable(child.ClassName) then
+			elseif not snapshot.meta.keepUnknowns and Dom.isCreatable(child.ClassName) then
+				print(snapshot.meta)
 				changes:remove(child)
 			end
 		end
@@ -196,7 +197,7 @@ function Processor:applyAddition(snapshot: Types.AddedSnapshot)
 	end
 
 	instance.Parent = parent
-	self.tree:insert(instance, snapshot.id)
+	self.tree:insertInstance(instance, snapshot.id, snapshot.meta)
 
 	for _, child in ipairs(snapshot.children) do
 		child.parent = snapshot.id
@@ -210,6 +211,16 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 
 	local instance = self.tree:getInstance(snapshot.id)
 	local defaultProperties = Dom.getDefaultProperties(snapshot.class or instance.ClassName)
+
+	if snapshot.meta then
+		self.tree:updateMeta(snapshot.id, snapshot.meta)
+
+		if not snapshot.meta.keepUnknowns then
+			for _, child in ipairs(instance:GetChildren()) do
+				self:applyRemoval(child)
+			end
+		end
+	end
 
 	if snapshot.class then
 		local newInstance = Instance.new(snapshot.class)
@@ -235,7 +246,7 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 		newInstance.Parent = instance.Parent
 
 		instance:Destroy()
-		self.tree:update(snapshot.id, newInstance)
+		self.tree:updateInstance(snapshot.id, newInstance)
 
 		instance = newInstance
 	end
