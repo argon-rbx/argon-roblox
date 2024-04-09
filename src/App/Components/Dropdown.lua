@@ -15,7 +15,6 @@ local getTextSize = require(Util.getTextSize)
 local getState = require(Util.getState)
 local isState = require(Util.isState)
 
-local TextButton = require(Components.TextButton)
 local Container = require(Components.Container)
 local Padding = require(Components.Padding)
 local Corner = require(Components.Corner)
@@ -28,7 +27,6 @@ local Value = Fusion.Value
 local Spring = Fusion.Spring
 local Hydrate = Fusion.Hydrate
 local OnEvent = Fusion.OnEvent
-local OnChange = Fusion.OnChange
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local ForValues = Fusion.ForValues
@@ -37,7 +35,6 @@ local peek = Fusion.peek
 local BUTTON_COMPONENT_ONLY_PROPS = {
 	'Activated',
 	'IsSelected',
-	'Transparency',
 	'IsFirst',
 	'IsLast',
 }
@@ -45,14 +42,12 @@ local BUTTON_COMPONENT_ONLY_PROPS = {
 type ButtonProps = {
 	Activated: () -> (),
 	IsSelected: Fusion.Computed<boolean>,
-	Transparency: Fusion.Spring<number>,
-	IsFirst: boolean,
+	IsFirst: Fusion.Value<boolean>?,
 	IsLast: boolean,
 	[any]: any,
 }
 
 local function Button(props: ButtonProps): TextButton
-	local absoluteSize = Value(Vector2.new())
 	local isHovered = Value(false)
 	local isPressed = Value(false)
 
@@ -69,8 +64,7 @@ local function Button(props: ButtonProps): TextButton
 	)
 
 	return Hydrate(New 'TextButton' {
-		Text = 'Button',
-		Size = UDim2.fromScale(1, 1),
+		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Medium),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
 		TextSize = Theme.TextSize.Large,
@@ -79,8 +73,6 @@ local function Button(props: ButtonProps): TextButton
 		TextColor3 = Computed(function(use)
 			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
 		end),
-		TextTransparency = props.Transparency,
-		BackgroundTransparency = props.Transparency,
 
 		[OnEvent 'InputBegan'] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -97,13 +89,12 @@ local function Button(props: ButtonProps): TextButton
 			end
 		end,
 		[OnEvent('Activated')] = function()
-			if props.Activated then
-				props.Activated()
+			if props.IsFirst then
+				isHovered:set(false)
+				isPressed:set(false)
 			end
-		end,
 
-		[OnChange 'AbsoluteSize'] = function(size)
-			absoluteSize:set(size)
+			props.Activated()
 		end,
 
 		[Children] = GlobalUtil.join(
@@ -122,6 +113,9 @@ local function Button(props: ButtonProps): TextButton
 						Size = UDim2.fromScale(1.2, 0.2),
 						BackgroundColor3 = color,
 						BorderSizePixel = 0,
+						Visible = Computed(function(use)
+							return use(props.IsFirst)
+						end),
 					},
 				}
 				elseif props.IsLast then {
@@ -155,8 +149,7 @@ type Props = {
 return function(props: Props): TextButton
 	local value = isState(props.Value) and props.Value or Value(props.Value or props.Options[1])
 	local isOpen = Value(false)
-
-	local anchorPoint = Vector2.zero
+	local anchor = Value(0)
 
 	local size
 	do
@@ -173,21 +166,9 @@ return function(props: Props): TextButton
 		size = UDim2.fromOffset(maxSize.X + 50, Theme.CompSizeY.Medium)
 	end
 
-	local transparency = Spring(
-		Computed(function(use)
-			return use(isOpen) and 0 or 1
-		end),
-		30
-	)
-
-	return Hydrate(TextButton {
-		TextXAlignment = Enum.TextXAlignment.Left,
+	return Hydrate(Container {
+		AutomaticSize = Enum.AutomaticSize.None,
 		Size = size,
-		Text = value,
-
-		Activated = function()
-			isOpen:set(not peek(isOpen))
-		end,
 
 		[Children] = {
 			Padding {
@@ -200,54 +181,64 @@ return function(props: Props): TextButton
 				Size = UDim2.fromOffset(16, 16),
 				Image = Assets.Icons.Dropdown,
 				ImageColor3 = Theme.Colors.Text,
+				ZIndex = 2,
+				ImageTransparency = Computed(function(use)
+					return use(isOpen) and 1 or 0
+				end),
 			},
-			Container {
-				AnchorPoint = Vector2.new(0.5, 0),
-				Position = UDim2.fromScale(0.5, 0),
-				Size = UDim2.new(1, 12, 1, 0),
+			Box {
+				ClipsDescendants = true,
 				AutomaticSize = Enum.AutomaticSize.None,
 
+				Size = Spring(
+					Computed(function(use)
+						return UDim2.new(1, 12, use(isOpen) and #props.Options or 1, 0)
+					end),
+					40
+				),
+
+				AnchorPoint = Computed(function(use)
+					if use(isOpen) then
+						local index = table.find(props.Options, peek(value))
+						anchor:set((index - 1) / #props.Options)
+					end
+
+					return Vector2.new(0.5, peek(anchor))
+				end),
+
+				Position = Computed(function(use)
+					return UDim2.fromScale(0.5, use(isOpen) and 0 or use(anchor))
+				end),
+
 				[Children] = {
-					Box {
-						ClipsDescendants = true,
-						AutomaticSize = Enum.AutomaticSize.None,
-						BorderTransparency = transparency,
-						BackgroundTransparency = transparency,
-
-						AnchorPoint = Computed(function(use)
-							if use(isOpen) then
-								local index = table.find(props.Options, peek(value))
-								anchorPoint = Vector2.new(0, (index - 1) / #props.Options)
-							end
-
-							return anchorPoint
-						end),
-
-						Size = Spring(
-							Computed(function(use)
-								return UDim2.fromScale(1, use(isOpen) and #props.Options or 0)
-							end),
-							50
-						),
+					Container {
+						Size = UDim2.fromScale(1, #props.Options),
 
 						[Children] = {
 							List {
-								VerticalFlex = Enum.UIFlexAlignment.Fill,
 								Spacing = 0,
 							},
 							ForValues(props.Options, function(_, option)
+								local isFirst = option == props.Options[1]
+
 								return Button {
-									Text = option,
-									Transparency = transparency,
+									Text = Computed(function(use)
+										if isFirst then
+											return use(isOpen) and option or use(value)
+										else
+											return option
+										end
+									end),
 
 									IsSelected = Computed(function(use)
-										return use(value) == option
+										return use(value) == option and use(isOpen)
 									end),
 
 									Activated = function()
-										isOpen:set(false)
+										local open = peek(isOpen)
+										isOpen:set(not open)
 
-										if option == peek(value) then
+										if not open or option == peek(value) then
 											return
 										end
 
@@ -258,7 +249,7 @@ return function(props: Props): TextButton
 										end
 									end,
 
-									IsFirst = option == props.Options[1],
+									IsFirst = isFirst and isOpen or nil,
 									IsLast = option == props.Options[#props.Options],
 								}
 							end, Fusion.cleanup),
