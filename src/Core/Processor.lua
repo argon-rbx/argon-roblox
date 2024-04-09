@@ -131,7 +131,6 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 
 				changes:join(diff(childSnapshot, snapshot.id))
 			elseif not snapshot.meta.keepUnknowns and Dom.isCreatable(child.ClassName) then
-				print(snapshot.meta)
 				changes:remove(child)
 			end
 		end
@@ -154,7 +153,7 @@ function Processor:initialize(snapshot: Types.Snapshot): Types.Changes
 	return changes
 end
 
-function Processor:applyChanges(changes: Types.Changes)
+function Processor:applyChanges(changes: Types.Changes, initial: boolean?)
 	Log.trace('Applying changes..')
 
 	for _, addition in ipairs(changes.additions) do
@@ -162,7 +161,7 @@ function Processor:applyChanges(changes: Types.Changes)
 	end
 
 	for _, update in ipairs(changes.updates) do
-		self:applyUpdate(update)
+		self:applyUpdate(update, initial)
 	end
 
 	for _, removal in ipairs(changes.removals) do
@@ -206,11 +205,11 @@ function Processor:applyAddition(snapshot: Types.AddedSnapshot)
 	end
 end
 
-function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
+function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: boolean?)
 	Log.trace('Applying update of', snapshot)
 
 	local instance = self.tree:getInstance(snapshot.id)
-	local defaultProperties = Dom.getDefaultProperties(snapshot.class or instance.ClassName)
+	local defaultProperties
 
 	if snapshot.meta then
 		self.tree:updateMeta(snapshot.id, snapshot.meta)
@@ -223,6 +222,8 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 	end
 
 	if snapshot.class then
+		defaultProperties = Dom.getDefaultProperties(snapshot.class)
+
 		local newInstance = Instance.new(snapshot.class)
 		newInstance.Name = instance.Name
 
@@ -256,11 +257,9 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 	end
 
 	if snapshot.properties then
-		for property, default in pairs(defaultProperties) do
-			local value = snapshot.properties[property]
-
-			if value then
-				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+		if initial then
+			for property, value in pairs(snapshot.properties) do
+				local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
 
 				if not decodeSuccess then
 					local err = Error.new(Error.DecodeFailed, property, value)
@@ -269,19 +268,41 @@ function Processor:applyUpdate(snapshot: Types.UpdatedSnapshot)
 					continue
 				end
 
-				local writeSuccess = Dom.writeProperty(instance, property, snapshotValue)
+				local writeSuccess = Dom.writeProperty(instance, property, decodedValue)
 
 				if not writeSuccess then
-					local err = Error.new(Error.WriteFailed, property, instance, snapshotValue)
+					local err = Error.new(Error.WriteFailed, property, instance, decodedValue)
 					Log.warn(err)
 				end
-			else
-				local _, defaultValue = Dom.EncodedValue.decode(default)
-				local writeSuccess = Dom.writeProperty(instance, property, defaultValue)
+			end
+		else
+			for property, default in pairs(defaultProperties or Dom.getDefaultProperties(snapshot.class)) do
+				local value = snapshot.properties[property]
 
-				if not writeSuccess then
-					local err = Error.new(Error.WriteFailed, property, instance, defaultValue)
-					Log.warn(err)
+				if value then
+					local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+
+					if not decodeSuccess then
+						local err = Error.new(Error.DecodeFailed, property, value)
+						Log.warn(err)
+
+						continue
+					end
+
+					local writeSuccess = Dom.writeProperty(instance, property, snapshotValue)
+
+					if not writeSuccess then
+						local err = Error.new(Error.WriteFailed, property, instance, snapshotValue)
+						Log.warn(err)
+					end
+				else
+					local _, defaultValue = Dom.EncodedValue.decode(default)
+					local writeSuccess = Dom.writeProperty(instance, property, defaultValue)
+
+					if not writeSuccess then
+						local err = Error.new(Error.WriteFailed, property, instance, defaultValue)
+						Log.warn(err)
+					end
 				end
 			end
 		end

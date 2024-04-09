@@ -139,7 +139,7 @@ return function(props: Props): { Instance }
 
 						widget = Widget {
 							Name = 'Argon - Project Details',
-							MinimumSize = Vector2.new(400, 250),
+							MinimumSize = Vector2.new(350, 300),
 
 							Closed = function()
 								widget:Destroy()

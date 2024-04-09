@@ -122,7 +122,7 @@ function Core:run(): Promise.TypedPromise<nil>
 			end
 		end
 
-		self.processor:applyChanges(initialChanges)
+		self.processor:applyChanges(initialChanges, true)
 
 		self.status = Core.Status.Connected
 		self.__ready(project)
@@ -180,9 +180,8 @@ function Core:__startSyncLoop()
 		while self.status == Core.Status.Connected do
 			local message = self.client:read():expect() :: Types.Message?
 
-			-- We disconnect from the server
 			if not message then
-				break
+				continue
 			end
 
 			local kind = next(message) :: Types.MessageKind

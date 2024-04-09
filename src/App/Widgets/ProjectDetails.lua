@@ -31,13 +31,15 @@ local function Entry(props: Props): Frame
 			Text {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Position = UDim2.fromScale(0, 0.5),
-				Size = UDim2.fromScale(0.5, 1),
+				Size = UDim2.new(0, 180, 1, 0),
 				Text = props.Name,
 			},
 			Text {
 				AnchorPoint = Vector2.new(1, 0),
 				Position = UDim2.fromScale(1, 0),
-				Size = UDim2.fromScale(0.5, 1),
+				Size = UDim2.new(1, -180, 1, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				TextWrapped = true,
 				Text = props.Value,
 			},
 		},
@@ -45,7 +47,6 @@ local function Entry(props: Props): Frame
 end
 
 return function(app, details: Fusion.Value<Types.ProjectDetails>): ScrollingFrame
-	print(details)
 	return ScrollingContainer {
 		[Children] = {
 			List {
@@ -74,8 +75,10 @@ return function(app, details: Fusion.Value<Types.ProjectDetails>): ScrollingFram
 				end),
 			},
 			Entry {
-				Name = 'Synced Directories',
-				Value = 'TODO',
+				Name = 'Synced Dirs',
+				Value = Computed(function(use)
+					return table.concat(use(details).syncedDirs, ', ')
+				end),
 			},
 			Entry {
 				Name = 'Server Version',

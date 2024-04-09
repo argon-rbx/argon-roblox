@@ -117,6 +117,8 @@ function Util.stringify(value: any): string
 		end
 	elseif typeof(value) == 'Instance' then
 		return value:GetFullName()
+	elseif type(value) == 'buffer' then
+		return buffer.tostring(value)
 	else
 		return tostring(value)
 	end

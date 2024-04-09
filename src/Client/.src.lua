@@ -8,7 +8,7 @@ local Http = require(script.Http)
 local Error = require(script.Error)
 
 local function generateId(): number
-	return math.floor(math.random() * 10 ^ 10)
+	return math.floor(math.random() * 10 ^ 9)
 end
 
 local Client = {}
