@@ -2,18 +2,12 @@ local Argon = script:FindFirstAncestor('Argon')
 
 local Types = require(Argon.Types)
 
-local LENGTH = 38
-
 return function(): Types.Ref
-	local id = ''
+	local buf = buffer.create(16)
 
-	for i = 1, LENGTH do
-		if i == 1 then
-			id ..= math.random(1, 9)
-		else
-			id ..= math.random(0, 9)
-		end
+	for i = 0, 15 do
+		buffer.writeu8(buf, i, math.random(0, 255))
 	end
 
-	return id
+	return buffer.tostring(buf)
 end

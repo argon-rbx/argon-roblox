@@ -9,6 +9,7 @@ local Config = require(Argon.Config)
 local Log = require(Argon.Log)
 local Util = require(Argon.Util)
 local Types = require(Argon.Types)
+local Watcher = require(Argon.Watcher)
 local Executor = require(Argon.Executor)
 
 local Initializer = require(script.Initializer)
@@ -33,6 +34,7 @@ function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
 
 	self.project = nil
+	self.rootDirs = {}
 	self.connections = {}
 	self.status = 0
 
@@ -42,6 +44,7 @@ function Core.new(host: string?, port: string?)
 	self.writeProcessor = WriteProcessor.new(self.tree)
 	self.readProcessor = ReadProcessor.new(self.tree)
 
+	self.watcher = Watcher.new(self.tree)
 	self.executor = Executor.new()
 
 	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
@@ -66,6 +69,18 @@ function Core.new(host: string?, port: string?)
 		end)
 	)
 
+	-- watch for `TwoWaySync` setting
+	table.insert(
+		self.connections,
+		Config:onChanged('TwoWaySync', function(enabled)
+			if enabled then
+				self.watcher:start(self.rootDirs)
+			else
+				self.watcher:stop()
+			end
+		end)
+	)
+
 	return self
 end
 
@@ -76,6 +91,7 @@ function Core:run(): Promise.TypedPromise<nil>
 		Log.trace('Fetching server details..')
 
 		local project = self.client:fetchDetails():expect()
+		self.project = project
 
 		if project.gameId and project.gameId ~= game.GameId then
 			local err = Error.new(Error.GameId, game.GameId, project.gameId)
@@ -96,7 +112,6 @@ function Core:run(): Promise.TypedPromise<nil>
 		Log.trace('Subscribing to the server queue..')
 
 		self.client:subscribe():expect()
-		self.project = project
 
 		Log.trace('Getting initial snapshot..')
 
@@ -105,6 +120,10 @@ function Core:run(): Promise.TypedPromise<nil>
 		Log.trace('Initializing processor..')
 
 		local initialChanges = Initializer.new(self.tree):start(snapshot)
+
+		for i, id in ipairs(project.rootDirs) do
+			self.rootDirs[i] = self.tree:getInstance(id)
+		end
 
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
@@ -125,8 +144,16 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		self.writeProcessor:applyChanges(initialChanges, true)
 
+		if Config:get('TwoWaySync') then
+			self.watcher:start(self.rootDirs)
+		end
+
 		self.status = Core.Status.Connected
 		self.__ready(project)
+
+		self:__startSyncbackLoop():catch(function(err)
+			return reject(err)
+		end)
 
 		return self:__startSyncLoop():expect()
 	end)
@@ -134,6 +161,8 @@ end
 
 function Core:stop()
 	self.status = Core.Status.Disconnecting
+
+	self.watcher:stop()
 
 	if self.client.isSubscribed then
 		task.spawn(function()
@@ -206,6 +235,33 @@ function Core:__startSyncLoop()
 			else
 				local err = Error.new(Error.UnknownEvent, kind, data)
 				Log.warn(err)
+			end
+		end
+
+		resolve()
+	end)
+end
+
+function Core:__startSyncbackLoop()
+	return Promise.new(function(resolve)
+		while self.status == Core.Status.Connected do
+			local event = self.watcher:awaitEvent() :: Types.WatcherEvent
+			local kind = event.kind
+
+			local snapshot
+
+			print(kind)
+
+			if kind == 'Add' then
+				snapshot = self.readProcessor:onAdd(event.instance)
+			elseif kind == 'Remove' then
+				snapshot = self.readProcessor:onRemove(event.instance)
+			else
+				snapshot = self.readProcessor:onChange(event.instance, event.property)
+			end
+
+			if snapshot then
+				print(snapshot)
 			end
 		end
 

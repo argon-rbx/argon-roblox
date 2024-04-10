@@ -42,6 +42,12 @@ export type UpdatedSnapshot = {
 
 -- Other structs
 
+export type WatcherEvent = {
+	kind: 'Added' | 'Removed' | 'Changed',
+	instance: Instance,
+	property: string?,
+}
+
 export type Changes = {
 	additions: { AddedSnapshot },
 	updates: { UpdatedSnapshot },

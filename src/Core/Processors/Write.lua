@@ -10,11 +10,9 @@ local WriteProcessor = {}
 WriteProcessor.__index = WriteProcessor
 
 function WriteProcessor.new(tree)
-	local self = {
+	return setmetatable({
 		tree = tree,
-	}
-
-	return setmetatable(self, WriteProcessor)
+	}, WriteProcessor)
 end
 
 function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
