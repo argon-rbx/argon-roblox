@@ -53,7 +53,7 @@ export type ProjectDetails = {
 	version: string,
 	gameId: number?,
 	placeIds: { number },
-	syncedDirs: { string },
+	rootDirs: { string },
 }
 
 -- Messages

@@ -11,7 +11,9 @@ local Util = require(Argon.Util)
 local Types = require(Argon.Types)
 local Executor = require(Argon.Executor)
 
-local Processor = require(script.Processor)
+local Initializer = require(script.Initializer)
+local WriteProcessor = require(script.Processors.Write)
+local ReadProcessor = require(script.Processors.Read)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
 
@@ -34,9 +36,12 @@ function Core.new(host: string?, port: string?)
 	self.connections = {}
 	self.status = 0
 
-	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
 	self.tree = Tree.new()
-	self.processor = Processor.new(self.tree)
+	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
+
+	self.writeProcessor = WriteProcessor.new(self.tree)
+	self.readProcessor = ReadProcessor.new(self.tree)
+
 	self.executor = Executor.new()
 
 	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
@@ -49,18 +54,14 @@ function Core.new(host: string?, port: string?)
 		self:__handleOpenInEditor()
 	end
 
+	-- watch for `OpenInEditor setting
 	table.insert(
 		self.connections,
 		Config:onChanged('OpenInEditor', function(enabled)
 			if enabled then
 				self:__handleOpenInEditor()
 			else
-				local connection = self.connections['openInEditor']
-
-				if connection then
-					connection:Disconnect()
-					self.connections['openInEditor'] = nil
-				end
+				self:__cleanConnection('openInEditor')
 			end
 		end)
 	)
@@ -103,7 +104,7 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		Log.trace('Initializing processor..')
 
-		local initialChanges = self.processor:initialize(snapshot)
+		local initialChanges = Initializer.new(self.tree):start(snapshot)
 
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
@@ -122,7 +123,7 @@ function Core:run(): Promise.TypedPromise<nil>
 			end
 		end
 
-		self.processor:applyChanges(initialChanges, true)
+		self.writeProcessor:applyChanges(initialChanges, true)
 
 		self.status = Core.Status.Connected
 		self.__ready(project)
@@ -175,6 +176,12 @@ function Core:onSync(callback: (kind: Types.MessageKind, data: any) -> ())
 	end
 end
 
+function Core.wasExitGraceful(err: Error.Error)
+	return err == Error.GameId or err == Error.PlaceIds or err == Error.TooManyChanges or err == Error.Terminated
+end
+
+-- Internal functions
+
 function Core:__startSyncLoop()
 	return Promise.new(function(resolve)
 		while self.status == Core.Status.Connected do
@@ -190,7 +197,7 @@ function Core:__startSyncLoop()
 			Log.trace('Received message:', kind)
 
 			if kind == 'SyncChanges' then
-				self.processor:applyChanges(data)
+				self.writeProcessor:applyChanges(data)
 				self.__sync(kind, data)
 			elseif kind == 'SyncDetails' then
 				self.__sync(kind, data)
@@ -207,7 +214,7 @@ function Core:__startSyncLoop()
 end
 
 function Core:__handleOpenInEditor()
-	local connection = ScriptEditorService.TextDocumentDidOpen:Connect(function(document)
+	self.connections['openInEditor'] = ScriptEditorService.TextDocumentDidOpen:Connect(function(document)
 		if self.status ~= Core.Status.Connected then
 			return
 		end
@@ -237,12 +244,15 @@ function Core:__handleOpenInEditor()
 				Log.debug('Failed to open document in editor:', err)
 			end)
 	end)
-
-	self.connections['openInEditor'] = connection
 end
 
-function Core.wasExitGraceful(err: Error.Error)
-	return err == Error.GameId or err == Error.PlaceIds or err == Error.TooManyChanges or err == Error.Terminated
+function Core:__cleanConnection(id: string)
+	local connection = self.connections[id]
+
+	if connection then
+		connection:Disconnect()
+		self.connections[id] = nil
+	end
 end
 
 return Core
