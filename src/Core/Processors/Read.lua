@@ -25,6 +25,8 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 		return
 	end
 
+	Log.trace('Detected addition of', instance)
+
 	local id = generateRef()
 	local properties = {}
 	local children = {}
@@ -58,6 +60,8 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 		snapshot = Snapshot.newAdded(id):withParent(parentId)
 	end
 
+	self.tree:insertInstance(instance, buffer.tostring(id), snapshot.meta)
+
 	return snapshot
 		:withName(instance.Name)
 		:withClass(instance.ClassName)
@@ -72,7 +76,11 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 		return
 	end
 
-	return id
+	Log.trace('Detected removal of', instance)
+
+	self.tree:removeById(id)
+
+	return buffer.fromstring(id)
 end
 
 function ReadProcessor:onChange(instance: Instance, property: string)
@@ -82,8 +90,10 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 		return
 	end
 
+	Log.trace('Detected change of', instance, property)
+
 	if property == 'Name' then
-		return Snapshot.newUpdated(id):withName(instance.Name)
+		return Snapshot.newUpdated(buffer.fromstring(id)):withName(instance.Name)
 	end
 
 	local properties = {}
@@ -105,7 +115,7 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 		end
 	end
 
-	return Snapshot.newUpdated(id):withProperties(properties)
+	return Snapshot.newUpdated(buffer.fromstring(id)):withProperties(properties)
 end
 
 return ReadProcessor

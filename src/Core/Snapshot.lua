@@ -46,6 +46,11 @@ function Snapshot.newUpdated(id: Types.Ref)
 	return self
 end
 
+function Snapshot:withMeta(meta: Types.Meta)
+	self.meta = meta
+	return self
+end
+
 function Snapshot:withParent(parent: Types.Ref)
 	self.parent = parent
 	return self

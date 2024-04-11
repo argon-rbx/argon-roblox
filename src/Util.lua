@@ -86,7 +86,7 @@ function Util.keys(dictionary: { any }): { any }
 end
 
 --- Stringify the value
-function Util.stringify(value: any): string
+function Util.stringify(value: any, __indent: number?): string
 	if type(value) == 'table' then
 		if Util.len(value) == 0 then
 			return '{}'
@@ -105,15 +105,17 @@ function Util.stringify(value: any): string
 			return str .. '}'
 		else
 			local str = '{\n'
+			local indent = __indent and __indent + 1 or 1
 
 			for k, v in pairs(value) do
-				local key = type(k) == 'string' and `"{k}"` or Util.stringify(k)
-				local val = type(v) == 'string' and `"{v}"` or Util.stringify(v)
+				local key = type(k) == 'string' and `"{k}"` or Util.stringify(k, indent)
+				local val = type(v) == 'string' and `"{v}"` or Util.stringify(v, indent)
 
-				str ..= `\t[{key}] = {val},\n`
+				str ..= str.rep('\t', indent)
+				str ..= `[{key}] = {val},\n`
 			end
 
-			return str .. '}'
+			return str .. string.rep('\t', indent - 1) .. '}'
 		end
 	elseif typeof(value) == 'Instance' then
 		return value:GetFullName()

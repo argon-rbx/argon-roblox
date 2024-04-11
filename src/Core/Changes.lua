@@ -45,8 +45,12 @@ function Changes:join(other: Types.Changes)
 	end
 end
 
-function Changes:total()
+function Changes:total(): number
 	return #self.additions + #self.updates + #self.removals
+end
+
+function Changes:isEmpty(): boolean
+	return self:total() == 0
 end
 
 return Changes

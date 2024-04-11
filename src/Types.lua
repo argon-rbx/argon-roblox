@@ -1,6 +1,6 @@
 -- General structs
 
-export type Ref = string
+export type Ref = string | buffer
 export type ClassName = string
 
 export type Properties = {

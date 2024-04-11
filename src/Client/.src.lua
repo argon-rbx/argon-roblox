@@ -89,6 +89,20 @@ function Client:read(): Promise.TypedPromise<Types.Message>
 		end)
 end
 
+function Client:write(changes: Types.Changes): Promise.Promise
+	local url = self:getUrl() .. `write`
+
+	print({
+		clientId = self.clientId,
+		changes = changes,
+	})
+
+	return Http.post(url, {
+		clientId = self.clientId,
+		changes = changes,
+	})
+end
+
 function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
 	local url = self:getUrl() .. 'snapshot'
 

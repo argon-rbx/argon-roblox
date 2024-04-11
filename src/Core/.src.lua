@@ -15,6 +15,7 @@ local Executor = require(Argon.Executor)
 local Initializer = require(script.Initializer)
 local WriteProcessor = require(script.Processors.Write)
 local ReadProcessor = require(script.Processors.Read)
+local Changes = require(script.Changes)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
 
@@ -248,20 +249,34 @@ function Core:__startSyncbackLoop()
 			local event = self.watcher:awaitEvent() :: Types.WatcherEvent
 			local kind = event.kind
 
-			local snapshot
+			Log.trace('Received event:', kind)
 
-			print(kind)
+			local changes = Changes.new()
 
 			if kind == 'Add' then
-				snapshot = self.readProcessor:onAdd(event.instance)
+				local snapshot = self.readProcessor:onAdd(event.instance)
+
+				if snapshot then
+					changes:add(snapshot)
+				end
 			elseif kind == 'Remove' then
-				snapshot = self.readProcessor:onRemove(event.instance)
+				local snapshot = self.readProcessor:onRemove(event.instance)
+
+				if snapshot then
+					changes:remove(snapshot)
+				end
 			else
-				snapshot = self.readProcessor:onChange(event.instance, event.property)
+				local snapshot = self.readProcessor:onChange(event.instance, event.property)
+
+				if snapshot then
+					changes:update(snapshot)
+				end
 			end
 
-			if snapshot then
-				print(snapshot)
+			if not changes:isEmpty() then
+				self.client:write(changes):catch(function(err)
+					Log.warn('Failed to write changes to the server:', err)
+				end)
 			end
 		end
 
