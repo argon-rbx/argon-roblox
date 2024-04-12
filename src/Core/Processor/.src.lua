@@ -9,18 +9,23 @@ local equals = require(Argon.Helpers.equals)
 local Error = require(script.Parent.Error)
 local Changes = require(script.Parent.Changes)
 
-local Initializer = {}
-Initializer.__index = Initializer
+local ReadProcessor = require(script.Read)
+local WriteProcessor = require(script.Write)
 
-function Initializer.new(tree)
+local Processor = {}
+Processor.__index = Processor
+
+function Processor.new(tree)
 	local self = {
 		tree = tree,
+		read = ReadProcessor.new(tree),
+		write = WriteProcessor.new(tree),
 	}
 
-	return setmetatable(self, Initializer)
+	return setmetatable(self, Processor)
 end
 
-function Initializer:hydrate(snapshot: Types.Snapshot, instance: Instance)
+function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	self.tree:insertInstance(instance, snapshot.id)
 
 	local children = instance:GetChildren()
@@ -41,7 +46,7 @@ function Initializer:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	end
 end
 
-function Initializer:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Changes
+function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Changes
 	local changes = Changes.new()
 
 	local instance = self.tree:getInstance(snapshot.id)
@@ -137,7 +142,7 @@ function Initializer:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Ch
 	return changes
 end
 
-function Initializer:start(snapshot: Types.Snapshot): Types.Changes
+function Processor:init(snapshot: Types.Snapshot): Types.Changes
 	Log.trace('Hydrating initial snapshot..')
 
 	self:hydrate(snapshot, game)
@@ -153,4 +158,4 @@ function Initializer:start(snapshot: Types.Snapshot): Types.Changes
 	return changes
 end
 
-return Initializer
+return Processor

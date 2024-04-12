@@ -12,9 +12,7 @@ local Types = require(Argon.Types)
 local Watcher = require(Argon.Watcher)
 local Executor = require(Argon.Executor)
 
-local Initializer = require(script.Initializer)
-local WriteProcessor = require(script.Processors.Write)
-local ReadProcessor = require(script.Processors.Read)
+local Processor = require(script.Processor)
 local Changes = require(script.Changes)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
@@ -41,10 +39,7 @@ function Core.new(host: string?, port: string?)
 
 	self.tree = Tree.new()
 	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
-
-	self.writeProcessor = WriteProcessor.new(self.tree)
-	self.readProcessor = ReadProcessor.new(self.tree)
-
+	self.processor = Processor.new(self.tree)
 	self.watcher = Watcher.new(self.tree)
 	self.executor = Executor.new()
 
@@ -120,7 +115,7 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		Log.trace('Initializing processor..')
 
-		local initialChanges = Initializer.new(self.tree):start(snapshot)
+		local initialChanges = self.processor:init(snapshot)
 
 		for i, id in ipairs(project.rootDirs) do
 			self.rootDirs[i] = self.tree:getInstance(id)
@@ -143,7 +138,7 @@ function Core:run(): Promise.TypedPromise<nil>
 			end
 		end
 
-		self.writeProcessor:applyChanges(initialChanges, true)
+		self.processor.write:applyChanges(initialChanges, true)
 
 		if Config:get('TwoWaySync') then
 			self.watcher:start(self.rootDirs)
@@ -227,7 +222,7 @@ function Core:__startSyncLoop()
 			Log.trace('Received message:', kind)
 
 			if kind == 'SyncChanges' then
-				self.writeProcessor:applyChanges(data)
+				self.processor.write:applyChanges(data)
 				self.__sync(kind, data)
 			elseif kind == 'SyncDetails' then
 				self.__sync(kind, data)
@@ -254,19 +249,19 @@ function Core:__startSyncbackLoop()
 			local changes = Changes.new()
 
 			if kind == 'Add' then
-				local snapshot = self.readProcessor:onAdd(event.instance)
+				local snapshot = self.processor.read:onAdd(event.instance)
 
 				if snapshot then
 					changes:add(snapshot)
 				end
 			elseif kind == 'Remove' then
-				local snapshot = self.readProcessor:onRemove(event.instance)
+				local snapshot = self.processor.read:onRemove(event.instance)
 
 				if snapshot then
 					changes:remove(snapshot)
 				end
 			else
-				local snapshot = self.readProcessor:onChange(event.instance, event.property)
+				local snapshot = self.processor.read:onChange(event.instance, event.property)
 
 				if snapshot then
 					changes:update(snapshot)
