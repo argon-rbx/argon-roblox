@@ -90,7 +90,7 @@ function Config:set(setting: Setting, value: any, level: Level)
 
 	local config = self.__configs[level]
 
-	if Util.len(config) == 0 then
+	if not next(config) then
 		plugin:SetSetting(CONFIGS[level], nil)
 	else
 		plugin:SetSetting(CONFIGS[level], config)

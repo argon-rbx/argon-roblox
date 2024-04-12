@@ -88,7 +88,7 @@ end
 --- Stringify the value
 function Util.stringify(value: any, __indent: number?): string
 	if type(value) == 'table' then
-		if Util.len(value) == 0 then
+		if not next(value) then
 			return '{}'
 		end
 

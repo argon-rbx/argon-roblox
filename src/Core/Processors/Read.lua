@@ -3,6 +3,8 @@ local Argon = script:FindFirstAncestor('Argon')
 local Types = require(Argon.Types)
 local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
+local Config = require(Argon.Config)
+
 local equals = require(Argon.Helpers.equals)
 local generateRef = require(Argon.Helpers.generateRef)
 
@@ -11,6 +13,10 @@ local Error = require(script.Parent.Parent.Error)
 
 local ReadProcessor = {}
 ReadProcessor.__index = ReadProcessor
+
+local function syncProperties(instance: Instance)
+	return instance:IsA('LuaSourceContainer') or Config:get('TwoWaySyncProperties')
+end
 
 function ReadProcessor.new(tree)
 	return setmetatable({
@@ -21,7 +27,11 @@ end
 function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
-	if not parentId then
+	if parentId then
+		if not __parentId then
+			parentId = buffer.fromstring(parentId)
+		end
+	else
 		return
 	end
 
@@ -31,20 +41,32 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 	local properties = {}
 	local children = {}
 
-	for property, default in Dom.getDefaultProperties(instance.ClassName) do
-		local readSuccess, instanceValue = Dom.readProperty(instance, property)
+	if syncProperties(instance) then
+		for property, default in Dom.getDefaultProperties(instance.ClassName) do
+			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
-		if not readSuccess then
-			local err = Error.new(Error.ReadFailed, property, instance)
-			Log.warn(err)
+			if not readSuccess then
+				local err = Error.new(Error.ReadFailed, property, instance)
+				Log.warn(err)
 
-			continue
-		end
+				continue
+			end
 
-		local _, defaultValue = Dom.EncodedValue.decode(default)
+			local _, defaultValue = Dom.EncodedValue.decode(default)
 
-		if not equals(instanceValue, defaultValue) then
-			properties[property] = instanceValue
+			if not equals(instanceValue, defaultValue) then
+				local propertyType = next(default)
+				local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, propertyType)
+
+				if not encodeSuccess then
+					local err = Error.new(Error.EncodeFailed, property, instanceValue)
+					Log.warn(err)
+
+					continue
+				end
+
+				properties[property] = encodedValue
+			end
 		end
 	end
 
@@ -84,16 +106,22 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 end
 
 function ReadProcessor:onChange(instance: Instance, property: string)
+	if not syncProperties(instance) then
+		return
+	end
+
 	local id = self.tree:getId(instance)
 
-	if not id then
+	if id then
+		id = buffer.fromstring(id)
+	else
 		return
 	end
 
 	Log.trace('Detected change of', instance, property)
 
 	if property == 'Name' then
-		return Snapshot.newUpdated(buffer.fromstring(id)):withName(instance.Name)
+		return Snapshot.newUpdated(id):withName(instance.Name)
 	end
 
 	local properties = {}
@@ -111,11 +139,25 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 		local _, defaultValue = Dom.EncodedValue.decode(default)
 
 		if not equals(instanceValue, defaultValue) then
-			properties[property] = instanceValue
+			local propertyType = next(default)
+			local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, propertyType)
+
+			if not encodeSuccess then
+				local err = Error.new(Error.EncodeFailed, property, instanceValue)
+				Log.warn(err)
+
+				continue
+			end
+
+			properties[property] = encodedValue
 		end
 	end
 
-	return Snapshot.newUpdated(buffer.fromstring(id)):withProperties(properties)
+	if not next(properties) then
+		return
+	end
+
+	return Snapshot.newUpdated(id):withProperties(properties)
 end
 
 return ReadProcessor

@@ -19,6 +19,7 @@ local Error = {
 	UnknownEvent = 'Received an unknown event from the server: $1, with data: $2',
 	-- Process errors
 	DecodeFailed = 'Failed to decode snapshot property: $1 with value: $2',
+	EncodeFailed = 'Failed to encode snapshot property: $1 with value: $2',
 	ReadFailed = 'Failed to read property: $1 from instance: $2',
 	WriteFailed = 'Failed to write property: $1 for instance: $2',
 	InstanceNotFound = 'Instance: $1 does not exist in the tree',

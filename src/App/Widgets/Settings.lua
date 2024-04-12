@@ -65,13 +65,13 @@ local SETTINGS_DATA = {
 	},
 	{
 		Setting = 'TwoWaySync',
-		Name = 'Two-Way Sync (WIP)',
+		Name = 'Two-Way Sync',
 		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
 	},
 	{
 		Setting = 'TwoWaySyncProperties',
-		Name = 'Sync Properties (WIP)',
-		Description = 'Whether all properties should be synced back to the server',
+		Name = 'Sync Properties',
+		Description = 'Whether all properties should be synced back to the server <b>(does not affect scripts)</b>',
 		Requires = 'TwoWaySync',
 	},
 }
@@ -200,6 +200,7 @@ local function Entry(props: Props): Frame
 					Container {
 						[Children] = {
 							Text {
+								RichText = true,
 								TextWrapped = true,
 								AutomaticSize = Enum.AutomaticSize.None,
 								Text = props.Data.Description,

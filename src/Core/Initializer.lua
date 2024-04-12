@@ -102,7 +102,7 @@ function Initializer:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Ch
 			end
 		end
 
-		if Util.len(updatedProperties) > 0 then
+		if next(updatedProperties) then
 			changes:update({
 				id = snapshot.id,
 				properties = updatedProperties,

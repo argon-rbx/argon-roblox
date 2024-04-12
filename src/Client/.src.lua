@@ -92,11 +92,6 @@ end
 function Client:write(changes: Types.Changes): Promise.Promise
 	local url = self:getUrl() .. `write`
 
-	print({
-		clientId = self.clientId,
-		changes = changes,
-	})
-
 	return Http.post(url, {
 		clientId = self.clientId,
 		changes = changes,
