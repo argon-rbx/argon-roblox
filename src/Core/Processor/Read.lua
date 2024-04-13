@@ -21,6 +21,7 @@ end
 function ReadProcessor.new(tree)
 	return setmetatable({
 		tree = tree,
+		isPaused = false,
 	}, ReadProcessor)
 end
 
@@ -158,6 +159,14 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 	end
 
 	return Snapshot.newUpdated(id):withProperties(properties)
+end
+
+function ReadProcessor:pause()
+	self.isPaused = true
+end
+
+function ReadProcessor:resume()
+	self.isPaused = false
 end
 
 return ReadProcessor

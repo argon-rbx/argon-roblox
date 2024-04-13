@@ -222,7 +222,10 @@ function Core:__startSyncLoop()
 			Log.trace('Received message:', kind)
 
 			if kind == 'SyncChanges' then
+				self.processor.read:pause()
 				self.processor.write:applyChanges(data)
+				self.processor.read:resume()
+
 				self.__sync(kind, data)
 			elseif kind == 'SyncDetails' then
 				self.__sync(kind, data)
@@ -242,11 +245,15 @@ function Core:__startSyncbackLoop()
 	return Promise.new(function(resolve)
 		while self.status == Core.Status.Connected do
 			local event = self.watcher:awaitEvent() :: Types.WatcherEvent
+
+			if self.processor.read.isPaused then
+				continue
+			end
+
 			local kind = event.kind
+			local changes = Changes.new()
 
 			Log.trace('Received event:', kind)
-
-			local changes = Changes.new()
 
 			if kind == 'Add' then
 				local snapshot = self.processor.read:onAdd(event.instance)
