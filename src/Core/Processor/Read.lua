@@ -14,8 +14,8 @@ local Error = require(script.Parent.Parent.Error)
 local ReadProcessor = {}
 ReadProcessor.__index = ReadProcessor
 
-local function syncProperties(instance: Instance)
-	return instance:IsA('LuaSourceContainer') or Config:get('TwoWaySyncProperties')
+local function syncProperties(instance: Instance, property: string?)
+	return instance:IsA('LuaSourceContainer') or Config:get('TwoWaySyncProperties') or property == 'Name'
 end
 
 function ReadProcessor.new(tree)
@@ -107,7 +107,7 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 end
 
 function ReadProcessor:onChange(instance: Instance, property: string)
-	if not syncProperties(instance) then
+	if not syncProperties(instance, property) then
 		return
 	end
 
@@ -154,8 +154,13 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 		end
 	end
 
+	-- Temporary solution for serde failing to deserialize empty HashMap
 	if not next(properties) then
-		return
+		return Snapshot.newUpdated(id):withProperties({
+			ArgonEmpty = {
+				Bool = true,
+			},
+		})
 	end
 
 	return Snapshot.newUpdated(id):withProperties(properties)

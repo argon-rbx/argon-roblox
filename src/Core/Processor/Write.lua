@@ -3,6 +3,7 @@ local Argon = script:FindFirstAncestor('Argon')
 local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
 local Types = require(Argon.Types)
+local Config = require(Argon.Config)
 
 local Error = require(script.Parent.Parent.Error)
 
@@ -76,7 +77,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	if snapshot.meta then
 		self.tree:updateMeta(snapshot.id, snapshot.meta)
 
-		if not snapshot.meta.keepUnknowns then
+		if not snapshot.meta.keepUnknowns and not Config:get('KeepUnknowns') then
 			for _, child in ipairs(instance:GetChildren()) do
 				self:applyRemoval(child)
 			end

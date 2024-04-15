@@ -119,8 +119,8 @@ return function(props: Props): { Instance }
 					Solid = true,
 
 					Activated = function()
-						props.App:home()
 						props.App:disconnect()
+						props.App:home()
 					end,
 				},
 				IconButton {

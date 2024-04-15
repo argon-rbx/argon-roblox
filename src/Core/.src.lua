@@ -279,6 +279,8 @@ function Core:__startSyncbackLoop()
 				self.client:write(changes):catch(function(err)
 					Log.warn('Failed to write changes to the server:', err)
 				end)
+
+				self.__sync(kind, changes)
 			end
 		end
 

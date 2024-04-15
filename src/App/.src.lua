@@ -50,6 +50,8 @@ local Children = Fusion.Children
 local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
+local RECONNECT_INTERVAL = 5
+
 local App = {}
 App.__index = App
 
@@ -61,6 +63,7 @@ function App.new()
 	self.core = nil
 	self.helpWidget = nil
 	self.settingsWidget = nil
+	self.lastUpdate = os.clock()
 	self.onCanceled = Signal.new()
 
 	self.host = Config:get('Host')
@@ -200,6 +203,8 @@ function App:setPage(page)
 end
 
 function App:home()
+	self.lastUpdate = os.clock()
+
 	self:setPage(NotConnected {
 		App = self,
 		Host = self.host,
@@ -341,10 +346,20 @@ function App:connect()
 		})
 
 		self:disconnect()
+
+		if Config:get('AutoReconnect') then
+			task.wait(RECONNECT_INTERVAL)
+
+			if self.lastUpdate + RECONNECT_INTERVAL <= os.clock() then
+				self:connect()
+			end
+		end
 	end)
 end
 
 function App:disconnect(cancel: boolean?)
+	self.lastUpdate = os.clock()
+
 	if self.core then
 		if cancel then
 			self.onCanceled:Fire()

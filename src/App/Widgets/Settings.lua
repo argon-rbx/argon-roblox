@@ -53,6 +53,16 @@ local SETTINGS_DATA = {
 		Description = 'Automatically attempt to connect to the server when you open a new place',
 	},
 	{
+		Setting = 'AutoReconnect',
+		Name = 'Auto Reconnect',
+		Description = 'If the connection is lost, automatically reconnect to the server after delay',
+	},
+	{
+		Setting = 'KeepUnknowns',
+		Name = 'Keep Unknowns',
+		Description = 'By default keep instances that are not present in the file system',
+	},
+	{
 		Setting = 'OpenInEditor',
 		Name = 'Open In Editor',
 		Description = 'Open scripts in your OS default editor instead of the Roblox Studio one',
