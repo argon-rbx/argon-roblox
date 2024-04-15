@@ -14,8 +14,17 @@ local Error = require(script.Parent.Parent.Error)
 local ReadProcessor = {}
 ReadProcessor.__index = ReadProcessor
 
-local function syncProperties(instance: Instance, property: string?)
+local function syncProperties(instance: Instance, property: string?): boolean
 	return instance:IsA('LuaSourceContainer') or Config:get('TwoWaySyncProperties') or property == 'Name'
+end
+
+-- Temporary solution for serde failing to deserialize empty HashMap
+local function validateProperties(properties: Types.Properties)
+	if not next(properties) then
+		properties.ArgonEmpty = {
+			Bool = true,
+		}
+	end
 end
 
 function ReadProcessor.new(tree)
@@ -33,7 +42,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 			parentId = buffer.fromstring(parentId)
 		end
 	else
-		return
+		return nil
 	end
 
 	Log.trace('Detected addition of', instance)
@@ -85,6 +94,8 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 
 	self.tree:insertInstance(instance, buffer.tostring(id), snapshot.meta)
 
+	validateProperties(properties)
+
 	return snapshot
 		:withName(instance.Name)
 		:withClass(instance.ClassName)
@@ -92,23 +103,9 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 		:withChildren(children)
 end
 
-function ReadProcessor:onRemove(instance: Instance): Types.Ref?
-	local id = self.tree:getId(instance)
-
-	if not id then
-		return
-	end
-
-	Log.trace('Detected removal of', instance)
-
-	self.tree:removeById(id)
-
-	return buffer.fromstring(id)
-end
-
-function ReadProcessor:onChange(instance: Instance, property: string)
+function ReadProcessor:onChange(instance: Instance, property: string): Types.UpdatedSnapshot?
 	if not syncProperties(instance, property) then
-		return
+		return nil
 	end
 
 	local id = self.tree:getId(instance)
@@ -116,7 +113,7 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 	if id then
 		id = buffer.fromstring(id)
 	else
-		return
+		return nil
 	end
 
 	Log.trace('Detected change of', instance, property)
@@ -154,16 +151,23 @@ function ReadProcessor:onChange(instance: Instance, property: string)
 		end
 	end
 
-	-- Temporary solution for serde failing to deserialize empty HashMap
-	if not next(properties) then
-		return Snapshot.newUpdated(id):withProperties({
-			ArgonEmpty = {
-				Bool = true,
-			},
-		})
-	end
+	validateProperties(properties)
 
 	return Snapshot.newUpdated(id):withProperties(properties)
+end
+
+function ReadProcessor:onRemove(instance: Instance): Types.Ref?
+	local id = self.tree:getId(instance)
+
+	if not id then
+		return nil
+	end
+
+	Log.trace('Detected removal of', instance)
+
+	self.tree:removeById(id)
+
+	return buffer.fromstring(id)
 end
 
 function ReadProcessor:pause()

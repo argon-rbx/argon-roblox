@@ -261,17 +261,17 @@ function Core:__startSyncbackLoop()
 				if snapshot then
 					changes:add(snapshot)
 				end
+			elseif kind == 'Change' then
+				local snapshot = self.processor.read:onChange(event.instance, event.property)
+
+				if snapshot then
+					changes:update(snapshot)
+				end
 			elseif kind == 'Remove' then
 				local snapshot = self.processor.read:onRemove(event.instance)
 
 				if snapshot then
 					changes:remove(snapshot)
-				end
-			else
-				local snapshot = self.processor.read:onChange(event.instance, event.property)
-
-				if snapshot then
-					changes:update(snapshot)
 				end
 			end
 

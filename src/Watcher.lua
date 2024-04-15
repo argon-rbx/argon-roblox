@@ -56,15 +56,15 @@ function Watcher:__connectEvents(instance: Instance)
 
 	table.insert(
 		connections,
-		instance.ChildRemoved:Connect(function(child)
-			self:__onRemoved(child)
+		instance.Changed:Connect(function(property)
+			self:__onChanged(instance, property)
 		end)
 	)
 
 	table.insert(
 		connections,
-		instance.Changed:Connect(function(property)
-			self:__onChanged(instance, property)
+		instance.ChildRemoved:Connect(function(child)
+			self:__onRemoved(child)
 		end)
 	)
 
@@ -77,6 +77,18 @@ function Watcher:__onAdded(instance: Instance)
 	self.signal:Fire({
 		kind = 'Add',
 		instance = instance,
+	})
+end
+
+function Watcher:__onChanged(instance: Instance, property: string)
+	if property == 'Parent' then
+		return
+	end
+
+	self.signal:Fire({
+		kind = 'Change',
+		instance = instance,
+		property = property,
 	})
 end
 
@@ -94,18 +106,6 @@ function Watcher:__onRemoved(instance: Instance)
 	self.signal:Fire({
 		kind = 'Remove',
 		instance = instance,
-	})
-end
-
-function Watcher:__onChanged(instance: Instance, property: string)
-	if property == 'Parent' then
-		return
-	end
-
-	self.signal:Fire({
-		kind = 'Change',
-		instance = instance,
-		property = property,
 	})
 end
 
