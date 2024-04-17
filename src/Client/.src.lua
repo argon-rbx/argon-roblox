@@ -98,12 +98,21 @@ function Client:write(changes: Types.Changes): Promise.Promise
 	})
 end
 
-function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
-	local url = self:getUrl() .. 'snapshot'
+function Client:readAll(): Promise.TypedPromise<Types.Snapshot>
+	local url = self:getUrl() .. `readAll?clientId={self.clientId}`
 
 	return Http.get(url):andThen(function(response)
 		return response:decode()
 	end)
+end
+
+function Client:writeAll(snapshot: Types.Snapshot): Promise.Promise
+	local url = self:getUrl() .. 'writeAll'
+
+	return Http.post(url, {
+		clientId = self.clientId,
+		snapshot = snapshot,
+	})
 end
 
 function Client:open(instance: Types.Ref, line: number?): Promise.Promise

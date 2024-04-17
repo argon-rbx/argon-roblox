@@ -111,7 +111,7 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		Log.trace('Getting initial snapshot..')
 
-		local snapshot = self.client:getSnapshot():expect()
+		local snapshot = self.client:readAll():expect()
 
 		Log.trace('Initializing processor..')
 
