@@ -9,9 +9,10 @@ export type Level = 'Place' | 'Game' | 'Global'
 export type Setting =
 	'Host'
 	| 'Port'
+	| 'InitialSyncPriority'
 	| 'AutoConnect'
 	| 'AutoReconnect'
-	| 'InitialSyncPriority'
+	| 'DisplayPrompts'
 	| 'KeepUnknowns'
 	| 'OpenInEditor'
 	| 'LogLevel'
@@ -21,9 +22,10 @@ export type Setting =
 local DEFAULTS = {
 	Host = 'localhost',
 	Port = 8000,
+	InitialSyncPriority = 'Server',
 	AutoConnect = true,
 	AutoReconnect = false,
-	InitialSyncPriority = 'Server',
+	DisplayPrompts = 'Always',
 	KeepUnknowns = false,
 	OpenInEditor = false,
 	LogLevel = 'Warn',

@@ -239,9 +239,9 @@ function App:help()
 end
 
 function App:connect()
-	local loading = true
 	local project = Value({})
 	local canceled = false
+	local loading = true
 
 	self.core = Core.new(self.host, self.port)
 
@@ -263,7 +263,9 @@ function App:connect()
 		loading = false
 
 		local signal = Signal.new()
+		local result = false
 
+		-- Prompt user to accept or reject incoming changes
 		if changes then
 			local options = { 'Accept', 'Diff', 'Cancel' }
 			message = describeChanges(changes)
@@ -275,19 +277,15 @@ function App:connect()
 				Signal = signal,
 			})
 
-			local result = signal:Wait()
+			local choice = signal:Wait()
 
-			while result == 'Diff' do
+			while choice == 'Diff' do
 				warn('This feature is not yet implemented')
-				result = signal:Wait()
+				choice = signal:Wait()
 			end
 
-			if result == 'Cancel' then
-				self:disconnect(true)
-				self:home()
-			end
-
-			return result == 'Accept'
+			result = choice == 'Accept'
+		-- Prompt user whether to continue when server ID differs
 		else
 			local options = { 'Continue', 'Cancel' }
 
@@ -298,8 +296,17 @@ function App:connect()
 				Signal = signal,
 			})
 
-			return signal:Wait() == 'Continue'
+			result = signal:Wait() == 'Continue'
 		end
+
+		if self.core.status == Core.Status.Connected then
+			self:setPage(Connected {
+				App = self,
+				Project = project,
+			})
+		end
+
+		return result
 	end)
 
 	self.core:onReady(function(projectDetails)
@@ -327,6 +334,7 @@ function App:connect()
 
 		if Core.wasExitGraceful(err) or canceled then
 			self:disconnect()
+			self:home()
 			return
 		end
 

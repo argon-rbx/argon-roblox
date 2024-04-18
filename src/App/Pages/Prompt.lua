@@ -95,8 +95,5 @@ return function(props: Props): { Instance }
 				end, Fusion.cleanup),
 			},
 		},
-		Container { -- spacer
-			Size = UDim2.new(1, 0, 0, 6),
-		},
 	}
 end

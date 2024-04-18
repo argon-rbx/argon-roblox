@@ -17,6 +17,7 @@ local Error = {
 	Terminated = 'Terminated connection by the user',
 	-- Core errors
 	UnknownEvent = 'Received an unknown event from the server: $1, with data: $2',
+	Disconnected = 'Disconnected from the server: $1',
 	-- Process errors
 	DecodeFailed = 'Failed to decode snapshot property: $1 with value: $2',
 	EncodeFailed = 'Failed to encode snapshot property: $1 with value: $2',

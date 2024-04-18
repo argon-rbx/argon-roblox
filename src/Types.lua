@@ -64,8 +64,8 @@ export type Project = {
 
 -- Messages
 
-export type Message = SyncChanges | SyncDetails | ExecuteCode
-export type MessageKind = 'SyncChanges' | 'SyncDetails' | 'ExecuteCode'
+export type Message = SyncChanges | SyncDetails | ExecuteCode | Disconnect
+export type MessageKind = 'SyncChanges' | 'SyncDetails' | 'ExecuteCode' | 'Disconnect'
 
 export type SyncChanges = {
 	SyncChanges: Changes,
@@ -77,6 +77,10 @@ export type SyncDetails = {
 
 export type ExecuteCode = {
 	code: string,
+}
+
+export type Disconnect = {
+	message: string,
 }
 
 return nil

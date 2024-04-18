@@ -52,4 +52,8 @@ function Changes:isEmpty(): boolean
 	return self:total() == 0
 end
 
+function Changes.Total(changes: Types.Changes): number
+	return #changes.additions + #changes.updates + #changes.removals
+end
+
 return Changes

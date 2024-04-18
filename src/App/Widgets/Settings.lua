@@ -49,6 +49,12 @@ local SETTINGS_DATA = {
 		Description = 'The port of the server that you want to connect to',
 	},
 	{
+		Setting = 'InitialSyncPriority',
+		Name = 'Initial Sync Priority',
+		Description = 'Which side should be considered as up to date when connecting',
+		Options = { 'Server', 'Client' },
+	},
+	{
 		Setting = 'AutoConnect',
 		Name = 'Auto Connect',
 		Description = 'Automatically attempt to connect to the server when you open a new place',
@@ -59,10 +65,10 @@ local SETTINGS_DATA = {
 		Description = 'If the connection is lost, automatically reconnect to the server after delay',
 	},
 	{
-		Setting = 'InitialSyncPriority',
-		Name = 'Initial Sync Priority',
-		Description = 'Which side should be considered as up to date when connecting',
-		Options = { 'Server', 'Client' },
+		Setting = 'DisplayPrompts',
+		Name = 'Display Prompts',
+		Description = 'When to show prompts for actions that require confirmation',
+		Options = { 'Always', 'Initial', 'Never' },
 	},
 	{
 		Setting = 'KeepUnknowns',

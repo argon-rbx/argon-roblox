@@ -49,19 +49,13 @@ function Core.new(host: string?, port: string?)
 	self.__ready = function(_project: Types.Project) end
 	self.__sync = function(_kind: Types.MessageKind, _data: any) end
 
-	if Config:get('OpenInEditor') then
-		self:__handleOpenInEditor()
-	end
+	self:__handleOpenInEditor(Config:get('OpenInEditor'))
 
 	-- watch for `OpenInEditor setting
 	table.insert(
 		self.connections,
 		Config:onChanged('OpenInEditor', function(enabled)
-			if enabled then
-				self:__handleOpenInEditor()
-			else
-				self:__cleanConnection('openInEditor')
-			end
+			self:__handleOpenInEditor(enabled)
 		end)
 	)
 
@@ -89,21 +83,7 @@ function Core:run(): Promise.Promise
 		local project = self.client:fetchDetails():expect()
 		self.project = project
 
-		if project.gameId and project.gameId ~= game.GameId then
-			local err = Error.new(Error.GameId, game.GameId, project.gameId)
-
-			if not self.__prompt(err.message) or self.status ~= Core.Status.Connecting then
-				return reject(err)
-			end
-		end
-
-		if #project.placeIds > 0 and not table.find(project.placeIds, game.PlaceId) then
-			local err = Error.new(Error.PlaceIds, game.PlaceId, project.placeIds)
-
-			if not self.__prompt(err.message) or self.status ~= Core.Status.Connecting then
-				return reject(err)
-			end
-		end
+		self:__verifyProject(project, true):expect()
 
 		Log.trace('Subscribing to the server queue..')
 
@@ -126,19 +106,7 @@ function Core:run(): Promise.Promise
 		end
 
 		if self:__syncServer() then
-			if initialChanges:total() > CHANGES_TRESHOLD then
-				local err = Error.new(
-					Error.TooManyChanges,
-					#initialChanges.additions,
-					#initialChanges.updates,
-					#initialChanges.removals
-				)
-
-				if not self.__prompt(err.message, initialChanges) then
-					return reject(err)
-				end
-			end
-
+			self:__verifyChanges(initialChanges, true):expect()
 			self.processor.write:applyChanges(initialChanges, true)
 		elseif initialChanges:total() > 0 then
 			local reverted = self.processor:revertChanges(initialChanges)
@@ -212,8 +180,48 @@ end
 
 -- Internal functions
 
+function Core:__verifyProject(project: Types.Project, initial: boolean?): Promise.Promise
+	if not self:__shouldPrompt(initial) then
+		return Promise.resolve()
+	end
+
+	if project.gameId and project.gameId ~= game.GameId then
+		local err = Error.new(Error.GameId, game.GameId, project.gameId)
+
+		if not self.__prompt(err.message) then
+			return Promise.reject(err)
+		end
+	end
+
+	if #project.placeIds > 0 and not table.find(project.placeIds, game.PlaceId) then
+		local err = Error.new(Error.PlaceIds, game.PlaceId, project.placeIds)
+
+		if not self.__prompt(err.message) then
+			return Promise.reject(err)
+		end
+	end
+
+	return Promise.resolve()
+end
+
+function Core:__verifyChanges(changes: Types.Changes, initial: boolean?): Promise.Promise
+	if not self:__shouldPrompt(initial) then
+		return Promise.resolve()
+	end
+
+	if Changes.Total(changes) > CHANGES_TRESHOLD then
+		local err = Error.new(Error.TooManyChanges, #changes.additions, #changes.updates, #changes.removals)
+
+		if not self.__prompt(err.message, changes) then
+			return Promise.reject(err)
+		end
+	end
+
+	return Promise.resolve()
+end
+
 function Core:__startSyncLoop()
-	return Promise.new(function(resolve)
+	return Promise.new(function(resolve, reject)
 		while self.status == Core.Status.Connected do
 			local message = self.client:read():expect() :: Types.Message?
 
@@ -227,6 +235,8 @@ function Core:__startSyncLoop()
 			Log.trace('Received message:', kind)
 
 			if kind == 'SyncChanges' then
+				self:__verifyChanges(data):expect()
+
 				self.processor.read:pause()
 				self.processor.write:applyChanges(data)
 				self.processor.read:resume()
@@ -234,8 +244,11 @@ function Core:__startSyncLoop()
 				self.__sync(kind, data)
 			elseif kind == 'SyncDetails' then
 				self.__sync(kind, data)
+				self:__verifyProject(data):expect()
 			elseif kind == 'ExecuteCode' then
 				self.executor:execute(data.code)
+			elseif kind == 'Disconnect' then
+				reject(Error.new(Error.Disconnected, data.message))
 			else
 				local err = Error.new(Error.UnknownEvent, kind, data)
 				Log.warn(err)
@@ -293,7 +306,18 @@ function Core:__startSyncbackLoop()
 	end)
 end
 
-function Core:__handleOpenInEditor()
+function Core:__handleOpenInEditor(enabled: boolean)
+	if not enabled then
+		local connection = self.connections['openInEditor']
+
+		if connection then
+			connection:Disconnect()
+			self.connections['openInEditor'] = nil
+		end
+
+		return
+	end
+
 	self.connections['openInEditor'] = ScriptEditorService.TextDocumentDidOpen:Connect(function(document)
 		if self.status ~= Core.Status.Connected then
 			return
@@ -311,12 +335,12 @@ function Core:__handleOpenInEditor()
 			return
 		end
 
-		task.wait()
-
-		local line = document:GetSelectionStart()
+		-- We currently don't support opening document lines anyway
+		-- task.wait()
+		-- local line = document:GetSelectionStart()
 
 		self.client
-			:open(id, line)
+			:open(id, 0)
 			:andThen(function()
 				document:CloseAsync()
 			end)
@@ -337,6 +361,18 @@ end
 
 function Core:__syncServer(): boolean
 	return Config:get('InitialSyncPriority') == 'Server'
+end
+
+function Core:__shouldPrompt(initial: boolean?): boolean
+	local mode = Config:get('DisplayPrompts')
+
+	if mode == 'Always' then
+		return true
+	elseif mode == 'Initial' and initial then
+		return true
+	else
+		return false
+	end
 end
 
 return Core

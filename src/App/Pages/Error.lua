@@ -10,7 +10,6 @@ local getTextSize = require(Util.getTextSize)
 
 local TextButton = require(Components.TextButton)
 local ScrollingContainer = require(Components.ScrollingContainer)
-local Container = require(Components.Container)
 local Padding = require(Components.Padding)
 local Text = require(Components.Text)
 local List = require(Components.List)
@@ -76,9 +75,6 @@ return function(props: Props): { Instance }
 			Activated = function()
 				props.App:home()
 			end,
-		},
-		Container { -- spacer
-			Size = UDim2.new(1, 0, 0, 6),
 		},
 	}
 end
