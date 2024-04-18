@@ -103,8 +103,8 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 		:withChildren(children)
 end
 
-function ReadProcessor:onChange(instance: Instance, property: string): Types.UpdatedSnapshot?
-	if not syncProperties(instance, property) then
+function ReadProcessor:onChange(instance: Instance, property: string?): Types.UpdatedSnapshot?
+	if not syncProperties(instance, property) and property then
 		return nil
 	end
 

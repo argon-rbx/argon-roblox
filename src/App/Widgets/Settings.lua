@@ -13,6 +13,7 @@ local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
 local getTextSize = require(Util.getTextSize)
 
+local Widget = require(Components.Plugin.Widget)
 local ScrollingContainer = require(Components.ScrollingContainer)
 local OptionSelector = require(Components.OptionSelector)
 local TextButton = require(Components.TextButton)
@@ -58,6 +59,12 @@ local SETTINGS_DATA = {
 		Description = 'If the connection is lost, automatically reconnect to the server after delay',
 	},
 	{
+		Setting = 'InitialSyncPriority',
+		Name = 'Initial Sync Priority',
+		Description = 'Which side should be considered as up to date when connecting',
+		Options = { 'Server', 'Client' },
+	},
+	{
 		Setting = 'KeepUnknowns',
 		Name = 'Keep Unknowns',
 		Description = 'By default keep instances that are not present in the file system',
@@ -96,14 +103,14 @@ type SettingData = {
 	Options: { string }?,
 }
 
-type Props = {
+type EntryProps = {
 	Data: SettingData,
 	Level: Fusion.Value<Config.Level>,
 	Binding: Fusion.Value<any>,
 	Requires: Fusion.Value<boolean>?,
 }
 
-local function Entry(props: Props): Frame
+local function Entry(props: EntryProps): Frame
 	local setting = props.Data.Setting
 	local absoluteSize = Value(Vector2.new())
 
@@ -248,54 +255,72 @@ local function Entry(props: Props): Frame
 	}
 end
 
-return function(): ScrollingFrame
+type Props = {
+	Closed: (() -> ())?,
+}
+
+return function(props: Props): DockWidgetPluginGui
 	local level = Value('Global')
 	local bindings = {}
 
-	return ScrollingContainer {
+	return Widget {
+		Name = 'Argon - Settings',
+		MinimumSize = Vector2.new(350, 400),
+		Closed = props.Closed,
+
 		[Children] = {
-			List {},
 			Padding {
-				Padding = Theme.WidgetPadding,
+				Right = 4,
 			},
-			OptionSelector {
-				Options = LEVELS,
-				Selected = function(option)
-					level:set(option)
 
-					for setting, binding in pairs(bindings) do
-						binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
-					end
-				end,
-			},
-			ForValues(SETTINGS_DATA, function(_, data)
-				local setting = data.Setting
-				local binding = Value(default(Config:get(setting, peek(level)), Config:getDefault(setting)))
+			ScrollingContainer {
+				ScrollBar = true,
 
-				bindings[setting] = binding
-
-				return Entry {
-					Data = data,
-					Level = level,
-					Binding = binding,
-					Requires = bindings[data.Requires],
-				}
-			end, Fusion.cleanup),
-			Container {
-				Size = UDim2.fromScale(1, 0),
-				LayoutOrder = #SETTINGS_DATA + 1,
 				[Children] = {
-					TextButton {
-						AnchorPoint = Vector2.new(1, 0),
-						Position = UDim2.fromScale(1, 0),
-						Text = 'Restore Defaults',
-						Activated = function()
-							for setting, binding in pairs(bindings) do
-								binding:set(Config:getDefault(setting))
-							end
+					List {},
+					Padding {
+						Padding = Theme.WidgetPadding,
+					},
+					OptionSelector {
+						Options = LEVELS,
+						Selected = function(option)
+							level:set(option)
 
-							Config:restoreDefaults(peek(level))
+							for setting, binding in pairs(bindings) do
+								binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
+							end
 						end,
+					},
+					ForValues(SETTINGS_DATA, function(_, data)
+						local setting = data.Setting
+						local binding = Value(default(Config:get(setting, peek(level)), Config:getDefault(setting)))
+
+						bindings[setting] = binding
+
+						return Entry {
+							Data = data,
+							Level = level,
+							Binding = binding,
+							Requires = bindings[data.Requires],
+						}
+					end, Fusion.cleanup),
+					Container {
+						Size = UDim2.fromScale(1, 0),
+						LayoutOrder = #SETTINGS_DATA + 1,
+						[Children] = {
+							TextButton {
+								AnchorPoint = Vector2.new(1, 0),
+								Position = UDim2.fromScale(1, 0),
+								Text = 'Restore Defaults',
+								Activated = function()
+									for setting, binding in pairs(bindings) do
+										binding:set(Config:getDefault(setting))
+									end
+
+									Config:restoreDefaults(peek(level))
+								end,
+							},
+						},
 					},
 				},
 			},

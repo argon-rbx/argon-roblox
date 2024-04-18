@@ -217,16 +217,11 @@ function App:settings()
 		self.settingsWidget:Destroy()
 	end
 
-	self.settingsWidget = Widget {
-		Name = 'Argon - Settings',
-		MinimumSize = Vector2.new(350, 400),
-
+	self.settingsWidget = Settings {
 		Closed = function()
 			self.settingsWidget:Destroy()
 			self.settingsWidget = nil
 		end,
-
-		[Children] = Settings(),
 	}
 end
 
@@ -235,16 +230,11 @@ function App:help()
 		self.helpWidget:Destroy()
 	end
 
-	self.helpWidget = Widget {
-		Name = 'Argon - Help',
-		MinimumSize = Vector2.new(400, 350),
-
+	self.helpWidget = Help {
 		Closed = function()
 			self.helpWidget:Destroy()
 			self.helpWidget = nil
 		end,
-
-		[Children] = Help(),
 	}
 end
 

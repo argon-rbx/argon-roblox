@@ -10,7 +10,6 @@ local Types = require(Argon.Types)
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
 
-local Widget = require(Components.Plugin.Widget)
 local ProjectDetails = require(Widgets.ProjectDetails)
 local TextButton = require(Components.TextButton)
 local IconButton = require(Components.IconButton)
@@ -29,7 +28,7 @@ local peek = Fusion.peek
 
 type Props = {
 	App: { [string]: any },
-	Project: Fusion.Value<Types.ProjectDetails>,
+	Project: Fusion.Value<Types.Project>,
 }
 
 return function(props: Props): { Instance }
@@ -137,16 +136,14 @@ return function(props: Props): { Instance }
 							widget:Destroy()
 						end
 
-						widget = Widget {
-							Name = 'Argon - Project Details',
-							MinimumSize = Vector2.new(350, 300),
+						widget = ProjectDetails {
+							App = props.App,
+							Project = props.Project,
 
 							Closed = function()
 								widget:Destroy()
 								widget = nil
 							end,
-
-							[Children] = ProjectDetails(props.App, props.Project),
 						}
 					end,
 					[Cleanup] = function()

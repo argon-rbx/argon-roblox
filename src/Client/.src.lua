@@ -29,7 +29,7 @@ function Client:getUrl(): string
 	return `http://{self.host}:{self.port}/`
 end
 
-function Client:fetchDetails(): Promise.TypedPromise<Types.ProjectDetails>
+function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
 	local url = self:getUrl() .. 'details'
 
 	return Http.get(url):andThen(function(response)
@@ -73,6 +73,14 @@ function Client:unsubscribe(): Promise.Promise
 		end)
 end
 
+function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
+	local url = self:getUrl() .. 'snapshot'
+
+	return Http.get(url):andThen(function(response)
+		return response:decode()
+	end)
+end
+
 function Client:read(): Promise.TypedPromise<Types.Message>
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
@@ -95,23 +103,6 @@ function Client:write(changes: Types.Changes): Promise.Promise
 	return Http.post(url, {
 		clientId = self.clientId,
 		changes = changes,
-	})
-end
-
-function Client:readAll(): Promise.TypedPromise<Types.Snapshot>
-	local url = self:getUrl() .. `readAll?clientId={self.clientId}`
-
-	return Http.get(url):andThen(function(response)
-		return response:decode()
-	end)
-end
-
-function Client:writeAll(snapshot: Types.Snapshot): Promise.Promise
-	local url = self:getUrl() .. 'writeAll'
-
-	return Http.post(url, {
-		clientId = self.clientId,
-		snapshot = snapshot,
 	})
 end
 

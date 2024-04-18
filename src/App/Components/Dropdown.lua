@@ -163,7 +163,7 @@ return function(props: Props): TextButton
 			end
 		end
 
-		size = UDim2.fromOffset(maxSize.X + 50, Theme.CompSizeY.Medium)
+		size = UDim2.fromOffset(maxSize.X + 40, Theme.CompSizeY.Medium)
 	end
 
 	return Hydrate(Container {

@@ -46,7 +46,8 @@ function Error.new(err: Error, ...): Error
 end
 
 function Error.fromResponse(response: { [string]: any }): Error
-	return Error.__new(Error.Unknown.message:gsub('$1', response.Body), 'Unknown', response)
+	local message = response.Body ~= '' and response.Body or response.StatusMessage
+	return Error.__new(Error.Unknown.message:gsub('$1', message), 'Unknown', response)
 end
 
 function Error.fromMessage(message: string): Error

@@ -6,6 +6,7 @@ local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
 
+local Widget = require(Components.Plugin.Widget)
 local ScrollingContainer = require(Components.ScrollingContainer)
 local Container = require(Components.Container)
 local Padding = require(Components.Padding)
@@ -72,33 +73,51 @@ local function Link(text: string, url: string)
 	}
 end
 
-return function(): ScrollingFrame
-	return ScrollingContainer {
+type Props = {
+	Closed: (() -> ())?,
+}
+
+return function(props: Props): DockWidgetPluginGui
+	return Widget {
+		Name = 'Argon - Help',
+		MinimumSize = Vector2.new(400, 350),
+		Closed = props.Closed,
+
 		[Children] = {
-			List {
-				Spacing = 22,
-			},
 			Padding {
-				Padding = Theme.WidgetPadding,
+				Right = 4,
 			},
-			Link('Visit official website to learn more:', 'https://argon.wiki'),
-			Entry {
-				Header '1. Setting up the project',
-				Paragraph 'First you need to create new Argon project. If you are using CLI run "argon init" command.',
-				Paragraph 'If you are using VS Code extension open command palette (ctrl/cmd + shift + P) and run "Argon: Open Menu" -> "Init".',
-			},
-			Entry {
-				Header '2. Starting the server',
-				Paragraph 'To start the server run "argon run" command in your terminal or use "Argon: Start Server" command in VS Code.',
-			},
-			Entry {
-				Header '3. Connecting to the server',
-				Paragraph 'To connect to the server first make sure that host name and port are the same. Then press "Connect" button and you are done!',
-			},
-			Entry {
-				Header '4. Syncing',
-				Paragraph 'Now you can finally start syncing your changes. Remember to save your files in order to see the changes in Roblox Studio.',
-				Paragraph 'You can also enable Two-Way Sync in the settings to sync changes made in Studio back to the file system.',
+
+			ScrollingContainer {
+				ScrollBar = true,
+
+				[Children] = {
+					List {
+						Spacing = 22,
+					},
+					Padding {
+						Padding = Theme.WidgetPadding,
+					},
+					Link('Visit official website to learn more:', 'https://argon.wiki'),
+					Entry {
+						Header '1. Setting up the project',
+						Paragraph 'First you need to create new Argon project. If you are using CLI run "argon init" command.',
+						Paragraph 'If you are using VS Code extension open command palette (ctrl/cmd + shift + P) and run "Argon: Open Menu" -> "Init".',
+					},
+					Entry {
+						Header '2. Starting the server',
+						Paragraph 'To start the server run "argon run" command in your terminal or use "Argon: Start Server" command in VS Code.',
+					},
+					Entry {
+						Header '3. Connecting to the server',
+						Paragraph 'To connect to the server first make sure that host name and port are the same. Then press "Connect" button and you are done!',
+					},
+					Entry {
+						Header '4. Syncing',
+						Paragraph 'Now you can finally start syncing your changes. Remember to save your files in order to see the changes in Roblox Studio.',
+						Paragraph 'You can also enable Two-Way Sync in the settings to sync changes made in Studio back to the file system.',
+					},
+				},
 			},
 		},
 	}

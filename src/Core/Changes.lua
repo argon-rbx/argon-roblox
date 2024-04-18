@@ -1,6 +1,5 @@
 local Argon = script:FindFirstAncestor('Argon')
 
-local Util = require(Argon.Util)
 local Types = require(Argon.Types)
 
 local Changes = {}
@@ -17,14 +16,14 @@ function Changes.new()
 end
 
 function Changes:add(snapshot: Types.Snapshot, parent: Types.Ref?)
-	local addedSnapshot = Util.deepCopy(snapshot)
+	local addedSnapshot = snapshot
 	addedSnapshot.parent = parent or addedSnapshot.parent
 
 	table.insert(self.additions, addedSnapshot)
 end
 
 function Changes:update(snapshot: Types.UpdatedSnapshot)
-	table.insert(self.updates, Util.deepCopy(snapshot))
+	table.insert(self.updates, snapshot)
 end
 
 function Changes:remove(object: Types.Ref | Instance)

@@ -24,7 +24,7 @@ return function(props: Props): ScrollingFrame
 	return Hydrate(New 'ScrollingFrame' {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
-		ScrollBarThickness = props.ScrollBar and 4 or 0,
+		ScrollBarThickness = props.ScrollBar and 5 or 0,
 		ScrollBarImageColor3 = Theme.Colors.TextDimmed,
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		CanvasSize = UDim2.fromScale(0, 0),

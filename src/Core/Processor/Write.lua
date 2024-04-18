@@ -19,16 +19,16 @@ end
 function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 	Log.trace('Applying changes..')
 
-	for _, addition in ipairs(changes.additions) do
-		self:applyAddition(addition)
+	for _, snapshot in ipairs(changes.additions) do
+		self:applyAddition(snapshot)
 	end
 
-	for _, update in ipairs(changes.updates) do
-		self:applyUpdate(update, initial)
+	for _, snapshot in ipairs(changes.updates) do
+		self:applyUpdate(snapshot, initial)
 	end
 
-	for _, removal in ipairs(changes.removals) do
-		self:applyRemoval(removal)
+	for _, object in ipairs(changes.removals) do
+		self:applyRemoval(object)
 	end
 end
 

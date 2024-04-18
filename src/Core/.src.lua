@@ -46,7 +46,7 @@ function Core.new(host: string?, port: string?)
 	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
 		return true
 	end
-	self.__ready = function(_project: Types.ProjectDetails) end
+	self.__ready = function(_project: Types.Project) end
 	self.__sync = function(_kind: Types.MessageKind, _data: any) end
 
 	if Config:get('OpenInEditor') then
@@ -80,7 +80,7 @@ function Core.new(host: string?, port: string?)
 	return self
 end
 
-function Core:run(): Promise.TypedPromise<nil>
+function Core:run(): Promise.Promise
 	return Promise.new(function(_, reject)
 		self.status = Core.Status.Connecting
 
@@ -111,34 +111,39 @@ function Core:run(): Promise.TypedPromise<nil>
 
 		Log.trace('Getting initial snapshot..')
 
-		local snapshot = self.client:readAll():expect()
+		local snapshot = self.client:getSnapshot():expect()
 
 		Log.trace('Initializing processor..')
 
 		local initialChanges = self.processor:init(snapshot)
 
-		for i, id in ipairs(project.rootDirs) do
-			self.rootDirs[i] = self.tree:getInstance(id)
-		end
-
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
 		end
 
-		if initialChanges:total() > CHANGES_TRESHOLD then
-			local err = Error.new(
-				Error.TooManyChanges,
-				#initialChanges.additions,
-				#initialChanges.updates,
-				#initialChanges.removals
-			)
-
-			if not self.__prompt(err.message, initialChanges) then
-				return reject(err)
-			end
+		for i, id in ipairs(project.rootDirs) do
+			self.rootDirs[i] = self.tree:getInstance(id)
 		end
 
-		self.processor.write:applyChanges(initialChanges, true)
+		if self:__syncServer() then
+			if initialChanges:total() > CHANGES_TRESHOLD then
+				local err = Error.new(
+					Error.TooManyChanges,
+					#initialChanges.additions,
+					#initialChanges.updates,
+					#initialChanges.removals
+				)
+
+				if not self.__prompt(err.message, initialChanges) then
+					return reject(err)
+				end
+			end
+
+			self.processor.write:applyChanges(initialChanges, true)
+		elseif initialChanges:total() > 0 then
+			local reverted = self.processor:revertChanges(initialChanges)
+			self.client:write(reverted):expect()
+		end
 
 		if Config:get('TwoWaySync') then
 			self.watcher:start(self.rootDirs)
@@ -181,7 +186,7 @@ function Core:onPrompt(callback: (message: string, changes: Types.Changes?) -> b
 	end
 end
 
-function Core:onReady(callback: (project: Types.ProjectDetails) -> ())
+function Core:onReady(callback: (project: Types.Project) -> ())
 	self.__ready = function(project)
 		if self.status == Core.Status.Disconnecting then
 			return
@@ -328,6 +333,10 @@ function Core:__cleanConnection(id: string)
 		connection:Disconnect()
 		self.connections[id] = nil
 	end
+end
+
+function Core:__syncServer(): boolean
+	return Config:get('InitialSyncPriority') == 'Server'
 end
 
 return Core

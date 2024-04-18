@@ -54,7 +54,7 @@ export type Changes = {
 	removals: { Ref | Instance },
 }
 
-export type ProjectDetails = {
+export type Project = {
 	name: string,
 	version: string,
 	gameId: number?,
@@ -72,7 +72,7 @@ export type SyncChanges = {
 }
 
 export type SyncDetails = {
-	SyncDetails: ProjectDetails,
+	SyncDetails: Project,
 }
 
 export type ExecuteCode = {

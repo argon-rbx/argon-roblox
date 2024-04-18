@@ -22,21 +22,6 @@ function Util.join(table1: { any }, table2: { any }): { any }
 	return table1
 end
 
---- Copy table and all of its subtables
-function Util.deepCopy(table: { any }): { any }
-	local copy = {}
-
-	for key, value in pairs(table) do
-		if type(value) == 'table' then
-			copy[key] = Util.deepCopy(value)
-		else
-			copy[key] = value
-		end
-	end
-
-	return copy
-end
-
 --- Convert dictionary to array, ignoring keys
 function Util.dictionaryToArray(dictionary: { [string]: any }, lastArray: { string }?): { string }
 	local array = lastArray or {}
@@ -52,17 +37,6 @@ function Util.dictionaryToArray(dictionary: { [string]: any }, lastArray: { stri
 	return array
 end
 
---- Find the key of the provided value in the table
-function Util.find(table: { any }, value: any): any?
-	for k, v in pairs(table) do
-		if v == value then
-			return k
-		end
-	end
-
-	return nil
-end
-
 --- Find the value and key of the first element that passes the filter
 function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean): (any?, any?)
 	for key, value in pairs(table) do
@@ -72,17 +46,6 @@ function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean):
 	end
 
 	return nil
-end
-
---- Get an array of keys provided dictionary
-function Util.keys(dictionary: { any }): { any }
-	local keys = {}
-
-	for key in pairs(dictionary) do
-		table.insert(keys, key)
-	end
-
-	return keys
 end
 
 --- Stringify the value

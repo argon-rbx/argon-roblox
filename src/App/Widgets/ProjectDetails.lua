@@ -8,6 +8,7 @@ local Types = require(Argon.Types)
 
 local Theme = require(App.Theme)
 
+local Widget = require(Components.Plugin.Widget)
 local ScrollingContainer = require(Components.ScrollingContainer)
 local Padding = require(Components.Padding)
 local Text = require(Components.Text)
@@ -18,12 +19,12 @@ local Children = Fusion.Children
 local Computed = Fusion.Computed
 local peek = Fusion.peek
 
-type Props = {
+type EntryProps = {
 	Name: string,
 	Value: string,
 }
 
-local function Entry(props: Props): Frame
+local function Entry(props: EntryProps): Frame
 	return Box {
 		Size = UDim2.fromScale(1, 0),
 		[Children] = {
@@ -46,53 +47,79 @@ local function Entry(props: Props): Frame
 	}
 end
 
-return function(app, details: Fusion.Value<Types.ProjectDetails>): ScrollingFrame
-	return ScrollingContainer {
+type Props = {
+	App: { [string]: any },
+	Project: Fusion.Value<Types.Project>,
+	Closed: (() -> ())?,
+}
+
+return function(props: Props): DockWidgetPluginGui
+	return Widget {
+		Name = 'Argon - Project Details',
+		MinimumSize = Vector2.new(410, 300),
+		Closed = props.Closed,
+
 		[Children] = {
-			List {
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			},
 			Padding {
-				Padding = Theme.WidgetPadding,
+				Right = 4,
 			},
-			Entry {
-				Name = 'Name',
-				Value = Computed(function(use)
-					return use(details).name
-				end),
-			},
-			Entry {
-				Name = 'Game ID',
-				Value = Computed(function(use)
-					return use(details).gameId or 'Any'
-				end),
-			},
-			Entry {
-				Name = 'Place IDs',
-				Value = Computed(function(use)
-					local details = use(details)
-					return #details.placeIds > 0 and table.concat(details.placeIds, ', ') or 'Any'
-				end),
-			},
-			Entry {
-				Name = 'Synced Dirs',
-				Value = Computed(function(use)
-					return table.concat(use(details).syncedDirs, ', ')
-				end),
-			},
-			Entry {
-				Name = 'Server Version',
-				Value = Computed(function(use)
-					return use(details).version
-				end),
-			},
-			Entry {
-				Name = 'Host',
-				Value = peek(app.host),
-			},
-			Entry {
-				Name = 'Port',
-				Value = peek(app.port),
+
+			ScrollingContainer {
+				ScrollBar = true,
+
+				[Children] = {
+					List {
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					},
+					Padding {
+						Padding = Theme.WidgetPadding,
+					},
+					Entry {
+						Name = 'Name',
+						Value = Computed(function(use)
+							return use(props.Project).name
+						end),
+					},
+					Entry {
+						Name = 'Game ID',
+						Value = Computed(function(use)
+							return use(props.Project).gameId or 'Any'
+						end),
+					},
+					Entry {
+						Name = 'Place IDs',
+						Value = Computed(function(use)
+							local project = use(props.Project)
+							return #project.placeIds > 0 and table.concat(project.placeIds, ', ') or 'Any'
+						end),
+					},
+					Entry {
+						Name = 'Synced Dirs',
+						Value = Computed(function(use)
+							local rootDirs = {}
+
+							for i, id in ipairs(use(props.Project).rootDirs) do
+								rootDirs[i] = props.App.core.tree:getInstance(id).Name
+							end
+
+							return table.concat(rootDirs, ', ')
+						end),
+					},
+					Entry {
+						Name = 'Server Version',
+						Value = Computed(function(use)
+							return use(props.Project).version
+						end),
+					},
+					Entry {
+						Name = 'Host',
+						Value = peek(props.App.host),
+					},
+					Entry {
+						Name = 'Port',
+						Value = peek(props.App.port),
+					},
+				},
 			},
 		},
 	}

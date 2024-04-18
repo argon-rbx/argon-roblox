@@ -25,6 +25,22 @@ function Processor.new(tree)
 	return setmetatable(self, Processor)
 end
 
+function Processor:init(snapshot: Types.Snapshot): Types.Changes
+	Log.trace('Hydrating initial snapshot..')
+
+	self:hydrate(snapshot, game)
+
+	Log.trace('Diffing initial snapshot..')
+
+	local changes = Changes.new()
+
+	for _, child in ipairs(snapshot.children) do
+		changes:join(self:diff(child, snapshot.id))
+	end
+
+	return changes
+end
+
 function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	self.tree:insertInstance(instance, snapshot.id)
 
@@ -142,20 +158,23 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Chan
 	return changes
 end
 
-function Processor:init(snapshot: Types.Snapshot): Types.Changes
-	Log.trace('Hydrating initial snapshot..')
+function Processor:revertChanges(changes: Types.Changes): Types.Changes
+	local reverted = Changes.new()
 
-	self:hydrate(snapshot, game)
-
-	Log.trace('Diffing initial snapshot..')
-
-	local changes = Changes.new()
-
-	for _, child in ipairs(snapshot.children) do
-		changes:join(self:diff(child, snapshot.id))
+	for _, snapshot in ipairs(changes.additions) do
+		reverted:remove(buffer.fromstring(snapshot.id))
 	end
 
-	return changes
+	for _, snapshot in ipairs(changes.updates) do
+		local instance = self.tree:getInstance(snapshot.id)
+		reverted:update(self.read:onChange(instance))
+	end
+
+	for _, instance in ipairs(changes.removals) do
+		reverted:add(self.read:onAdd(instance))
+	end
+
+	return reverted
 end
 
 return Processor

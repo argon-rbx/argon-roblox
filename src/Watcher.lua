@@ -26,6 +26,8 @@ function Watcher:start(rootDirs: { Instance })
 			self:__connectEvents(descendant)
 		end
 	end
+
+	self.rootDirs = rootDirs
 end
 
 function Watcher:stop()
