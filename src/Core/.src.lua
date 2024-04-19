@@ -78,6 +78,8 @@ function Core:run(): Promise.Promise
 	return Promise.new(function(_, reject)
 		self.status = Core.Status.Connecting
 
+		local syncServer = Config:get('InitialSyncPriority') == 'Server'
+
 		Log.trace('Fetching server details..')
 
 		local project = self.client:fetchDetails():expect()
@@ -95,7 +97,7 @@ function Core:run(): Promise.Promise
 
 		Log.trace('Initializing processor..')
 
-		local initialChanges = self.processor:init(snapshot)
+		local changes = self.processor:init(snapshot, not syncServer)
 
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
@@ -105,11 +107,11 @@ function Core:run(): Promise.Promise
 			self.rootDirs[i] = self.tree:getInstance(id)
 		end
 
-		if self:__syncServer() then
-			self:__verifyChanges(initialChanges, true):expect()
-			self.processor.write:applyChanges(initialChanges, true)
-		elseif initialChanges:total() > 0 then
-			local reverted = self.processor:revertChanges(initialChanges)
+		if syncServer then
+			self:__verifyChanges(changes, true):expect()
+			self.processor.write:applyChanges(changes, true)
+		elseif changes:total() > 0 then
+			local reverted = self.processor:revertChanges(changes)
 			self.client:write(reverted):expect()
 		end
 
@@ -357,10 +359,6 @@ function Core:__cleanConnection(id: string)
 		connection:Disconnect()
 		self.connections[id] = nil
 	end
-end
-
-function Core:__syncServer(): boolean
-	return Config:get('InitialSyncPriority') == 'Server'
 end
 
 function Core:__shouldPrompt(initial: boolean?): boolean

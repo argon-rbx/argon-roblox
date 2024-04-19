@@ -25,7 +25,7 @@ function Processor.new(tree)
 	return setmetatable(self, Processor)
 end
 
-function Processor:init(snapshot: Types.Snapshot): Types.Changes
+function Processor:init(snapshot: Types.Snapshot, ignoreMeta: boolean): Types.Changes
 	Log.trace('Hydrating initial snapshot..')
 
 	self:hydrate(snapshot, game)
@@ -35,7 +35,7 @@ function Processor:init(snapshot: Types.Snapshot): Types.Changes
 	local changes = Changes.new()
 
 	for _, child in ipairs(snapshot.children) do
-		changes:join(self:diff(child, snapshot.id))
+		changes:join(self:diff(child, snapshot.id, ignoreMeta))
 	end
 
 	return changes
@@ -62,7 +62,7 @@ function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	end
 end
 
-function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Changes
+function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta: boolean): Types.Changes
 	local changes = Changes.new()
 
 	local instance = self.tree:getInstance(snapshot.id)
@@ -149,8 +149,8 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref): Types.Chan
 				return child.id == childId
 			end)
 
-			changes:join(self:diff(childSnapshot, snapshot.id))
-		elseif not snapshot.meta.keepUnknowns and Dom.isCreatable(child.ClassName) then
+			changes:join(self:diff(childSnapshot, snapshot.id, ignoreMeta))
+		elseif (not snapshot.meta.keepUnknowns or ignoreMeta) and Dom.isCreatable(child.ClassName) then
 			changes:remove(child)
 		end
 	end
