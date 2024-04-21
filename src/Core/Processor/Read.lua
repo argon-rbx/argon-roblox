@@ -11,9 +11,6 @@ local generateRef = require(Argon.Helpers.generateRef)
 local Snapshot = require(script.Parent.Parent.Snapshot)
 local Error = require(script.Parent.Parent.Error)
 
-local ReadProcessor = {}
-ReadProcessor.__index = ReadProcessor
-
 local function syncProperties(instance: Instance, property: string?): boolean
 	return instance:IsA('LuaSourceContainer') or Config:get('TwoWaySyncProperties') or property == 'Name'
 end
@@ -26,6 +23,9 @@ local function validateProperties(properties: Types.Properties)
 		}
 	end
 end
+
+local ReadProcessor = {}
+ReadProcessor.__index = ReadProcessor
 
 function ReadProcessor.new(tree)
 	return setmetatable({

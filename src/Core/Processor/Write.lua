@@ -1,11 +1,18 @@
+local ChangeHistoryService = game:GetService('ChangeHistoryService')
+
 local Argon = script:FindFirstAncestor('Argon')
 
 local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
 local Types = require(Argon.Types)
 local Config = require(Argon.Config)
+local generateRef = require(Argon.Helpers.generateRef)
 
 local Error = require(script.Parent.Parent.Error)
+
+local function setWaypoint(action: string?)
+	ChangeHistoryService:SetWaypoint(`Argon {action or 'sync'}: {DateTime.now():FormatLocalTime('LTS', 'en-us')}`)
+end
 
 local WriteProcessor = {}
 WriteProcessor.__index = WriteProcessor
@@ -13,11 +20,14 @@ WriteProcessor.__index = WriteProcessor
 function WriteProcessor.new(tree)
 	return setmetatable({
 		tree = tree,
+		lastRemovedInstance = nil,
 	}, WriteProcessor)
 end
 
 function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 	Log.trace('Applying changes..')
+
+	setWaypoint()
 
 	for _, snapshot in ipairs(changes.additions) do
 		self:applyAddition(snapshot)
@@ -66,6 +76,8 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 
 		self:applyAddition(child)
 	end
+
+	setWaypoint('add')
 end
 
 function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: boolean?)
@@ -170,6 +182,8 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 			end
 		end
 	end
+
+	setWaypoint('update')
 end
 
 function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
@@ -181,9 +195,44 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 	else
 		local instance = self.tree:getInstance(object)
 
+		self.lastRemovedInstance = {
+			instance = instance:Clone(),
+			parent = instance.Parent,
+		}
+
 		self.tree:removeById(object)
 		instance:Destroy()
 	end
+
+	setWaypoint('remove')
+end
+
+function WriteProcessor:undoLastRemoval()
+	if not self.lastRemovedInstance then
+		Log.warn('Argon failed to restore the last removed instance')
+		return
+	end
+
+	local instance = self.lastRemovedInstance.instance
+	instance.Parent = self.lastRemovedInstance.parent
+
+	self.lastRemovedInstance = nil
+
+	if not Config:get('TwoWaySync') then
+		local function walk(instance)
+			self.tree:insertInstance(instance, generateRef(true))
+
+			for _, child in ipairs(instance:GetChildren()) do
+				walk(child)
+			end
+		end
+
+		walk(instance)
+	end
+
+	print('Argon successfully restored this instance, you can ignore the warning above')
+
+	setWaypoint('undo')
 end
 
 return WriteProcessor
