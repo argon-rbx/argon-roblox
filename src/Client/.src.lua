@@ -3,6 +3,7 @@ local Argon = script:FindFirstAncestor('Argon')
 local Promise = require(Argon.Packages.Promise)
 
 local Types = require(Argon.Types)
+local Place = require(Argon.Place)
 
 local Http = require(script.Http)
 local Error = require(script.Error)
@@ -19,6 +20,7 @@ function Client.new(host: string, port: number)
 
 	self.isSubscribed = false
 	self.clientId = generateId()
+	self.placeName = Place.Name
 	self.host = host
 	self.port = port
 
@@ -42,6 +44,7 @@ function Client:subscribe(): Promise.Promise
 
 	return Http.post(url, {
 		clientId = self.clientId,
+		name = self.placeName,
 	})
 		:andThen(function()
 			self.isSubscribed = true

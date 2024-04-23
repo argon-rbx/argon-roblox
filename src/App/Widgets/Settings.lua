@@ -37,7 +37,7 @@ local OnChange = Fusion.OnChange
 local ForValues = Fusion.ForValues
 local peek = Fusion.peek
 
-local SETTINGS_DATA = {
+local SETTINGS_DATA: { SettingData } = {
 	{
 		Setting = 'Host',
 		Name = 'Server Host',
@@ -176,6 +176,16 @@ local function Entry(props: EntryProps): Frame
 					[Children] = {
 						Padding {
 							Vertical = false,
+						},
+						-- Temporary
+						Text {
+							Position = UDim2.new(1, 26, 0, 14),
+							TextSize = Theme.TextSize.Small,
+							Color = Theme.Colors.TextDimmed,
+							AutomaticSize = Enum.AutomaticSize.None,
+							Text = setting == 'Host'
+									and 'Broken UI?\n1. Go to File > Beta Features\n2. Enable "UIListLayout Flex"\n3. Restart Roblox Studio'
+								or '',
 						},
 					},
 					[Cleanup] = disconnect,

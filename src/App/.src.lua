@@ -1,3 +1,5 @@
+local RunService = game:GetService('RunService')
+
 local plugin = script:FindFirstAncestorWhichIsA('Plugin')
 
 local Argon = script:FindFirstAncestor('Argon')
@@ -33,6 +35,7 @@ local List = require(Components.List)
 local NotConnected = require(Pages.NotConnected)
 local Connecting = require(Pages.Connecting)
 local Connected = require(Pages.Connected)
+local Unavailable = require(Pages.Unavailable)
 local Prompt = require(Pages.Prompt)
 local Error = require(Pages.Error)
 
@@ -111,7 +114,11 @@ function App.new()
 
 	toolbarButton:SetActive(peek(isOpen))
 
-	self:home()
+	if RunService:IsEdit() then
+		self:home()
+	else
+		self:setPage(Unavailable())
+	end
 
 	if Config:get('AutoConnect') then
 		self:connect()
