@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.0] - 2024-05-01
+
 ### Added
 
 - Full two-way sync
@@ -65,7 +67,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[Unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0-pre5...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0-pre5...2.0.0
 [2.0.0-pre5]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0-pre4...2.0.0-pre5
 [2.0.0-pre4]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0-pre3...2.0.0-pre4
 [2.0.0-pre3]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0-pre2...2.0.0-pre3
