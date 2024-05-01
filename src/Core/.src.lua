@@ -353,7 +353,7 @@ function Core:__handleOpenInEditor(enabled: boolean)
 		-- local line = document:GetSelectionStart()
 
 		self.client
-			:open(id, 0)
+			:open(id)
 			:andThen(function()
 				document:CloseAsync()
 			end)

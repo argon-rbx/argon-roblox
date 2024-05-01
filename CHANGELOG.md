@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Full two-way sync
+- Sync direction indicator
+- Place "porting" - Initial Sync Priority setting
+- Auto Reconnect setting
+- Option to control when user should be prompted for confirmation
+- Support for `keepUnknowns` property
 - Ability to re-release the same version when needed
 - UI icon pre-loader
 - Helper scripts
@@ -16,6 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Argon network protocol now uses MessagePack instead of JSON
 - Argon UI now supports custom Studio themes
+- All floating widgets and some UI elements
+
+### Fixed
+
+- Open In Editor works again (caused by usage of Luau buffers)
 
 ## [2.0.0-pre5] - 2024-03-22
 

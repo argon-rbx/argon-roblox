@@ -95,9 +95,18 @@ return function(props: Props): { Instance }
 					AnchorPoint = Vector2.new(1, 0.5),
 					Position = UDim2.new(1, -2, 0.5, 0),
 					Text = Computed(function(use)
-						return 'Synced\n' .. use(syncedText)
+						local lastSyncKind = use(props.App.lastSyncKind)
+						local action = ''
+
+						if lastSyncKind == 'Server' then
+							action = '↓'
+						elseif lastSyncKind == 'Client' then
+							action = '↑'
+						end
+
+						return action .. '<i> Synced\n' .. use(syncedText) .. '</i>'
 					end),
-					Font = Theme.Fonts.Italic,
+					RichText = true,
 					Color = Theme.Colors.TextDimmed,
 					TextSize = Theme.TextSize.Small,
 					TextXAlignment = Enum.TextXAlignment.Right,

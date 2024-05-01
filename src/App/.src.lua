@@ -73,6 +73,7 @@ function App.new()
 	self.port = Config:get('Port')
 
 	self.lastSync = Value(os.time())
+	self.lastSyncKind = Value('Unknown')
 	self.rootSize = Value(Vector2.new(300, 190))
 	self.pages = Value({})
 
@@ -321,6 +322,7 @@ function App:connect()
 		project:set(projectDetails)
 
 		self.lastSync:set(os.time())
+		self.lastSyncKind:set(Config:get('InitialSyncPriority'))
 
 		self:setPage(Connected {
 			App = self,
@@ -330,6 +332,11 @@ function App:connect()
 
 	self.core:onSync(function(kind, data)
 		self.lastSync:set(os.time())
+		self.lastSyncKind:set(
+			kind == ('SyncChanges' or 'SyncDetails') and 'Server'
+				or (kind == 'Add' or kind == 'Change' or kind == 'Remove') and 'Client'
+				or 'Unknown'
+		)
 
 		if kind == 'SyncDetails' then
 			project:set(data)
