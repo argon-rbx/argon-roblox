@@ -12,6 +12,8 @@ local Util = require(Argon.Util)
 local Types = require(Argon.Types)
 local Watcher = require(Argon.Watcher)
 local Executor = require(Argon.Executor)
+local SemVer = require(Argon.SemVer)
+local manifest = require(Argon.manifest)
 
 local Processor = require(script.Processor)
 local Changes = require(script.Changes)
@@ -212,6 +214,12 @@ function Core:__verifyProject(project: Types.Project, initial: boolean?): Promis
 		if not self.__prompt(err.message) then
 			return Promise.reject(err)
 		end
+	end
+
+	if not SemVer.parse(project.version):isCompatible(SemVer.parse(manifest.package.version)) then
+		local err = Error.new(Error.Version, manifest.package.version, project.version)
+
+		return Promise.reject(err)
 	end
 
 	return Promise.resolve()

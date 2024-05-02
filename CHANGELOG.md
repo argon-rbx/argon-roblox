@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Syncing with `Client` priority no longer causes `Payload Too Large` error, reported by [@OctoShot](https://devforum.roblox.com/u/octoshotr)
+
+### Improved
+
+- Plugin now compares the server version to check whether it is compatible
+
 ## [2.0.0] - 2024-05-01
 
 ### Added

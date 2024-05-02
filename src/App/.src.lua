@@ -74,7 +74,7 @@ function App.new()
 
 	self.lastSync = Value(os.time())
 	self.lastSyncKind = Value('Unknown')
-	self.rootSize = Value(Vector2.new(300, 190))
+	self.rootSize = Value(Vector2.new(300, 200))
 	self.pages = Value({})
 
 	local isOpen = Value(false)

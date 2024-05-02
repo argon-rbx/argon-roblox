@@ -13,6 +13,7 @@ local Error = {
 	-- Initial prompts
 	GameId = 'Current GameId: $1 does not match the server gameId: $2',
 	PlaceIds = 'Current PlaceId: $1 is not inluded in the server placeIds: $2',
+	Version = 'Client version: $1 is not compatible with the server version: $2',
 	TooManyChanges = 'There are $1 additions, $2 updates, $3 deletions compared to the server',
 	Terminated = 'Terminated connection by the user',
 	-- Core errors
