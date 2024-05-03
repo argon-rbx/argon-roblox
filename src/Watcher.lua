@@ -3,6 +3,7 @@ local Argon = script:FindFirstAncestor('Argon')
 local Signal = require(Argon.Packages.Signal)
 
 local Types = require(Argon.Types)
+local Log = require(Argon.Log)
 
 local Watcher = {}
 Watcher.__index = Watcher
@@ -19,6 +20,8 @@ function Watcher.new(tree)
 end
 
 function Watcher:start(rootDirs: { Instance })
+	Log.trace('Starting watcher..')
+
 	for _, instance in ipairs(rootDirs) do
 		self:__connectEvents(instance)
 
@@ -31,6 +34,8 @@ function Watcher:start(rootDirs: { Instance })
 end
 
 function Watcher:stop()
+	Log.trace('Stopping watcher..')
+
 	self.signal:UnbindAll()
 
 	for _, connections in pairs(self.connections) do

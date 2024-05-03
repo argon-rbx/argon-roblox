@@ -24,7 +24,9 @@ local Error = {
 	EncodeFailed = 'Failed to encode snapshot property: $1 with value: $2',
 	ReadFailed = 'Failed to read property: $1 from instance: $2',
 	WriteFailed = 'Failed to write property: $1 for instance: $2',
-	InstanceNotFound = 'Instance: $1 does not exist in the tree',
+	NoInstanceAdd = 'Tried to add an instance whose parent that does not exist in the tree: $1',
+	NoInstanceUpdate = 'Tried to update an instance that does not exist in the tree: $1',
+	NoInstanceRemove = 'Tried to remove an instance that does not exist in the tree: $1',
 }
 
 local function eq(self: Error, other: Error): boolean

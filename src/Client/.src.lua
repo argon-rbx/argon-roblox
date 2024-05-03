@@ -4,6 +4,7 @@ local Promise = require(Argon.Packages.Promise)
 
 local Types = require(Argon.Types)
 local Place = require(Argon.Place)
+local Log = require(Argon.Log)
 
 local Http = require(script.Http)
 local Error = require(script.Error)
@@ -32,6 +33,8 @@ function Client:getUrl(): string
 end
 
 function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
+	Log.trace('Client request: details')
+
 	local url = self:getUrl() .. 'details'
 
 	return Http.get(url):andThen(function(response)
@@ -40,6 +43,8 @@ function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
 end
 
 function Client:subscribe(): Promise.Promise
+	Log.trace('Client request: subscribe')
+
 	local url = self:getUrl() .. 'subscribe'
 
 	return Http.post(url, {
@@ -59,6 +64,8 @@ function Client:subscribe(): Promise.Promise
 end
 
 function Client:unsubscribe(): Promise.Promise
+	Log.trace('Client request: unsubscribe')
+
 	local url = self:getUrl() .. 'unsubscribe'
 
 	return Http.post(url, {
@@ -77,6 +84,8 @@ function Client:unsubscribe(): Promise.Promise
 end
 
 function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
+	Log.trace('Client request: snapshot')
+
 	local url = self:getUrl() .. 'snapshot'
 
 	return Http.get(url):andThen(function(response)
@@ -85,6 +94,8 @@ function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
 end
 
 function Client:read(): Promise.TypedPromise<Types.Message>
+	Log.trace('Client request: read')
+
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
 	return Http.get(url)
@@ -102,6 +113,8 @@ function Client:read(): Promise.TypedPromise<Types.Message>
 end
 
 function Client:write(changes: Types.Changes): Promise.Promise
+	Log.trace('Client request: write')
+
 	local url = self:getUrl() .. `write`
 
 	return Http.post(url, {
@@ -111,6 +124,8 @@ function Client:write(changes: Types.Changes): Promise.Promise
 end
 
 function Client:open(instance: Types.Ref, line: number?): Promise.Promise
+	Log.trace('Client request: open')
+
 	local url = self:getUrl() .. 'open'
 
 	return Http.post(url, {

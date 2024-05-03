@@ -120,12 +120,14 @@ function Core:run(): Promise.Promise
 			self.rootDirs[i] = self.tree:getInstance(id)
 		end
 
+		Log.trace('Processing initial snapshot..')
+
 		if syncServer then
 			self:__verifyChanges(changes, true):expect()
 			self.processor.write:applyChanges(changes, true)
 		elseif changes:total() > 0 then
-			local reverted = self.processor:revertChanges(changes)
-			self.client:write(reverted):expect()
+			local reversed = self.processor:reverseChanges(changes)
+			self.client:write(reversed):expect()
 		end
 
 		if Config:get('TwoWaySync') then
@@ -134,6 +136,8 @@ function Core:run(): Promise.Promise
 
 		self.status = Core.Status.Connected
 		self.__ready(project)
+
+		Log.trace('Starting sync loops..')
 
 		self:__startSyncbackLoop():catch(function(err)
 			return reject(err)

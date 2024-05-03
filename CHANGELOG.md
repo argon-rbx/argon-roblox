@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Syncing back instances with one of the properties set to `math.huge` no longer causes Argon to crash
+
+### Improved
+
+- Applying corrupted instance changes no longer causes Argon to crash
+- Dom database is now saved in MessagePack, this fixes some issues & decreases the plugin size
+
 ## [2.0.1] - 2024-05-02
 
 ### Fixed

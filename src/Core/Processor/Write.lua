@@ -47,6 +47,13 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 
 	local parent = self.tree:getInstance(snapshot.parent)
 
+	if not parent then
+		local err = Error.new(Error.NoInstanceAdd, snapshot)
+		Log.warn(err)
+
+		return
+	end
+
 	local instance = Instance.new(snapshot.class)
 	instance.Name = snapshot.name
 
@@ -84,6 +91,14 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	Log.trace('Applying update of', snapshot)
 
 	local instance = self.tree:getInstance(snapshot.id)
+
+	if not instance then
+		local err = Error.new(Error.NoInstanceUpdate, snapshot)
+		Log.warn(err)
+
+		return
+	end
+
 	local defaultProperties
 
 	if snapshot.meta then
@@ -194,6 +209,13 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 		object:Destroy()
 	else
 		local instance = self.tree:getInstance(object)
+
+		if not instance then
+			local err = Error.new(Error.NoInstanceRemove, object)
+			Log.warn(err)
+
+			return
+		end
 
 		self.lastRemovedInstance = {
 			instance = instance:Clone(),

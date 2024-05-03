@@ -158,23 +158,25 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 	return changes
 end
 
-function Processor:revertChanges(changes: Types.Changes): Types.Changes
-	local reverted = Changes.new()
+function Processor:reverseChanges(changes: Types.Changes): Types.Changes
+	Log.trace('Reversing changes..')
+
+	local reversed = Changes.new()
 
 	for _, snapshot in ipairs(changes.additions) do
-		reverted:remove(buffer.fromstring(snapshot.id))
+		reversed:remove(buffer.fromstring(snapshot.id))
 	end
 
 	for _, snapshot in ipairs(changes.updates) do
 		local instance = self.tree:getInstance(snapshot.id)
-		reverted:update(self.read:onChange(instance))
+		reversed:update(self.read:onChange(instance))
 	end
 
 	for _, instance in ipairs(changes.removals) do
-		reverted:add(self.read:onAdd(instance))
+		reversed:add(self.read:onAdd(instance))
 	end
 
-	return reverted
+	return reversed
 end
 
 return Processor
