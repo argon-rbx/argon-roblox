@@ -58,14 +58,15 @@ function Util.stringify(value: any, __indent: number?): string
 		local first = next(value)
 
 		if type(first) == 'number' then
-			local str = '{'
+			local str = '{\n'
+			local indent = __indent and __indent + 1 or 1
 
-			for _, v in ipairs(value) do
-				str ..= Util.stringify(v) .. ', '
+			for i, v in ipairs(value) do
+				str ..= str.rep('\t', indent)
+				str ..= `[{i}] = {Util.stringify(v, indent)},\n`
 			end
 
-			str = str:sub(1, -3)
-			return str .. '}'
+			return str .. string.rep('\t', indent - 1) .. '}'
 		else
 			local str = '{\n'
 			local indent = __indent and __indent + 1 or 1

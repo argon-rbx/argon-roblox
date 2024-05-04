@@ -31,6 +31,15 @@ local function reverse(b: buffer, offset: number, count: number): ()
 	end
 end
 
+-- Split a 64-bit number into two 32-bit numbers
+local function split(value: number): (number, number)
+	return value // 0x100000000, value % 0x100000000
+end
+
+local function join(hi: number, lo: number): number
+	return hi * 0x100000000 + lo
+end
+
 local function writeu16(b: buffer, offset: number, value: number): ()
 	buffer.writeu16(b, offset, value)
 	reverse(b, offset, 2)
@@ -141,7 +150,7 @@ local function parse(message: buffer, offset: number): (any, number)
 	elseif byte == 0xCE then -- uint 32
 		return readu32(message, offset + 1), offset + 5
 	elseif byte == 0xCF then -- uint 64
-		return msgpack.UInt64.new(readu32(message, offset + 1), readu32(message, offset + 5)), offset + 9
+		return join(readu32(message, offset + 1), readu32(message, offset + 5)), offset + 9
 	elseif byte == 0xD0 then -- int 8
 		return readi8(message, offset + 1), offset + 2
 	elseif byte == 0xD1 then -- int 16
@@ -149,7 +158,7 @@ local function parse(message: buffer, offset: number): (any, number)
 	elseif byte == 0xD2 then -- int 32
 		return readi32(message, offset + 1), offset + 5
 	elseif byte == 0xD3 then -- int 64
-		return msgpack.Int64.new(readu32(message, offset + 1), readu32(message, offset + 5)), offset + 9
+		return join(readi32(message, offset + 1), readi32(message, offset + 5)), offset + 9
 	elseif byte == 0xD4 then -- fixext 1
 		local newBuf = bufferCreate(1)
 		bufferCopy(newBuf, 0, message, offset + 2, 1)
@@ -336,9 +345,7 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 		local msgpackType = data._msgpackType
 
 		if msgpackType then
-			if msgpackType == msgpack.Int64 or msgpackType == msgpack.UInt64 then
-				return 9
-			elseif msgpackType == msgpack.Extension then
+			if msgpackType == msgpack.Extension then
 				local length = bufferLen(data.data)
 
 				if length == 1 then
@@ -496,8 +503,7 @@ local function encode(result: buffer, offset: number, data: any): number
 		local integral, fractional = modf(data)
 		local sign = sign(data)
 
-		if fractional ~= 0 or integral > 0xFFFFFFFF or integral < -0x80000000 then
-			-- float 64
+		if fractional ~= 0 then -- float 64
 			writeu8(result, offset, 0xCB)
 			writef64(result, offset + 1, data)
 			return offset + 9
@@ -519,6 +525,13 @@ local function encode(result: buffer, offset: number, data: any): number
 				writeu8(result, offset, 0xCE)
 				writeu32(result, offset + 1, integral)
 				return offset + 5
+			elseif integral <= 0xFFFFFFFFFFFFFFFF then -- uint 64
+				local high, low = split(integral)
+				writeu8(result, offset, 0xCF)
+				writeu32(result, offset + 1, high)
+				writeu32(result, offset + 5, low)
+
+				return offset + 9
 			end
 		else
 			if integral >= -0x20 then -- negative fixint
@@ -536,6 +549,22 @@ local function encode(result: buffer, offset: number, data: any): number
 				writeu8(result, offset, 0xD2)
 				writei32(result, offset + 1, integral)
 				return offset + 5
+			elseif integral >= -0x8000000000000000 then -- int 64
+				local high, low = split(integral)
+
+				if high >= 0x80000000 then
+					high = high - 0x100000000
+				end
+
+				if low >= 0x80000000 then
+					low = low - 0x100000000
+				end
+
+				writeu8(result, offset, 0xD3)
+				writei32(result, offset + 1, high)
+				writei32(result, offset + 5, low)
+
+				return offset + 9
 			end
 		end
 
@@ -544,13 +573,7 @@ local function encode(result: buffer, offset: number, data: any): number
 		local msgpackType = data._msgpackType
 
 		if msgpackType then
-			if msgpackType == msgpack.Int64 or msgpackType == msgpack.UInt64 then
-				local intType = if msgpackType == msgpack.UInt64 then 0xCF else 0xD3
-				writeu8(result, offset, intType)
-				writeu32(result, offset + 1, data.mostSignificantPart)
-				writeu32(result, offset + 5, data.leastSignificantPart)
-				return offset + 9
-			elseif msgpackType == msgpack.Extension then
+			if msgpackType == msgpack.Extension then
 				local length = bufferLen(data.data)
 				local extType = extensionTypeLUT[length]
 
@@ -643,26 +666,6 @@ local function encode(result: buffer, offset: number, data: any): number
 	error(string.format('Could not encode - unsupported datatype "%s"', typeof(data)))
 end
 
-msgpack.Int64 = {}
-
-function msgpack.Int64.new(mostSignificantPart: number, leastSignificantPart: number): Int64
-	return {
-		_msgpackType = msgpack.Int64,
-		mostSignificantPart = mostSignificantPart,
-		leastSignificantPart = leastSignificantPart,
-	}
-end
-
-msgpack.UInt64 = {}
-
-function msgpack.UInt64.new(mostSignificantPart: number, leastSignificantPart: number): UInt64
-	return {
-		_msgpackType = msgpack.UInt64,
-		mostSignificantPart = mostSignificantPart,
-		leastSignificantPart = leastSignificantPart,
-	}
-end
-
 msgpack.Extension = {}
 
 function msgpack.Extension.new(extensionType: number, blob: buffer): Extension
@@ -746,8 +749,6 @@ function msgpack.encode(data: any): string
 	return bufferToString(result)
 end
 
-export type Int64 = { _msgpackType: typeof(msgpack.Int64), mostSignificantPart: number, leastSignificantPart: number }
-export type UInt64 = { _msgpackType: typeof(msgpack.UInt64), mostSignificantPart: number, leastSignificantPart: number }
 export type Extension = { _msgpackType: typeof(msgpack.Extension), type: number, data: buffer }
 
 return msgpack
