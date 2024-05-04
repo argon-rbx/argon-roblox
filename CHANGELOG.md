@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - `Int64` is now serialized properly instead of converting it to `Float64` (MessagePack)
+- Tables are stringified with appropriate indentation
 
 ## [2.0.2] - 2024-05-03
 
@@ -16,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Syncing back instances with one of the properties set to `math.huge` no longer causes Argon to crash
 
-### Improved
+### Changed
 
 - Applying corrupted instance changes no longer causes Argon to crash
 - Dom database is now saved in MessagePack, this fixes some issues & decreases the plugin size
@@ -25,9 +26,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Syncing with `Client` priority no longer causes `Payload Too Large` error, reported by [@OctoShot](https://devforum.roblox.com/u/octoshotr)
+- Syncing with `Client` priority no longer causes `Payload Too Large` error
 
-### Improved
+### Changed
 
 - Plugin now compares the server version to check whether it is compatible
 
@@ -45,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - UI icon pre-loader
 - Helper scripts
 
-### Improved
+### Changed
 
 - Argon network protocol now uses MessagePack instead of JSON
 - Argon UI now supports custom Studio themes
@@ -59,7 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Main host and port box now works without need for the first input, reported by [@Arid](https://github.com/AridAjd)
+- Main host and port box now works without need for the first input
 
 ## [2.0.0-pre4] - 2024-03-21
 
@@ -76,9 +77,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Locked property error, reported by [@EthanMichalicek](https://github.com/EthanMichalicek) in [#1](https://github.com/argon-rbx/argon-roblox/issues/1)
+- Locked property error ([#1])
 - Sync confirmation cancellation not working
 - Text inputs in the Settings widget
+
+[#1]: https://github.com/argon-rbx/argon-roblox/issues/1
 
 ## [2.0.0-pre2] - 2024-03-19
 

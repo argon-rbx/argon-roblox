@@ -552,14 +552,6 @@ local function encode(result: buffer, offset: number, data: any): number
 			elseif integral >= -0x8000000000000000 then -- int 64
 				local high, low = split(integral)
 
-				if high >= 0x80000000 then
-					high = high - 0x100000000
-				end
-
-				if low >= 0x80000000 then
-					low = low - 0x100000000
-				end
-
 				writeu8(result, offset, 0xD3)
 				writei32(result, offset + 1, high)
 				writei32(result, offset + 5, low)
