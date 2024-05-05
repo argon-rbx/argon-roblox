@@ -47,11 +47,15 @@ function Watcher:stop()
 	self.connections = {}
 end
 
-function Watcher:awaitEvent(): Types.WatcherEvent
+function Watcher:listen(): Types.WatcherEvent
 	return self.signal:Wait()
 end
 
 function Watcher:__connectEvents(instance: Instance)
+	if instance == workspace.CurrentCamera then
+		return
+	end
+
 	local connections = {}
 
 	table.insert(

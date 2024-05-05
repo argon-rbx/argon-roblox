@@ -27,6 +27,9 @@ local Error = {
 	NoInstanceAdd = 'Tried to add an instance whose parent that does not exist in the tree: $1',
 	NoInstanceUpdate = 'Tried to update an instance that does not exist in the tree: $1',
 	NoInstanceRemove = 'Tried to remove an instance that does not exist in the tree: $1',
+	NotCreatable = 'Tried to create an instance of class: $1 that is not creatable',
+	NotRemovable = 'Tried to remove an instance of class: $1 that is not removable',
+	HydrationFailed = 'Failed to hydrate root service, snapshot: $1',
 }
 
 local function eq(self: Error, other: Error): boolean

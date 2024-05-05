@@ -333,8 +333,8 @@ function App:connect()
 	self.core:onSync(function(kind, data)
 		self.lastSync:set(os.time())
 		self.lastSyncKind:set(
-			kind == ('SyncChanges' or 'SyncDetails') and 'Server'
-				or (kind == 'Add' or kind == 'Change' or kind == 'Remove') and 'Client'
+			(kind == 'SyncChanges' or kind == 'SyncDetails') and 'Server'
+				or kind == 'SyncbackChanges' and 'Client'
 				or 'Unknown'
 		)
 

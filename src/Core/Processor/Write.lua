@@ -54,7 +54,28 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 		return
 	end
 
-	local instance = Instance.new(snapshot.class)
+	local instance
+
+	if Dom.isCreatable(snapshot.class) then
+		instance = Instance.new(snapshot.class)
+	elseif parent == game then
+		local service = game:FindFirstChildOfClass(snapshot.class)
+
+		if service then
+			instance = service
+		else
+			local err = Error.new(Error.HydrationFailed, snapshot)
+			Log.warn(err)
+
+			return
+		end
+	else
+		local err = Error.new(Error.NotCreatable, snapshot.class)
+		Log.warn(err)
+
+		return
+	end
+
 	instance.Name = snapshot.name
 
 	for property, value in pairs(snapshot.properties) do
@@ -212,6 +233,13 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 
 		if not instance then
 			local err = Error.new(Error.NoInstanceRemove, object)
+			Log.warn(err)
+
+			return
+		end
+
+		if not Dom.isCreatable(instance.ClassName) then
+			local err = Error.new(Error.NotRemovable, instance.ClassName)
 			Log.warn(err)
 
 			return

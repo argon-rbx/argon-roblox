@@ -21,6 +21,7 @@ local Tree = require(script.Tree)
 local Error = require(script.Error)
 
 local CHANGES_TRESHOLD = 5
+local SYNCBACK_RATE = 0.5
 
 local Core = {
 	Status = {
@@ -285,9 +286,30 @@ function Core:__startSyncLoop()
 end
 
 function Core:__startSyncbackLoop()
+	local aggregateChanges = Changes.new()
+
 	return Promise.new(function(resolve)
+		task.spawn(function()
+			while self.status == Core.Status.Connected do
+				task.wait(SYNCBACK_RATE)
+
+				if aggregateChanges:isEmpty() then
+					continue
+				end
+
+				local changes = aggregateChanges
+				aggregateChanges = Changes.new()
+
+				self.client:write(changes):catch(function(err)
+					Log.warn('Failed to write changes to the server:', err)
+				end)
+
+				self.__sync('kind', changes)
+			end
+		end)
+
 		while self.status == Core.Status.Connected do
-			local event = self.watcher:awaitEvent() :: Types.WatcherEvent
+			local event = self.watcher:listen() :: Types.WatcherEvent
 
 			if self.processor.read.isPaused then
 				continue
@@ -318,13 +340,7 @@ function Core:__startSyncbackLoop()
 				end
 			end
 
-			if not changes:isEmpty() then
-				self.client:write(changes):catch(function(err)
-					Log.warn('Failed to write changes to the server:', err)
-				end)
-
-				self.__sync(kind, changes)
-			end
+			aggregateChanges:join(changes)
 		end
 
 		resolve()

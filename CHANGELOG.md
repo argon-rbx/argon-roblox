@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- "Creating" services is now possible via hydration
+
+### Fixed
+
+- `workspace.Camera` is now ignored by syncback so HTTP request limit no longer gets exceeded
+- Removing services no longer causes Argon to crash, instead the user receives a warning
+
+### Changed
+
+- Two-way sync is now rate limited to a maximum of 2 requests per second
+
 ## [2.0.3] - 2024-05-04
 
 ### Fixed
@@ -79,11 +92,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Locked property error ([#1])
+- Locked property error ([#1](https://github.com/argon-rbx/argon-roblox/issues/1))
 - Sync confirmation cancellation not working
 - Text inputs in the Settings widget
-
-[#1]: https://github.com/argon-rbx/argon-roblox/issues/1
 
 ## [2.0.0-pre2] - 2024-03-19
 
