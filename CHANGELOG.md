@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.4] - 2024-05-05
+
 ### Added
 
 - "Creating" services is now possible via hydration
@@ -108,7 +110,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.3...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.4...HEAD
+[2.0.4]: https://github.com/argon-rbx/argon-roblox/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/argon-rbx/argon-roblox/compare/HEAD...2.0.3
 [2.0.2]: https://github.com/argon-rbx/argon-roblox/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/argon-rbx/argon-roblox/compare/2.0.0...2.0.1
