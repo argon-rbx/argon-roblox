@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Current plugin status is now disabled on the Argon's toolbar icon
+
+### Fixed
+
+- The plugin widget's previous state is now restored correctly
+
 ## [2.0.4] - 2024-05-05
 
 ### Added

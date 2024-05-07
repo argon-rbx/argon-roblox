@@ -26,17 +26,23 @@ local tableCreate = table.create
 local function reverse(b: buffer, offset: number, count: number): ()
 	for i = 1, count // 2 do
 		local byte = readu8(b, offset + i - 1)
+
 		bufferCopy(b, offset + i - 1, b, offset + count - i, 1)
 		writeu8(b, offset + count - i, byte)
 	end
 end
 
--- Split a 64-bit number into two 32-bit numbers
+-- Split a 64-bit integer into two 32-bit integers
 local function split(value: number): (number, number)
 	return value // 0x100000000, value % 0x100000000
 end
 
+-- Join two 32-bit integers into a 64-bit integer
 local function join(hi: number, lo: number): number
+	if lo < 0 then
+		lo += 0x100000000
+	end
+
 	return hi * 0x100000000 + lo
 end
 
@@ -59,11 +65,6 @@ local function writei32(b: buffer, offset: number, value: number): ()
 	buffer.writei32(b, offset, value)
 	reverse(b, offset, 4)
 end
-
--- local function writef32(b: buffer, offset: number, value: number): ()
--- 	buffer.writef32(b, offset, value)
--- 	reverse(b, offset, 4)
--- end
 
 local function writef64(b: buffer, offset: number, value: number): ()
 	buffer.writef64(b, offset, value)
@@ -268,6 +269,7 @@ end
 
 local function computeLength(data: any, tableSet: { [any]: boolean }): number
 	local dtype = type(data)
+
 	if data == nil then
 		return 1
 	elseif dtype == 'boolean' then
@@ -311,14 +313,12 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 		end
 
 		local integral, fractional = modf(data)
-		local sign = sign(data)
 
 		if fractional ~= 0 or integral > 0xFFFFFFFF or integral < -0x80000000 then
-			-- float 64
-			return 9
+			return 9 -- float 64 and int 64
 		end
 
-		if sign > 0 then
+		if sign(data) > 0 then
 			if integral <= 127 then -- positive fixint
 				return 1
 			elseif integral <= 0xFF then -- uint 8
@@ -384,6 +384,7 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 		end
 
 		local headerLen
+
 		if mapLength <= 15 then
 			headerLen = 1
 		elseif mapLength <= 0xFFFF then
@@ -400,6 +401,7 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 
 		if length == mapLength then -- array
 			local contentLen = 0
+
 			for _, v in ipairs(data) do
 				contentLen += computeLength(v, tableSet)
 			end
@@ -407,6 +409,7 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 			return headerLen + contentLen
 		else -- map
 			local contentLen = 0
+
 			for k, v in pairs(data) do
 				contentLen += computeLength(k, tableSet)
 				contentLen += computeLength(v, tableSet)
@@ -429,6 +432,7 @@ local extensionTypeLUT = {
 
 local function encode(result: buffer, offset: number, data: any): number
 	local dtype = type(data)
+
 	if data == nil then
 		writestring(result, offset, '\xC0')
 		return offset + 1
@@ -501,7 +505,6 @@ local function encode(result: buffer, offset: number, data: any): number
 		end
 
 		local integral, fractional = modf(data)
-		local sign = sign(data)
 
 		if fractional ~= 0 then -- float 64
 			writeu8(result, offset, 0xCB)
@@ -509,7 +512,7 @@ local function encode(result: buffer, offset: number, data: any): number
 			return offset + 9
 		end
 
-		if sign > 0 then
+		if sign(data) > 0 then
 			if integral <= 127 then -- positive fixint
 				writeu8(result, offset, integral)
 				return offset + 1
@@ -527,6 +530,7 @@ local function encode(result: buffer, offset: number, data: any): number
 				return offset + 5
 			elseif integral <= 0xFFFFFFFFFFFFFFFF then -- uint 64
 				local high, low = split(integral)
+
 				writeu8(result, offset, 0xCF)
 				writeu32(result, offset + 1, high)
 				writeu32(result, offset + 5, low)
@@ -560,7 +564,10 @@ local function encode(result: buffer, offset: number, data: any): number
 			end
 		end
 
-		error(string.format('Could not encode - unhandled number "%s"', typeof(data)))
+		-- Catch large floats as modf does not work for them
+		writeu8(result, offset, 0xCB)
+		writef64(result, offset + 1, data)
+		return offset + 9
 	elseif dtype == 'table' then
 		local msgpackType = data._msgpackType
 
@@ -609,6 +616,7 @@ local function encode(result: buffer, offset: number, data: any): number
 
 		if length == mapLength then -- array
 			local newOffset = offset
+
 			if length <= 15 then
 				writeu8(result, offset, bor(0x90, mapLength))
 				newOffset += 1
@@ -631,6 +639,7 @@ local function encode(result: buffer, offset: number, data: any): number
 			return newOffset
 		else -- map
 			local newOffset = offset
+
 			if mapLength <= 15 then
 				writeu8(result, offset, bor(0x80, mapLength))
 				newOffset += 1
@@ -674,6 +683,7 @@ function msgpack.utf8Encode(message: string): string
 	local result = bufferCreate(nBytes)
 
 	local bitPointer = 0
+
 	for i = 1, nBytes do
 		local j = 1 + floor(bitPointer / 8)
 		local bitRemainder = bitPointer % 8
@@ -685,6 +695,7 @@ function msgpack.utf8Encode(message: string): string
 			writeu8(result, i - 1, extract(byte, 0, 7))
 		else
 			local nextByte = sbyte(message, j + 1) or 0
+
 			writeu8(
 				result,
 				i - 1,
@@ -706,6 +717,7 @@ function msgpack.utf8Decode(message: string): string
 	local result = bufferCreate(nBytes)
 
 	local bitPointer = 0
+
 	for i = 1, nBytes do
 		local bitRemainder = bitPointer % 7
 		local byte = sbyte(message, 1 + floor(bitPointer / 7))
@@ -730,14 +742,18 @@ function msgpack.decode(message: string): any
 	if message == '' then
 		error('Could not decode - input string is too short')
 	end
+
 	local messageBuf = buffer.fromstring(message)
+
 	return (parse(messageBuf, 0))
 end
 
 function msgpack.encode(data: any): string
 	local length = computeLength(data, {})
 	local result = bufferCreate(length)
+
 	encode(result, 0, data)
+
 	return bufferToString(result)
 end
 

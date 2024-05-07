@@ -75,6 +75,7 @@ function App.new()
 	self.lastSync = Value(os.time())
 	self.lastSyncKind = Value('Unknown')
 	self.rootSize = Value(Vector2.new(300, 200))
+	self.icon = Value(Assets.Argon.Logo)
 	self.pages = Value({})
 
 	local isOpen = Value(false)
@@ -85,7 +86,7 @@ function App.new()
 		},
 		Name = 'Argon',
 		ToolTip = 'Open Argon UI',
-		Image = Assets.Argon.Logo,
+		Image = self.icon,
 
 		[OnEvent 'Click'] = function()
 			isOpen:set(not peek(isOpen))
@@ -108,7 +109,7 @@ function App.new()
 		[Children] = self.pages,
 	}
 
-	plugin.Unloading:Connect(Observer(isOpen):onChange(function()
+	plugin.Unloading:Once(Observer(isOpen):onChange(function()
 		toolbarButton:SetActive(peek(isOpen))
 		self:disconnect()
 	end))
@@ -126,6 +127,18 @@ function App.new()
 	end
 
 	return self
+end
+
+function App:setIcon(icon: ('Ok' | 'Warn' | 'Error')?)
+	if icon == 'Ok' then
+		self.icon:set(Assets.Argon.LogoOk)
+	elseif icon == 'Warn' then
+		self.icon:set(Assets.Argon.LogoWarn)
+	elseif icon == 'Error' then
+		self.icon:set(Assets.Argon.LogoError)
+	else
+		self.icon:set(Assets.Argon.Logo)
+	end
 end
 
 function App:setPage(page)
@@ -218,6 +231,8 @@ function App:home()
 		Host = self.host,
 		Port = self.port,
 	})
+
+	self:setIcon()
 end
 
 function App:settings()
@@ -273,6 +288,8 @@ function App:connect()
 		local signal = Signal.new()
 		local result = false
 
+		self:setIcon('Warn')
+
 		-- Prompt user to accept or reject incoming changes
 		if changes then
 			local options = { 'Accept', 'Diff', 'Cancel' }
@@ -312,6 +329,8 @@ function App:connect()
 				App = self,
 				Project = project,
 			})
+
+			self:setIcon('Ok')
 		end
 
 		return result
@@ -328,6 +347,8 @@ function App:connect()
 			App = self,
 			Project = project,
 		})
+
+		self:setIcon('Ok')
 	end)
 
 	self.core:onSync(function(kind, data)
@@ -356,6 +377,8 @@ function App:connect()
 			App = self,
 			Message = err.message or tostring(err),
 		})
+
+		self:setIcon('Error')
 
 		self:disconnect()
 

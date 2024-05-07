@@ -7,13 +7,12 @@ local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
 
-local GlobalUtil = require(Argon.Util)
-
 local stripProps = require(Util.stripProps)
 local isState = require(Util.isState)
 local default = require(Util.default)
 
 local Hydrate = Fusion.Hydrate
+local peek = Fusion.peek
 
 local COMPONENT_ONLY_PROPS = {
 	'Id',
@@ -41,7 +40,7 @@ return function(props: WidgetProps): DockWidgetPluginGui
 	local floatingSize = props.FloatingSize or props.MinimumSize
 
 	local widget = plugin:CreateDockWidgetPluginGui(
-		props.Id or GlobalUtil.generateGUID(),
+		props.Id or 'Argon' .. peek(props.Name),
 		DockWidgetPluginGuiInfo.new(
 			props.InitialDockTo or Enum.InitialDockState.Float,
 			default(props.InitialEnabled, true),

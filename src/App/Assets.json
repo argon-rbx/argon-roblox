@@ -1,7 +1,10 @@
 {
   "Argon": {
+    "Banner": "rbxassetid://16996859431",
     "Logo": "rbxassetid://16940983037",
-    "Banner": "rbxassetid://16996859431"
+    "LogoOk": "rbxassetid://17419316559",
+    "LogoWarn": "rbxassetid://17419316412",
+    "LogoError": "rbxassetid://17419316704"
   },
   "Icons": {
     "Settings": "rbxassetid://16549970121",
