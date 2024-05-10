@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Current plugin status is now disabled on the Argon's toolbar icon
+- Current plugin status is now displayed on the Argon's toolbar icon
 
 ### Fixed
 
