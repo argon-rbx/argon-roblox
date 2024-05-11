@@ -118,12 +118,12 @@ function App.new()
 
 	if RunService:IsEdit() then
 		self:home()
+
+		if Config:get('AutoConnect') then
+			self:connect()
+		end
 	else
 		self:setPage(Unavailable())
-	end
-
-	if Config:get('AutoConnect') then
-		self:connect()
 	end
 
 	return self
