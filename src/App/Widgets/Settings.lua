@@ -55,6 +55,12 @@ local SETTINGS_DATA: { SettingData } = {
 		Options = { 'Server', 'Client' },
 	},
 	{
+		Setting = 'OnlyCodeMode',
+		Name = 'Only Code Mode',
+		Description = 'Initially sync scripts, and instances that have scripts as descendants only',
+		Requires = 'InitialSyncPriority=Client',
+	},
+	{
 		Setting = 'AutoConnect',
 		Name = 'Auto Connect',
 		Description = 'Automatically attempt to connect to the server when you open a new place',
@@ -71,9 +77,15 @@ local SETTINGS_DATA: { SettingData } = {
 		Options = { 'Always', 'Initial', 'Never' },
 	},
 	{
-		Setting = 'KeepUnknowns',
-		Name = 'Keep Unknowns',
-		Description = 'By default keep instances that are not present in the file system',
+		Setting = 'TwoWaySync',
+		Name = 'Two-Way Sync',
+		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
+	},
+	{
+		Setting = 'TwoWaySyncProperties',
+		Name = 'Sync Properties',
+		Description = 'Whether all properties should be synced back to the server <b>(does not affect scripts)</b>',
+		Requires = 'TwoWaySync',
 	},
 	{
 		Setting = 'OpenInEditor',
@@ -87,15 +99,14 @@ local SETTINGS_DATA: { SettingData } = {
 		Options = { 'Off', 'Error', 'Warn', 'Info', 'Debug', 'Trace' },
 	},
 	{
-		Setting = 'TwoWaySync',
-		Name = 'Two-Way Sync',
-		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
+		Setting = 'KeepUnknowns',
+		Name = 'Keep Unknowns',
+		Description = 'By default keep instances that are not present in the file system',
 	},
 	{
-		Setting = 'TwoWaySyncProperties',
-		Name = 'Sync Properties',
-		Description = 'Whether all properties should be synced back to the server <b>(does not affect scripts)</b>',
-		Requires = 'TwoWaySync',
+		Setting = 'SkipInitialSync',
+		Name = 'Skip Initial Sync',
+		Description = 'Skip the initial sync when connecting to the server <b>(only recommended for large places)</b>',
 	},
 }
 
@@ -313,11 +324,23 @@ return function(props: Props): DockWidgetPluginGui
 
 						bindings[setting] = binding
 
+						local requireBinding
+
+						if data.Requires and data.Requires:find('=') then
+							local name, value = data.Requires:match('(%a+)=(%w+)')
+
+							requireBinding = Computed(function(use)
+								return use(bindings[name]) == value
+							end)
+						else
+							requireBinding = bindings[data.Requires]
+						end
+
 						return Entry {
 							Data = data,
 							Level = level,
 							Binding = binding,
-							Requires = bindings[data.Requires],
+							Requires = requireBinding,
 						}
 					end, Fusion.cleanup),
 					Container {

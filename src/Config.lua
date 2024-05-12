@@ -10,27 +10,31 @@ export type Setting =
 	'Host'
 	| 'Port'
 	| 'InitialSyncPriority'
+	| 'OnlyCodeMode'
 	| 'AutoConnect'
 	| 'AutoReconnect'
 	| 'DisplayPrompts'
-	| 'KeepUnknowns'
-	| 'OpenInEditor'
-	| 'LogLevel'
 	| 'TwoWaySync'
 	| 'TwoWaySyncProperties'
+	| 'OpenInEditor'
+	| 'LogLevel'
+	| 'KeepUnknowns'
+	| 'SkipInitialSync'
 
 local DEFAULTS = {
 	Host = 'localhost',
 	Port = 8000,
 	InitialSyncPriority = 'Server',
+	OnlyCodeMode = true,
 	AutoConnect = true,
 	AutoReconnect = false,
 	DisplayPrompts = 'Always',
-	KeepUnknowns = false,
-	OpenInEditor = false,
-	LogLevel = 'Warn',
 	TwoWaySync = false,
 	TwoWaySyncProperties = false,
+	OpenInEditor = false,
+	LogLevel = 'Warn',
+	KeepUnknowns = false,
+	SkipInitialSync = false,
 }
 
 local CONFIGS = {

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `Only Code Mode` setting - when enabled only scripts will be synced initially
+- `Skip Initial Sync` setting - totally disables initial sync
+
 ### Fixed
 
 - Argon no longer tries to sync changes when testing the game (even if auto connect is enabled)
