@@ -25,7 +25,7 @@ function Snapshot.newAdded(id: Types.Ref)
 
 	self.id = id
 	self.meta = Meta.new()
-	self.parent = ''
+	self.parent = buffer.create(16)
 	self.name = ''
 	self.class = ''
 	self.properties = {}

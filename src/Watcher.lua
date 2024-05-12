@@ -8,9 +8,8 @@ local Log = require(Argon.Log)
 local Watcher = {}
 Watcher.__index = Watcher
 
-function Watcher.new(tree)
+function Watcher.new()
 	local self = {
-		tree = tree,
 		rootDirs = {},
 		connections = {},
 		signal = Signal.new(),

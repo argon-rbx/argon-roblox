@@ -4,6 +4,7 @@ local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
 local Util = require(Argon.Util)
 local Types = require(Argon.Types)
+local Config = require(Argon.Config)
 local equals = require(Argon.Helpers.equals)
 
 local Error = require(script.Parent.Error)
@@ -25,10 +26,14 @@ function Processor.new(tree)
 	return setmetatable(self, Processor)
 end
 
-function Processor:init(snapshot: Types.Snapshot, ignoreMeta: boolean): Types.Changes
+function Processor:init(snapshot: Types.Snapshot, ignoreMeta: boolean, skipDiff: boolean): Types.Changes
 	Log.trace('Hydrating initial snapshot..')
 
 	self:hydrate(snapshot, game)
+
+	if skipDiff then
+		return Changes.new()
+	end
 
 	Log.trace('Diffing initial snapshot..')
 
@@ -172,8 +177,18 @@ function Processor:reverseChanges(changes: Types.Changes): Types.Changes
 		reversed:update(self.read:onChange(instance))
 	end
 
-	for _, instance in ipairs(changes.removals) do
-		reversed:add(self.read:onAdd(instance))
+	if not Config:get('OnlyCodeMode') then
+		for _, instance in ipairs(changes.removals) do
+			reversed:add(self.read:onAdd(instance))
+		end
+	else
+		for _, instance in ipairs(changes.removals) do
+			local snapshot = self.read:onAddOnlyCode(instance)
+
+			if snapshot then
+				reversed:add(snapshot)
+			end
+		end
 	end
 
 	return reversed

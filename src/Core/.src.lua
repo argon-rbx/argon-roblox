@@ -44,7 +44,7 @@ function Core.new(host: string?, port: string?)
 	self.tree = Tree.new()
 	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
 	self.processor = Processor.new(self.tree)
-	self.watcher = Watcher.new(self.tree)
+	self.watcher = Watcher.new()
 	self.executor = Executor.new()
 
 	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
@@ -92,6 +92,7 @@ function Core:run(): Promise.Promise
 	return Promise.new(function(_, reject)
 		self.status = Core.Status.Connecting
 
+		local skipInitialSync = Config:get('SkipInitialSync')
 		local syncServer = Config:get('InitialSyncPriority') == 'Server'
 
 		Log.trace('Fetching server details..')
@@ -111,7 +112,7 @@ function Core:run(): Promise.Promise
 
 		Log.trace('Initializing processor..')
 
-		local changes = self.processor:init(snapshot, not syncServer)
+		local changes = self.processor:init(snapshot, not syncServer, skipInitialSync)
 
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
@@ -121,14 +122,16 @@ function Core:run(): Promise.Promise
 			self.rootDirs[i] = self.tree:getInstance(id)
 		end
 
-		Log.trace('Processing initial snapshot..')
+		if not skipInitialSync then
+			Log.trace('Processing initial snapshot..')
 
-		if syncServer then
-			self:__verifyChanges(changes, true):expect()
-			self.processor.write:applyChanges(changes, true)
-		elseif changes:total() > 0 then
-			local reversed = self.processor:reverseChanges(changes)
-			self.client:write(reversed):expect()
+			if syncServer then
+				self:__verifyChanges(changes, true):expect()
+				self.processor.write:applyChanges(changes, true)
+			elseif changes:total() > 0 then
+				local reversed = self.processor:reverseChanges(changes)
+				self.client:write(reversed):expect()
+			end
 		end
 
 		if Config:get('TwoWaySync') then
@@ -274,7 +277,9 @@ function Core:__startSyncLoop()
 			elseif kind == 'ExecuteCode' then
 				self.executor:execute(data.code)
 			elseif kind == 'Disconnect' then
-				reject(Error.new(Error.Disconnected, data.message))
+				if not Config:get('SkipInitialSync') then
+					reject(Error.new(Error.Disconnected, data.message))
+				end
 			else
 				local err = Error.new(Error.UnknownEvent, kind, data)
 				Log.warn(err)
@@ -304,7 +309,7 @@ function Core:__startSyncbackLoop()
 					Log.warn('Failed to write changes to the server:', err)
 				end)
 
-				self.__sync('kind', changes)
+				self.__sync('SyncbackChanges', changes)
 			end
 		end)
 
