@@ -57,7 +57,7 @@ local SETTINGS_DATA: { SettingData } = {
 	{
 		Setting = 'OnlyCodeMode',
 		Name = 'Only Code Mode',
-		Description = 'Initially sync scripts, and instances that have scripts as descendants only',
+		Description = 'Initially only sync scripts and instances that have descendant scripts',
 		Requires = 'InitialSyncPriority=Client',
 	},
 	{

@@ -40,7 +40,7 @@ return function(props: WidgetProps): DockWidgetPluginGui
 	local floatingSize = props.FloatingSize or props.MinimumSize
 
 	local widget = plugin:CreateDockWidgetPluginGui(
-		props.Id or 'Argon' .. peek(props.Name),
+		props.Id or peek(props.Name),
 		DockWidgetPluginGuiInfo.new(
 			props.InitialDockTo or Enum.InitialDockState.Float,
 			default(props.InitialEnabled, true),
