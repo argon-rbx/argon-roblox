@@ -108,7 +108,9 @@ function Watcher:__connectEvents(instance: Instance)
 		table.insert(
 			connections,
 			instance.Changed:Connect(function(property)
-				self:__onChanged(instance, property)
+				if property ~= 'Parent' then
+					self:__onChanged(instance, property)
+				end
 			end)
 		)
 	else
@@ -137,6 +139,10 @@ function Watcher:__connectEvents(instance: Instance)
 end
 
 function Watcher:__watchTag(tag: string)
+	if self.tagConnections[tag] then
+		return
+	end
+
 	local tagConnections = {}
 
 	table.insert(
@@ -182,10 +188,6 @@ function Watcher:__onAdded(instance: Instance)
 end
 
 function Watcher:__onChanged(instance: Instance, property: string)
-	if property == 'Parent' then
-		return
-	end
-
 	self.signal:Fire({
 		kind = 'Change',
 		instance = instance,
