@@ -1,3 +1,5 @@
+local CollectionService = game:GetService('CollectionService')
+
 local Argon = script:FindFirstAncestor('Argon')
 
 local Signal = require(Argon.Packages.Signal)
@@ -12,6 +14,8 @@ function Watcher.new()
 	local self = {
 		rootDirs = {},
 		connections = {},
+		tagConnections = {},
+		valueInstances = {},
 		signal = Signal.new(),
 	}
 
@@ -21,6 +25,8 @@ end
 function Watcher:start(rootDirs: { Instance })
 	Log.trace('Starting watcher..')
 
+	self.rootDirs = rootDirs
+
 	for _, instance in ipairs(rootDirs) do
 		self:__connectEvents(instance)
 
@@ -29,7 +35,27 @@ function Watcher:start(rootDirs: { Instance })
 		end
 	end
 
-	self.rootDirs = rootDirs
+	local tagConnections = {}
+
+	table.insert(
+		tagConnections,
+		CollectionService.TagAdded:Connect(function(tag)
+			self:__watchTag(tag)
+
+			for _, instance in ipairs(CollectionService:GetTagged(tag)) do
+				self:__onChanged(instance, 'Tags')
+			end
+		end)
+	)
+
+	table.insert(
+		tagConnections,
+		CollectionService.TagRemoved:Connect(function(tag)
+			self:__unwatchTag(tag)
+		end)
+	)
+
+	self.tagConnections[CollectionService] = tagConnections
 end
 
 function Watcher:stop()
@@ -43,7 +69,14 @@ function Watcher:stop()
 		end
 	end
 
+	for _, tagConnections in pairs(self.tagConnections) do
+		for _, tagConnection in ipairs(tagConnections) do
+			tagConnection:Disconnect()
+		end
+	end
+
 	self.connections = {}
+	self.tagConnections = {}
 end
 
 function Watcher:listen(): Types.WatcherEvent
@@ -66,19 +99,77 @@ function Watcher:__connectEvents(instance: Instance)
 
 	table.insert(
 		connections,
-		instance.Changed:Connect(function(property)
-			self:__onChanged(instance, property)
-		end)
-	)
-
-	table.insert(
-		connections,
 		instance.ChildRemoved:Connect(function(child)
 			self:__onRemoved(child)
 		end)
 	)
 
+	if not instance:IsA('ValueBase') then
+		table.insert(
+			connections,
+			instance.Changed:Connect(function(property)
+				self:__onChanged(instance, property)
+			end)
+		)
+	else
+		self.valueInstances[instance] = true
+
+		table.insert(
+			connections,
+			instance.Changed:Connect(function(_value)
+				self:__onChanged(instance, 'Value')
+			end)
+		)
+
+		table.insert(
+			connections,
+			instance.AttributeChanged:Connect(function(_attribute)
+				self:__onChanged(instance, 'Attributes')
+			end)
+		)
+
+		for _, tag in ipairs(instance:GetTags()) do
+			self:__watchTag(tag)
+		end
+	end
+
 	self.connections[instance] = connections
+end
+
+function Watcher:__watchTag(tag: string)
+	local tagConnections = {}
+
+	table.insert(
+		tagConnections,
+		CollectionService:GetInstanceAddedSignal(tag):Connect(function(instance)
+			if self.valueInstances[instance] then
+				self:__onChanged(instance, 'Tags')
+			end
+		end)
+	)
+
+	table.insert(
+		tagConnections,
+		CollectionService:GetInstanceRemovedSignal(tag):Connect(function(instance)
+			if self.valueInstances[instance] then
+				self:__onChanged(instance, 'Tags')
+			end
+		end)
+	)
+
+	self.tagConnections[tag] = tagConnections
+end
+
+function Watcher:__unwatchTag(tag: string)
+	local tagConnections = self.tagConnections[tag]
+
+	if tagConnections then
+		for _, tagConnection in ipairs(tagConnections) do
+			tagConnection:Disconnect()
+		end
+
+		self.tagConnections[tag] = nil
+	end
 end
 
 function Watcher:__onAdded(instance: Instance)
@@ -111,6 +202,10 @@ function Watcher:__onRemoved(instance: Instance)
 		end
 
 		self.connections[instance] = nil
+	end
+
+	if self.valueInstances[instance] then
+		self.valueInstances[instance] = nil
 	end
 
 	self.signal:Fire({

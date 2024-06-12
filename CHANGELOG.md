@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `Tags` and `Attributes` of `Value` like instances now sync back in two-way sync
+
 ## [2.0.6] - 2024-05-12
 
 ### Added
