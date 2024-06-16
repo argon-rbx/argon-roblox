@@ -109,9 +109,8 @@ function App.new()
 		[Children] = self.pages,
 	}
 
-	plugin.Unloading:Once(Observer(isOpen):onChange(function()
+	plugin.Unloading:Connect(Observer(isOpen):onChange(function()
 		toolbarButton:SetActive(peek(isOpen))
-		self:disconnect()
 	end))
 
 	toolbarButton:SetActive(peek(isOpen))

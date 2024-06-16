@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - `Tags` and `Attributes` of `Value` like instances now sync back in two-way sync
+- Argon no longer stops when the plugin widget is closed ([#3](https://github.com/argon-rbx/argon-roblox/issues/3))
 
 ## [2.0.6] - 2024-05-12
 

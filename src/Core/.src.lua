@@ -152,6 +152,8 @@ function Core:run(): Promise.Promise
 end
 
 function Core:stop()
+	Log.trace('Stopping Argon core..')
+
 	self.status = Core.Status.Disconnecting
 
 	self.watcher:stop()
