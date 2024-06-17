@@ -148,4 +148,16 @@ function Util.clean(...)
 	end
 end
 
+function Util.isPackageDescendant(instance: Instance): boolean
+	repeat
+		if instance:FindFirstChildWhichIsA('PackageLink') then
+			return true
+		end
+
+		instance = instance.Parent or game
+	until instance == game
+
+	return false
+end
+
 return Util

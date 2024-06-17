@@ -71,7 +71,12 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 		end
 	else
 		local err = Error.new(Error.NotCreatable, snapshot.class)
-		Log.warn(err)
+
+		if snapshot.class == 'PackageLink' and not Config:get('OverridePackages') then
+			Log.debug(err)
+		else
+			Log.warn(err)
+		end
 
 		return
 	end

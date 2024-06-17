@@ -108,6 +108,11 @@ local SETTINGS_DATA: { SettingData } = {
 		Name = 'Skip Initial Sync',
 		Description = 'Skip the initial sync when connecting to the server <b>(only recommended for large places)</b>',
 	},
+	{
+		Setting = 'OverridePackages',
+		Name = 'Override Packages',
+		Description = 'Whether writing changes to the instances affected by <b>PackageLink</b> should be allowed',
+	},
 }
 
 local LEVELS = { 'Global', 'Game', 'Place' }

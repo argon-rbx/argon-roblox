@@ -20,6 +20,7 @@ export type Setting =
 	| 'LogLevel'
 	| 'KeepUnknowns'
 	| 'SkipInitialSync'
+	| 'OverridePackages'
 
 local DEFAULTS = {
 	Host = 'localhost',
@@ -35,6 +36,7 @@ local DEFAULTS = {
 	LogLevel = 'Warn',
 	KeepUnknowns = false,
 	SkipInitialSync = false,
+	OverridePackages = true,
 }
 
 local CONFIGS = {

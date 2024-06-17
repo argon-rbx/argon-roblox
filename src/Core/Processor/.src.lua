@@ -43,6 +43,36 @@ function Processor:init(snapshot: Types.Snapshot, ignoreMeta: boolean, skipDiff:
 		changes:join(self:diff(child, snapshot.id, ignoreMeta))
 	end
 
+	if not Config:get('OverridePackages') then
+		print(changes)
+		print(changes:total())
+
+		for i, snapshot in ipairs(changes.additions) do
+			local instance = self.tree:getInstance(snapshot.parent)
+
+			if instance and Util.isPackageDescendant(instance) then
+				table.remove(changes.additions, i)
+			end
+		end
+
+		for i, snapshot in ipairs(changes.updates) do
+			local instance = self.tree:getInstance(snapshot.id)
+
+			if instance and Util.isPackageDescendant(instance) then
+				table.remove(changes.updates, i)
+			end
+		end
+
+		for i, instance in ipairs(changes.removals) do
+			if Util.isPackageDescendant(instance) then
+				table.remove(changes.removals, i)
+			end
+		end
+
+		print(changes:total())
+		print(changes)
+	end
+
 	return changes
 end
 
