@@ -26,7 +26,7 @@ function Processor.new(tree)
 	return setmetatable(self, Processor)
 end
 
-function Processor:init(snapshot: Types.Snapshot, ignoreMeta: boolean, skipDiff: boolean): Types.Changes
+function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, skipDiff: boolean): Types.Changes
 	Log.trace('Hydrating initial snapshot..')
 
 	self:hydrate(snapshot, game)
@@ -40,37 +40,48 @@ function Processor:init(snapshot: Types.Snapshot, ignoreMeta: boolean, skipDiff:
 	local changes = Changes.new()
 
 	for _, child in ipairs(snapshot.children) do
-		changes:join(self:diff(child, snapshot.id, ignoreMeta))
+		changes:join(self:diff(child, snapshot.id, not initialSyncServer))
 	end
 
-	if not Config:get('OverridePackages') then
-		print(changes)
-		print(changes:total())
+	if not Config:get('OverridePackages') and initialSyncServer then
+		local temp = {}
 
-		for i, snapshot in ipairs(changes.additions) do
+		for _, snapshot in ipairs(changes.additions) do
 			local instance = self.tree:getInstance(snapshot.parent)
 
 			if instance and Util.isPackageDescendant(instance) then
-				table.remove(changes.additions, i)
+				table.insert(temp, snapshot)
 			end
 		end
 
-		for i, snapshot in ipairs(changes.updates) do
+		for i, snapshot in ipairs(temp) do
+			table.remove(changes.additions, table.find(changes.additions, snapshot))
+			temp[i] = nil
+		end
+
+		for _, snapshot in ipairs(changes.updates) do
 			local instance = self.tree:getInstance(snapshot.id)
 
 			if instance and Util.isPackageDescendant(instance) then
-				table.remove(changes.updates, i)
+				table.insert(temp, snapshot)
 			end
 		end
 
-		for i, instance in ipairs(changes.removals) do
+		for i, snapshot in ipairs(temp) do
+			table.remove(changes.updates, table.find(changes.updates, snapshot))
+			temp[i] = nil
+		end
+
+		for _, instance in ipairs(changes.removals) do
 			if Util.isPackageDescendant(instance) then
-				table.remove(changes.removals, i)
+				table.insert(temp, instance)
 			end
 		end
 
-		print(changes:total())
-		print(changes)
+		for i, instance in ipairs(temp) do
+			table.remove(changes.removals, table.find(changes.removals, instance))
+			temp[i] = nil
+		end
 	end
 
 	return changes

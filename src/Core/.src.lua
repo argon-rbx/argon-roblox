@@ -93,7 +93,7 @@ function Core:run(): Promise.Promise
 		self.status = Core.Status.Connecting
 
 		local skipInitialSync = Config:get('SkipInitialSync')
-		local syncServer = Config:get('InitialSyncPriority') == 'Server'
+		local initialSyncServer = Config:get('InitialSyncPriority') == 'Server'
 
 		Log.trace('Fetching server details..')
 
@@ -112,7 +112,7 @@ function Core:run(): Promise.Promise
 
 		Log.trace('Initializing processor..')
 
-		local changes = self.processor:init(snapshot, not syncServer, skipInitialSync)
+		local changes = self.processor:init(snapshot, initialSyncServer, skipInitialSync)
 
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
@@ -125,7 +125,7 @@ function Core:run(): Promise.Promise
 		if not skipInitialSync then
 			Log.trace('Processing initial snapshot..')
 
-			if syncServer then
+			if initialSyncServer then
 				self:__verifyChanges(changes, true):expect()
 				self.processor.write:applyChanges(changes, true)
 			elseif changes:total() > 0 then

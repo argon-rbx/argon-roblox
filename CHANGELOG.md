@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Proper support for `PackageLink` managed instances (`Override Packages` setting)
+
 ## [2.0.7] - 2024-06-16
 
 ### Fixed
