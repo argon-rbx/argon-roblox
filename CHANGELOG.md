@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.8] - 2024-06-25
+
 ### Added
 
 - Proper support for `PackageLink` managed instances (`Override Packages` setting)
@@ -147,7 +149,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.7...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.8...HEAD
+[2.0.8]: https://github.com/argon-rbx/argon-roblox/compare/2.0.7...2.0.8
 [2.0.7]: https://github.com/argon-rbx/argon-roblox/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/argon-rbx/argon-roblox/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/argon-rbx/argon-roblox/compare/2.0.4...2.0.5
