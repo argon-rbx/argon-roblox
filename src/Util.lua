@@ -51,6 +51,12 @@ end
 --- Stringify the value
 function Util.stringify(value: any, __indent: number?): string
 	if type(value) == 'table' then
+		local meta = getmetatable(value)
+
+		if meta and meta.__tostring then
+			return tostring(value)
+		end
+
 		if not next(value) then
 			return '{}'
 		end
@@ -90,22 +96,13 @@ function Util.stringify(value: any, __indent: number?): string
 	end
 end
 
---- Truncate the string to the provided length
-function Util.truncate(value: string, length: number): string
-	if #value > length then
-		return value:sub(1, length) .. '... *Truncated*'
-	end
-
-	return value
-end
-
 --- Generate a GUID, example: 04AEBFEA-87FC-480F-A98B-E5E221007A90
 function Util.generateGUID(): string
 	return HttpService:GenerateGUID(false)
 end
 
 --- Cast the value to the provided type (number, string, boolean, any)
-function Util.cast(value: any, target: any): any
+function Util.cast(value: any, target: string): any
 	if type(value) == target then
 		return value
 	end

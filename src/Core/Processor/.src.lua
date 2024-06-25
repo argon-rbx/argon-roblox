@@ -131,7 +131,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 				local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 				if not readSuccess then
-					local err = Error.new(Error.ReadFailed, property, instance)
+					local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
 					Log.warn(err)
 
 					continue
@@ -155,7 +155,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 				local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 				if not readSuccess then
-					local err = Error.new(Error.ReadFailed, property, instance)
+					local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
 					Log.warn(err)
 
 					continue

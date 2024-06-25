@@ -6,11 +6,7 @@ local function format(...): string
 	local args = ''
 
 	for _, arg in ipairs({ ... }) do
-		if type(arg) == 'table' and arg.message then
-			args ..= ' ' .. Util.truncate(arg.message, 200)
-		else
-			args ..= ' ' .. Util.stringify(arg)
-		end
+		args ..= ' ' .. Util.stringify(arg)
 	end
 
 	return args

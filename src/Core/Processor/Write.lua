@@ -55,6 +55,7 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 	end
 
 	local instance
+	local isService = false
 
 	if Dom.isCreatable(snapshot.class) then
 		instance = Instance.new(snapshot.class)
@@ -63,6 +64,7 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 
 		if service then
 			instance = service
+			isService = true
 		else
 			local err = Error.new(Error.HydrationFailed, snapshot)
 			Log.warn(err)
@@ -73,7 +75,7 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 		local err = Error.new(Error.NotCreatable, snapshot.class)
 
 		if snapshot.class == 'PackageLink' and not Config:get('OverridePackages') then
-			Log.debug(err)
+			Log.info(err)
 		else
 			Log.warn(err)
 		end
@@ -93,15 +95,18 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 			continue
 		end
 
-		local writeSuccess = Dom.writeProperty(instance, property, decodedValue)
+		local writeSuccess, reason = Dom.writeProperty(instance, property, decodedValue)
 
 		if not writeSuccess then
-			local err = Error.new(Error.WriteFailed, property, instance, decodedValue)
+			local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
 			Log.warn(err)
 		end
 	end
 
-	instance.Parent = parent
+	if not isService then
+		instance.Parent = parent
+	end
+
 	self.tree:insertInstance(instance, snapshot.id, snapshot.meta)
 
 	for _, child in ipairs(snapshot.children) do
@@ -147,10 +152,10 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 			if readSuccess then
-				local writeSuccess = Dom.writeProperty(newInstance, property, instanceValue)
+				local writeSuccess, reason = Dom.writeProperty(newInstance, property, instanceValue)
 
 				if not writeSuccess then
-					local err = Error.new(Error.WriteFailed, property, newInstance, instanceValue)
+					local err = Error.new(Error.WriteFailed, property, newInstance, reason.kind)
 					Log.warn(err)
 				end
 			end
@@ -184,10 +189,10 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 					continue
 				end
 
-				local writeSuccess = Dom.writeProperty(instance, property, decodedValue)
+				local writeSuccess, reason = Dom.writeProperty(instance, property, decodedValue)
 
 				if not writeSuccess then
-					local err = Error.new(Error.WriteFailed, property, instance, decodedValue)
+					local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
 					Log.warn(err)
 				end
 			end
@@ -205,18 +210,18 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 						continue
 					end
 
-					local writeSuccess = Dom.writeProperty(instance, property, snapshotValue)
+					local writeSuccess, reason = Dom.writeProperty(instance, property, snapshotValue)
 
 					if not writeSuccess then
-						local err = Error.new(Error.WriteFailed, property, instance, snapshotValue)
+						local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
 						Log.warn(err)
 					end
 				else
 					local _, defaultValue = Dom.EncodedValue.decode(default)
-					local writeSuccess = Dom.writeProperty(instance, property, defaultValue)
+					local writeSuccess, reason = Dom.writeProperty(instance, property, defaultValue)
 
 					if not writeSuccess then
-						local err = Error.new(Error.WriteFailed, property, instance, defaultValue)
+						local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
 						Log.warn(err)
 					end
 				end

@@ -5,7 +5,6 @@ local Util = require(Argon.Util)
 export type Error = {
 	message: string,
 	kind: string,
-	data: any?,
 }
 
 local Error = {
@@ -19,18 +18,11 @@ local Error = {
 	Timedout = 'HTTP request timed out',
 }
 
-local function eq(self: Error, other: Error): boolean
-	return self.kind == other.kind
-end
-
-function Error.__new(message: string, kind: string, data: any?): Error
+function Error.__new(message: string, kind: string): Error
 	local err = setmetatable({
 		message = message,
 		kind = kind,
-		data = data,
-	}, {
-		__eq = eq,
-	})
+	}, Error)
 
 	return err
 end
@@ -47,7 +39,7 @@ end
 
 function Error.fromResponse(response: { [string]: any }): Error
 	local message = response.Body ~= '' and response.Body or response.StatusMessage
-	return Error.__new(Error.Unknown.message:gsub('$1', message), 'Unknown', response)
+	return Error.__new(Error.Unknown.message:gsub('$1', message), 'Unknown')
 end
 
 function Error.fromMessage(message: string): Error
@@ -58,6 +50,14 @@ function Error.fromMessage(message: string): Error
 	end
 
 	return Error.__new(Error.Unknown.message:gsub('$1', message), 'Unknown')
+end
+
+function Error:__eq(other: Error): boolean
+	return self.kind == other.kind
+end
+
+function Error:__tostring(): string
+	return self.message
 end
 
 -- Convert all strings to Error objects

@@ -67,7 +67,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 			if not readSuccess then
-				local err = Error.new(Error.ReadFailed, property, instance)
+				local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
 				Log.warn(err)
 
 				continue
@@ -141,7 +141,7 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 		local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 		if not readSuccess then
-			local err = Error.new(Error.ReadFailed, property, instance)
+			local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
 			Log.warn(err)
 
 			continue
@@ -222,7 +222,7 @@ function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?)
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 			if not readSuccess then
-				local err = Error.new(Error.ReadFailed, property, instance)
+				local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
 				Log.warn(err)
 
 				continue
