@@ -1,4 +1,3 @@
-local ChangeHistoryService = game:GetService('ChangeHistoryService')
 local ScriptEditorService = game:GetService('ScriptEditorService')
 
 local Argon = script:FindFirstAncestor('Argon')
@@ -56,16 +55,6 @@ function Core.new(host: string?, port: string?)
 	self.__sync = function(_kind: Types.MessageKind, _data: any) end
 
 	self:__handleOpenInEditor(Config:get('OpenInEditor'))
-
-	-- handle undo of instance removal
-	table.insert(
-		self.connections,
-		ChangeHistoryService.OnUndo:Connect(function(action: string)
-			if action:match('^Argon remove') then
-				self.processor.write:undoLastRemoval()
-			end
-		end)
-	)
 
 	-- watch for `OpenInEditor setting
 	table.insert(

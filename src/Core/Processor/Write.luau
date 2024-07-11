@@ -8,9 +8,7 @@ local Types = require(Argon.Types)
 local Config = require(Argon.Config)
 
 local equals = require(Argon.Helpers.equals)
-local generateRef = require(Argon.Helpers.generateRef)
 
-local Meta = require(script.Parent.Parent.Meta)
 local Error = require(script.Parent.Parent.Error)
 
 local MESH_RERLOAD_PROPERTIES = { 'MeshId', 'InitialSize' }
@@ -71,7 +69,6 @@ WriteProcessor.__index = WriteProcessor
 function WriteProcessor.new(tree)
 	return setmetatable({
 		tree = tree,
-		lastRemovedInstance = nil,
 	}, WriteProcessor)
 end
 
@@ -240,8 +237,8 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		end
 
 		newInstance.Parent = instance.Parent
+		instance.Parent = nil
 
-		instance:Destroy()
 		self.tree:updateInstance(snapshot.id, newInstance)
 
 		instance = newInstance
@@ -311,7 +308,7 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 
 	if typeof(object) == 'Instance' then
 		self.tree:removeByInstance(object)
-		object:Destroy()
+		object.Parent = nil
 	else
 		local instance = self.tree:getInstance(object)
 
@@ -329,45 +326,11 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 			return
 		end
 
-		self.lastRemovedInstance = {
-			instance = instance:Clone(),
-			parent = instance.Parent,
-		}
-
 		self.tree:removeById(object)
-		instance:Destroy()
+		instance.Parent = nil
 	end
 
 	setWaypoint('remove')
-end
-
-function WriteProcessor:undoLastRemoval()
-	if not self.lastRemovedInstance then
-		Log.warn('Argon failed to restore the last removed instance')
-		return
-	end
-
-	local instance = self.lastRemovedInstance.instance
-	instance.Parent = self.lastRemovedInstance.parent
-
-	self.lastRemovedInstance = nil
-
-	if not Config:get('TwoWaySync') then
-		local function walk(instance)
-			-- TODO: Restore original meta as well
-			self.tree:insertInstance(instance, generateRef(true), Meta.new())
-
-			for _, child in ipairs(instance:GetChildren()) do
-				walk(child)
-			end
-		end
-
-		walk(instance)
-	end
-
-	print('Argon successfully restored this instance, you can ignore the warning above')
-
-	setWaypoint('undo')
 end
 
 return WriteProcessor

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Experimental support for syncing MeshPart's MeshId
+- Argon sync actions can now be undone an unlimited number of times
 
 ### Fixed
 
