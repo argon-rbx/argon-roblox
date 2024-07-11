@@ -9,6 +9,7 @@ export type Properties = {
 
 export type Meta = {
 	keepUnknowns: boolean,
+	meshSource: string?,
 }
 
 -- Snapshots

@@ -90,7 +90,7 @@ function Util.stringify(value: any, __indent: number?): string
 	elseif typeof(value) == 'Instance' then
 		return value:GetFullName()
 	elseif type(value) == 'buffer' then
-		return buffer.tostring(value)
+		return buffer.tostring(value) .. ' (buffer)'
 	else
 		return tostring(value)
 	end

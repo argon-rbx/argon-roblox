@@ -29,6 +29,7 @@ local Error = {
 	NotCreatable = 'Tried to create an instance of class: $1 that is not creatable',
 	NotRemovable = 'Tried to remove an instance of class: $1 that is not removable',
 	HydrationFailed = 'Failed to hydrate root service, snapshot: $1',
+	MeshLoadFailed = 'Failed to load MeshPart: $1',
 }
 
 function Error.__new(message: string, kind: string): Error

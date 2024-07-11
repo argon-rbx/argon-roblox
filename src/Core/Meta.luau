@@ -9,6 +9,7 @@ function Meta.new(): Types.Meta
 	local self = setmetatable({}, Meta)
 
 	self.keepUnknowns = false
+	self.meshSource = nil
 
 	return self
 end

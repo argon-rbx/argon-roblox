@@ -6,12 +6,63 @@ local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
 local Types = require(Argon.Types)
 local Config = require(Argon.Config)
+
+local equals = require(Argon.Helpers.equals)
 local generateRef = require(Argon.Helpers.generateRef)
 
+local Meta = require(script.Parent.Parent.Meta)
 local Error = require(script.Parent.Parent.Error)
+
+local MESH_RERLOAD_PROPERTIES = { 'MeshId', 'InitialSize' }
 
 local function setWaypoint(action: string?)
 	ChangeHistoryService:SetWaypoint(`Argon {action or 'sync'}: {DateTime.now():FormatLocalTime('LTS', 'en-us')}`)
+end
+
+local function loadMesh(path: string)
+	local success, mesh = pcall(function()
+		return game:GetObjects('rbxasset://argon/' .. path)[1]
+	end)
+
+	if not success then
+		local err = Error.new(Error.MeshLoadFailed, mesh)
+		Log.warn(err)
+
+		return nil
+	end
+
+	return mesh
+end
+
+local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
+	if not properties then
+		return false
+	end
+
+	for _, property in ipairs(MESH_RERLOAD_PROPERTIES) do
+		local value = properties[property]
+
+		if not value then
+			continue
+		end
+
+		local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+
+		if not decodeSuccess then
+			local err = Error.new(Error.DecodeFailed, property, value)
+			Log.warn(err)
+
+			continue
+		end
+
+		property = property == 'InitialSize' and 'MeshSize' or property
+
+		if not equals(mesh[property], snapshotValue) then
+			return true
+		end
+	end
+
+	return false
 end
 
 local WriteProcessor = {}
@@ -59,6 +110,14 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 
 	if Dom.isCreatable(snapshot.class) then
 		instance = Instance.new(snapshot.class)
+
+		if snapshot.meta.meshSource then
+			instance = loadMesh(snapshot.meta.meshSource)
+
+			if not instance then
+				return
+			end
+		end
 	elseif parent == game then
 		local service = game:FindFirstChildOfClass(snapshot.class)
 
@@ -142,10 +201,24 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		end
 	end
 
-	if snapshot.class then
-		defaultProperties = Dom.getDefaultProperties(snapshot.class)
+	local meta = self.tree:getMeta(snapshot.id)
 
-		local newInstance = Instance.new(snapshot.class)
+	if snapshot.class or (meta.meshSource and shouldReloadMesh(instance, snapshot.properties)) then
+		local newInstance
+
+		if snapshot.class then
+			newInstance = Instance.new(snapshot.class)
+			defaultProperties = Dom.getDefaultProperties(snapshot.class)
+		else
+			newInstance = loadMesh(meta.meshSource)
+
+			if not newInstance then
+				return
+			end
+
+			defaultProperties = Dom.getDefaultProperties(newInstance.ClassName)
+		end
+
 		newInstance.Name = instance.Name
 
 		for property in pairs(defaultProperties) do
@@ -280,7 +353,8 @@ function WriteProcessor:undoLastRemoval()
 
 	if not Config:get('TwoWaySync') then
 		local function walk(instance)
-			self.tree:insertInstance(instance, generateRef(true))
+			-- TODO: Restore original meta as well
+			self.tree:insertInstance(instance, generateRef(true), Meta.new())
 
 			for _, child in ipairs(instance:GetChildren()) do
 				walk(child)

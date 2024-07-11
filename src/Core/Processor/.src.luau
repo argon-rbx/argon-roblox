@@ -88,7 +88,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, sk
 end
 
 function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
-	self.tree:insertInstance(instance, snapshot.id)
+	self.tree:insertInstance(instance, snapshot.id, snapshot.meta)
 
 	local children = instance:GetChildren()
 	local hydrated = table.create(#children, false)

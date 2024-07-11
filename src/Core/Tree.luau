@@ -15,13 +15,11 @@ function Tree.new()
 	return setmetatable(self, Tree)
 end
 
-function Tree:insertInstance(instance: Instance, id: Types.Ref, meta: Types.Meta?)
+function Tree:insertInstance(instance: Instance, id: Types.Ref, meta: Types.Meta)
 	self.instanceMap[id] = instance
 	self.idMap[instance] = id
 
-	if meta then
-		self:insertMeta(id, meta)
-	end
+	self:insertMeta(id, meta)
 end
 
 function Tree:updateInstance(id: Types.Ref, instance: Instance)
