@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.9] - 2024-07-11
+
 ### Added
 
 - Experimental support for syncing MeshPart's MeshId
@@ -158,7 +160,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.8...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.9...HEAD
+[2.0.9]: https://github.com/argon-rbx/argon-roblox/compare/2.0.8...2.0.9
 [2.0.8]: https://github.com/argon-rbx/argon-roblox/compare/2.0.7...2.0.8
 [2.0.7]: https://github.com/argon-rbx/argon-roblox/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/argon-rbx/argon-roblox/compare/2.0.5...2.0.6
