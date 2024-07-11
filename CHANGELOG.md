@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Experimental support for syncing MeshPart's MeshId
+
+### Fixed
+
+- Two-way sync is now properly debounced when a new instance is added
+
 ## [2.0.8] - 2024-06-25
 
 ### Added

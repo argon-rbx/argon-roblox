@@ -22,6 +22,7 @@ local Error = require(script.Error)
 
 local CHANGES_TRESHOLD = 5
 local SYNCBACK_RATE = 0.5
+local SYNCBACK_DEBOUNCE = 0.01
 
 local Core = {
 	Status = {
@@ -40,6 +41,7 @@ function Core.new(host: string?, port: string?)
 	self.rootDirs = {}
 	self.connections = {}
 	self.status = 0
+	self.lastSync = os.clock()
 
 	self.tree = Tree.new()
 	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
@@ -268,9 +270,8 @@ function Core:__startSyncLoop()
 			if kind == 'SyncChanges' then
 				self:__verifyChanges(data):expect()
 
-				self.processor.read:pause()
 				self.processor.write:applyChanges(data)
-				self.processor.read:resume()
+				self.lastSync = os.clock()
 
 				self.__sync(kind, data)
 			elseif kind == 'SyncDetails' then
@@ -318,7 +319,7 @@ function Core:__startSyncbackLoop()
 		while self.status == Core.Status.Connected do
 			local event = self.watcher:listen() :: Types.WatcherEvent
 
-			if self.processor.read.isPaused then
+			if os.clock() - self.lastSync <= SYNCBACK_DEBOUNCE then
 				continue
 			end
 

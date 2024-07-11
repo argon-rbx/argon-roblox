@@ -40,7 +40,6 @@ ReadProcessor.__index = ReadProcessor
 function ReadProcessor.new(tree)
 	return setmetatable({
 		tree = tree,
-		isPaused = false,
 	}, ReadProcessor)
 end
 
@@ -182,14 +181,6 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 	self.tree:removeById(id)
 
 	return buffer.fromstring(id)
-end
-
-function ReadProcessor:pause()
-	self.isPaused = true
-end
-
-function ReadProcessor:resume()
-	self.isPaused = false
 end
 
 function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?

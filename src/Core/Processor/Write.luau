@@ -201,16 +201,17 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		end
 	end
 
-	local meta = self.tree:getMeta(snapshot.id)
-
-	if snapshot.class or (meta.meshSource and shouldReloadMesh(instance, snapshot.properties)) then
+	if
+		snapshot.class
+		or (snapshot.meta and snapshot.meta.meshSource and shouldReloadMesh(instance, snapshot.properties))
+	then
 		local newInstance
 
 		if snapshot.class then
 			newInstance = Instance.new(snapshot.class)
 			defaultProperties = Dom.getDefaultProperties(snapshot.class)
 		else
-			newInstance = loadMesh(meta.meshSource)
+			newInstance = loadMesh(snapshot.meta.meshSource or 'Luau LSP fix')
 
 			if not newInstance then
 				return
