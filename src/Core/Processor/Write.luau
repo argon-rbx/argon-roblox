@@ -191,7 +191,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	if snapshot.meta then
 		self.tree:updateMeta(snapshot.id, snapshot.meta)
 
-		if not snapshot.meta.keepUnknowns and not Config:get('KeepUnknowns') then
+		if not snapshot.meta.keepUnknowns then
 			for _, child in ipairs(instance:GetChildren()) do
 				self:applyRemoval(child)
 			end

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `KeepUnknowns` setting now works at the level of diffing changes rather than applying them
+
 ## [2.0.9] - 2024-07-11
 
 ### Added

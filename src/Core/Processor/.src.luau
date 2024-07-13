@@ -196,7 +196,11 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 			end)
 
 			changes:join(self:diff(childSnapshot, snapshot.id, ignoreMeta))
-		elseif (not snapshot.meta.keepUnknowns or ignoreMeta) and Dom.isCreatable(child.ClassName) then
+		elseif
+			(not snapshot.meta.keepUnknowns or ignoreMeta)
+			and (not Config:get('KeepUnknowns') or ignoreMeta)
+			and Dom.isCreatable(child.ClassName)
+		then
 			changes:remove(child)
 		end
 	end
