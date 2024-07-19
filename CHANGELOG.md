@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - `KeepUnknowns` setting now works at the level of diffing changes rather than applying them
+- Syncing `PhysicalProperties` from Studio to the file system no longer causes `Bad Request` error
 
 ## [2.0.9] - 2024-07-11
 

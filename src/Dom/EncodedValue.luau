@@ -333,11 +333,13 @@ types = {
 				return 'Default'
 			else
 				return {
-					density = roblox.Density,
-					friction = roblox.Friction,
-					elasticity = roblox.Elasticity,
-					frictionWeight = roblox.FrictionWeight,
-					elasticityWeight = roblox.ElasticityWeight,
+					Custom = {
+						density = roblox.Density,
+						friction = roblox.Friction,
+						elasticity = roblox.Elasticity,
+						frictionWeight = roblox.FrictionWeight,
+						elasticityWeight = roblox.ElasticityWeight,
+					},
 				}
 			end
 		end,
