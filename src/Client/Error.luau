@@ -49,6 +49,10 @@ function Error.fromMessage(message: string): Error
 		end
 	end
 
+	if message == "HttpError: Unknown" then
+		return Error.new(Error.ConnectFail)
+	end
+
 	return Error.__new(Error.Unknown.message:gsub("$1", message), "Unknown")
 end
 

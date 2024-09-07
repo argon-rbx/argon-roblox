@@ -48,7 +48,7 @@ function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean):
 	return nil
 end
 
---- Stringify the value
+--- Stringify the value (pretty print)
 function Util.stringify(value: any, __indent: number?): string
 	if type(value) == "table" then
 		local meta = getmetatable(value)
@@ -64,6 +64,19 @@ function Util.stringify(value: any, __indent: number?): string
 		local first = next(value)
 
 		if type(first) == "number" then
+			local containsTable = false
+
+			for _, v in ipairs(value) do
+				if type(v) == "table" then
+					containsTable = true
+					break
+				end
+			end
+
+			if not containsTable then
+				return "{" .. table.concat(value, ", ") .. "}"
+			end
+
 			local str = "{\n"
 			local indent = __indent and __indent + 1 or 1
 
