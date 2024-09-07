@@ -1,4 +1,5 @@
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
@@ -155,17 +156,16 @@ function App:setPage(page)
 		end)
 	end
 
-	local transparency = Value(0)
 	local size = Value(UDim2.fromScale(1, 1))
 
+	-- Extremely hacky way to smoothly transition between pages
 	page = Computed(function()
-		return New "CanvasGroup" {
+		return New "Frame" {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
+			Size = Spring(size, 10),
 			BackgroundColor3 = Theme.Colors.Background,
 			BorderSizePixel = 0,
-			GroupTransparency = Spring(transparency, 25),
-			Size = Spring(size, 5),
 			[Children] = {
 				List {
 					VerticalAlignment = Enum.VerticalAlignment.Center,
@@ -203,18 +203,40 @@ function App:setPage(page)
 			return
 		end
 
+		local TWEEN_INFO = TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+		TweenService:Create(page, TWEEN_INFO, { BackgroundTransparency = 1 }):Play()
+
 		for _, descendant in ipairs(page:GetDescendants()) do
-			if descendant:IsA("GuiButton") then
-				descendant.Active = false
+			local properties = {}
+
+			if descendant:IsA("GuiObject") then
+				if descendant:IsA("GuiButton") then
+					descendant.Active = false
+				end
+
+				properties.BackgroundTransparency = 1
+
+				if descendant:IsA("TextLabel") or descendant:IsA("TextButton") or descendant:IsA("TextBox") then
+					properties.TextTransparency = 1
+				elseif descendant:IsA("ImageLabel") or descendant:IsA("ImageButton") then
+					properties.ImageTransparency = 1
+				end
+			end
+
+			if descendant:IsA("UIStroke") then
+				properties.Transparency = 1
+			end
+
+			if next(properties) then
+				TweenService:Create(descendant, TWEEN_INFO, properties):Play()
 			end
 		end
 
 		page.ZIndex = 2
 
-		transparency:set(1)
-		size:set(UDim2.fromScale(2, 1.2))
-		task.wait(0.15)
+		size:set(UDim2.fromScale(1.2, 1))
 
+		task.wait(0.2)
 		cleanup(page)
 	end)
 

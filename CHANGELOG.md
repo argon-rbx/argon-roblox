@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Argon UI quality no longer drops with extreme widget sizes
+- Minor UI performance improvements
+
 ## [2.0.10] - 2024-07-19
 
 ### Fixed

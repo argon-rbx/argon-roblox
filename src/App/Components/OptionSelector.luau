@@ -19,7 +19,6 @@ local New = Fusion.New
 local Value = Fusion.Value
 local Hydrate = Fusion.Hydrate
 local OnEvent = Fusion.OnEvent
-local OnChange = Fusion.OnChange
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local ForValues = Fusion.ForValues
@@ -41,7 +40,6 @@ type ButtonProps = {
 }
 
 local function Button(props: ButtonProps): TextButton
-	local absoluteSize = Value(Vector2.new())
 	local isHovered = Value(false)
 	local isPressed = Value(false)
 
@@ -88,19 +86,12 @@ local function Button(props: ButtonProps): TextButton
 			end
 		end,
 
-		[OnChange "AbsoluteSize"] = function(size)
-			absoluteSize:set(size)
-		end,
-
 		[Children] = if props.IsFirst
 			then {
 				Corner {},
 				New "Frame" {
 					AnchorPoint = Vector2.new(1, 0),
-					-- temporary fix as scale with `UIFlexAlignment` combination is currently broken
-					Position = Computed(function(use)
-						return UDim2.fromOffset(use(absoluteSize).X + 1, 0)
-					end),
+					Position = UDim2.fromScale(1, 0),
 					Size = UDim2.fromScale(0.1, 1),
 					BackgroundColor3 = color,
 					BorderSizePixel = 0,

@@ -27,10 +27,7 @@ type Props = {
 return function(props: Props): ImageLabel
 	local rotation = Value(0)
 
-	-- hacky way to make the spinner spin as Fusion
-	-- does not start infinite tweens by itself
-	task.spawn(function()
-		task.wait()
+	task.defer(function()
 		rotation:set(360)
 	end)
 
