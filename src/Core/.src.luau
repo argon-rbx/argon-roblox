@@ -1,6 +1,6 @@
-local ScriptEditorService = game:GetService('ScriptEditorService')
+local ScriptEditorService = game:GetService("ScriptEditorService")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Promise = require(Argon.Packages.Promise)
 
@@ -19,7 +19,7 @@ local Changes = require(script.Changes)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
 
-local CHANGES_TRESHOLD = 5
+local CHANGES_THRESHOLD = 5
 local SYNCBACK_RATE = 0.5
 local SYNCBACK_DEBOUNCE = 0.01
 
@@ -43,7 +43,7 @@ function Core.new(host: string?, port: string?)
 	self.lastSync = os.clock()
 
 	self.tree = Tree.new()
-	self.client = Client.new(host or Config:get('Host'), port or Config:get('Port'))
+	self.client = Client.new(host or Config:get("Host"), port or Config:get("Port"))
 	self.processor = Processor.new(self.tree)
 	self.watcher = Watcher.new()
 	self.executor = Executor.new()
@@ -54,12 +54,12 @@ function Core.new(host: string?, port: string?)
 	self.__ready = function(_project: Types.Project) end
 	self.__sync = function(_kind: Types.MessageKind, _data: any) end
 
-	self:__handleOpenInEditor(Config:get('OpenInEditor'))
+	self:__handleOpenInEditor(Config:get("OpenInEditor"))
 
 	-- watch for `OpenInEditor setting
 	table.insert(
 		self.connections,
-		Config:onChanged('OpenInEditor', function(enabled)
+		Config:onChanged("OpenInEditor", function(enabled)
 			self:__handleOpenInEditor(enabled)
 		end)
 	)
@@ -67,7 +67,7 @@ function Core.new(host: string?, port: string?)
 	-- watch for `TwoWaySync` setting
 	table.insert(
 		self.connections,
-		Config:onChanged('TwoWaySync', function(enabled)
+		Config:onChanged("TwoWaySync", function(enabled)
 			if enabled then
 				self.watcher:start(self.rootDirs)
 			else
@@ -83,25 +83,25 @@ function Core:run(): Promise.Promise
 	return Promise.new(function(_, reject)
 		self.status = Core.Status.Connecting
 
-		local skipInitialSync = Config:get('SkipInitialSync')
-		local initialSyncServer = Config:get('InitialSyncPriority') == 'Server'
+		local skipInitialSync = Config:get("SkipInitialSync")
+		local initialSyncServer = Config:get("InitialSyncPriority") == "Server"
 
-		Log.trace('Fetching server details..')
+		Log.trace("Fetching server details..")
 
 		local project = self.client:fetchDetails():expect()
 		self.project = project
 
 		self:__verifyProject(project, true):expect()
 
-		Log.trace('Subscribing to the server queue..')
+		Log.trace("Subscribing to the server queue..")
 
 		self.client:subscribe():expect()
 
-		Log.trace('Getting initial snapshot..')
+		Log.trace("Getting initial snapshot..")
 
 		local snapshot = self.client:getSnapshot():expect()
 
-		Log.trace('Initializing processor..')
+		Log.trace("Initializing processor..")
 
 		local changes = self.processor:init(snapshot, initialSyncServer, skipInitialSync)
 
@@ -114,7 +114,7 @@ function Core:run(): Promise.Promise
 		end
 
 		if not skipInitialSync then
-			Log.trace('Processing initial snapshot..')
+			Log.trace("Processing initial snapshot..")
 
 			if initialSyncServer then
 				self:__verifyChanges(changes, true):expect()
@@ -125,14 +125,14 @@ function Core:run(): Promise.Promise
 			end
 		end
 
-		if Config:get('TwoWaySync') then
+		if Config:get("TwoWaySync") then
 			self.watcher:start(self.rootDirs)
 		end
 
 		self.status = Core.Status.Connected
 		self.__ready(project)
 
-		Log.trace('Starting sync loops..')
+		Log.trace("Starting sync loops..")
 
 		self:__startSyncbackLoop():catch(function(err)
 			return reject(err)
@@ -143,7 +143,7 @@ function Core:run(): Promise.Promise
 end
 
 function Core:stop()
-	Log.trace('Stopping Argon core..')
+	Log.trace("Stopping Argon core..")
 
 	self.status = Core.Status.Disconnecting
 
@@ -152,7 +152,7 @@ function Core:stop()
 	if self.client.isSubscribed then
 		task.spawn(function()
 			self.client:unsubscribe():catch(function(err)
-				Log.debug('Failed to unsubscribe from the server', err)
+				Log.debug("Failed to unsubscribe from the server", err)
 			end)
 		end)
 	end
@@ -231,7 +231,7 @@ function Core:__verifyChanges(changes: Types.Changes, initial: boolean?): Promis
 		return Promise.resolve()
 	end
 
-	if Changes.Total(changes) > CHANGES_TRESHOLD then
+	if Changes.Total(changes) > CHANGES_THRESHOLD then
 		local err = Error.new(Error.TooManyChanges, #changes.additions, #changes.updates, #changes.removals)
 
 		if not self.__prompt(err.message, changes) then
@@ -254,22 +254,22 @@ function Core:__startSyncLoop()
 			local kind = next(message) :: Types.MessageKind
 			local data = message[kind] :: any
 
-			Log.trace('Received message:', kind)
+			Log.trace("Received message:", kind)
 
-			if kind == 'SyncChanges' then
+			if kind == "SyncChanges" then
 				self:__verifyChanges(data):expect()
 
 				self.processor.write:applyChanges(data)
 				self.lastSync = os.clock()
 
 				self.__sync(kind, data)
-			elseif kind == 'SyncDetails' then
+			elseif kind == "SyncDetails" then
 				self.__sync(kind, data)
 				self:__verifyProject(data):expect()
-			elseif kind == 'ExecuteCode' then
+			elseif kind == "ExecuteCode" then
 				self.executor:execute(data.code)
-			elseif kind == 'Disconnect' then
-				if not Config:get('SkipInitialSync') then
+			elseif kind == "Disconnect" then
+				if not Config:get("SkipInitialSync") then
 					reject(Error.new(Error.Disconnected, data.message))
 				end
 			else
@@ -298,10 +298,10 @@ function Core:__startSyncbackLoop()
 				aggregateChanges = Changes.new()
 
 				self.client:write(changes):catch(function(err)
-					Log.warn('Failed to write changes to the server:', err)
+					Log.warn("Failed to write changes to the server:", err)
 				end)
 
-				self.__sync('SyncbackChanges', changes)
+				self.__sync("SyncbackChanges", changes)
 			end
 		end)
 
@@ -315,21 +315,21 @@ function Core:__startSyncbackLoop()
 			local kind = event.kind
 			local changes = Changes.new()
 
-			Log.trace('Received event:', kind)
+			Log.trace("Received event:", kind)
 
-			if kind == 'Add' then
+			if kind == "Add" then
 				local snapshot = self.processor.read:onAdd(event.instance)
 
 				if snapshot then
 					changes:add(snapshot)
 				end
-			elseif kind == 'Change' then
+			elseif kind == "Change" then
 				local snapshot = self.processor.read:onChange(event.instance, event.property)
 
 				if snapshot then
 					changes:update(snapshot)
 				end
-			elseif kind == 'Remove' then
+			elseif kind == "Remove" then
 				local snapshot = self.processor.read:onRemove(event.instance)
 
 				if snapshot then
@@ -346,30 +346,30 @@ end
 
 function Core:__handleOpenInEditor(enabled: boolean)
 	if not enabled then
-		local connection = self.connections['openInEditor']
+		local connection = self.connections["openInEditor"]
 
 		if connection then
 			connection:Disconnect()
-			self.connections['openInEditor'] = nil
+			self.connections["openInEditor"] = nil
 		end
 
 		return
 	end
 
-	self.connections['openInEditor'] = ScriptEditorService.TextDocumentDidOpen:Connect(function(document)
+	self.connections["openInEditor"] = ScriptEditorService.TextDocumentDidOpen:Connect(function(document)
 		if self.status ~= Core.Status.Connected then
 			return
 		end
 
 		if document:IsCommandBar() then
-			Log.trace('Document is a command bar, ignoring')
+			Log.trace("Document is a command bar, ignoring")
 			return
 		end
 
 		local id = self.tree:getId(document:GetScript())
 
 		if not id then
-			Log.trace('Document is not synced by Argon, ignoring')
+			Log.trace("Document is not synced by Argon, ignoring")
 			return
 		end
 
@@ -383,7 +383,7 @@ function Core:__handleOpenInEditor(enabled: boolean)
 				document:CloseAsync()
 			end)
 			:catch(function(err)
-				Log.debug('Failed to open document in editor:', err)
+				Log.debug("Failed to open document in editor:", err)
 			end)
 	end)
 end
@@ -398,11 +398,11 @@ function Core:__cleanConnection(id: string)
 end
 
 function Core:__shouldPrompt(initial: boolean?): boolean
-	local mode = Config:get('DisplayPrompts')
+	local mode = Config:get("DisplayPrompts")
 
-	if mode == 'Always' then
+	if mode == "Always" then
 		return true
-	elseif mode == 'Initial' and initial then
+	elseif mode == "Initial" and initial then
 		return true
 	else
 		return false

@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -16,7 +16,7 @@ local Value = Fusion.Value
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'Duration',
+	"Duration",
 }
 
 type Props = {

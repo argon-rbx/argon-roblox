@@ -1,7 +1,7 @@
-local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 local Studio = settings().Studio
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Fusion = require(Argon.Packages.Fusion)
 
@@ -55,10 +55,10 @@ local Theme = {
 	},
 
 	Fonts = {
-		Regular = Font.fromName('Ubuntu'),
-		Bold = Font.fromName('Ubuntu', Enum.FontWeight.Bold),
-		Italic = Font.fromName('Ubuntu', Enum.FontWeight.Regular, Enum.FontStyle.Italic),
-		Mono = Font.fromName('RobotoMono'),
+		Regular = Font.fromName("Ubuntu"),
+		Bold = Font.fromName("Ubuntu", Enum.FontWeight.Bold),
+		Italic = Font.fromName("Ubuntu", Enum.FontWeight.Regular, Enum.FontStyle.Italic),
+		Mono = Font.fromName("RobotoMono"),
 
 		-- required for TextService:GetTextSize()
 		Enums = {
@@ -101,7 +101,7 @@ do
 		Theme.IsDark:set(isDark)
 
 		for key, color in pairs(getColors(isDark)) do
-			if type(color) ~= 'table' then
+			if type(color) ~= "table" then
 				Theme.Colors[key]:set(color)
 			else
 				for subKey, subColor in pairs(color) do

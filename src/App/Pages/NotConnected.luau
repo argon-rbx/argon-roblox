@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -30,8 +30,8 @@ type Props = {
 }
 
 return function(props: Props): { Instance }
-	local hostInput = Value(props.Host ~= Config:getDefault('Host') and props.Host or '')
-	local portInput = Value(props.Port ~= Config:getDefault('Port') and props.Port or '')
+	local hostInput = Value(props.Host ~= Config:getDefault("Host") and props.Host or "")
+	local portInput = Value(props.Port ~= Config:getDefault("Port") and props.Port or "")
 
 	return {
 		List {},
@@ -41,7 +41,7 @@ return function(props: Props): { Instance }
 				Input {
 					Size = UDim2.fromScale(0.75, 1),
 					Font = Theme.Fonts.Mono,
-					PlaceholderText = 'localhost',
+					PlaceholderText = "localhost",
 					Text = hostInput,
 					Scaled = true,
 
@@ -50,7 +50,7 @@ return function(props: Props): { Instance }
 					end,
 
 					Finished = function(host)
-						props.App:setHost(host ~= '' and host or Config:getDefault('Host'))
+						props.App:setHost(host ~= "" and host or Config:getDefault("Host"))
 					end,
 				},
 				Input {
@@ -58,7 +58,7 @@ return function(props: Props): { Instance }
 					Position = UDim2.fromScale(1, 0),
 					Size = UDim2.fromScale(0, 1),
 					Font = Theme.Fonts.Mono,
-					PlaceholderText = '8000',
+					PlaceholderText = "8000",
 					Text = portInput,
 
 					Changed = function(text)
@@ -66,14 +66,14 @@ return function(props: Props): { Instance }
 					end,
 
 					Finished = function(port)
-						props.App:setPort(port ~= '' and tonumber(port) or Config:getDefault('Port'))
+						props.App:setPort(port ~= "" and tonumber(port) or Config:getDefault("Port"))
 					end,
 
 					[Children] = {
 						Text {
 							AnchorPoint = Vector2.new(1, 0.5),
 							Position = UDim2.fromScale(0, 0.5),
-							Text = ': ',
+							Text = ": ",
 							Font = Theme.Fonts.Mono,
 							Color = Theme.Colors.TextDimmed,
 						},
@@ -95,7 +95,7 @@ return function(props: Props): { Instance }
 				TextButton {
 					Solid = true,
 					LayoutOrder = 2,
-					Text = 'Connect',
+					Text = "Connect",
 					Activated = function()
 						props.App:connect()
 					end,

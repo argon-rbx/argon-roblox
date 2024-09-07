@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -12,7 +12,7 @@ local New = Fusion.New
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'ScrollBar',
+	"ScrollBar",
 }
 
 type Props = {
@@ -21,7 +21,7 @@ type Props = {
 }
 
 return function(props: Props): ScrollingFrame
-	return Hydrate(New 'ScrollingFrame' {
+	return Hydrate(New "ScrollingFrame" {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
 		ScrollBarThickness = props.ScrollBar and 5 or 0,

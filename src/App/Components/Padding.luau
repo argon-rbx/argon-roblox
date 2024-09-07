@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -13,13 +13,13 @@ local New = Fusion.New
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'Padding',
-	'Horizontal',
-	'Vertical',
-	'Left',
-	'Right',
-	'Top',
-	'Bottom',
+	"Padding",
+	"Horizontal",
+	"Vertical",
+	"Left",
+	"Right",
+	"Top",
+	"Bottom",
 }
 
 type Props = {
@@ -57,7 +57,7 @@ return function(props: Props): UIPadding
 		bottom = vertical and padding or nil
 	end
 
-	return Hydrate(New 'UIPadding' {
+	return Hydrate(New "UIPadding" {
 		PaddingLeft = left,
 		PaddingRight = right,
 		PaddingTop = top,

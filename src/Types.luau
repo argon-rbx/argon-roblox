@@ -44,7 +44,7 @@ export type UpdatedSnapshot = {
 -- Other structs
 
 export type WatcherEvent = {
-	kind: 'Added' | 'Removed' | 'Changed',
+	kind: "Added" | "Removed" | "Changed",
 	instance: Instance,
 	property: string?,
 }
@@ -66,7 +66,7 @@ export type Project = {
 -- Messages
 
 export type Message = SyncChanges | SyncDetails | ExecuteCode | Disconnect
-export type MessageKind = 'SyncChanges' | 'SyncDetails' | 'ExecuteCode' | 'Disconnect'
+export type MessageKind = "SyncChanges" | "SyncDetails" | "ExecuteCode" | "Disconnect"
 
 export type SyncChanges = {
 	SyncChanges: Changes,

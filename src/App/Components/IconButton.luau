@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -22,10 +22,10 @@ local Computed = Fusion.Computed
 local Children = Fusion.Children
 
 local COMPONENT_ONLY_PROPS = {
-	'Activated',
-	'Solid',
-	'Icon',
-	'Blending',
+	"Activated",
+	"Solid",
+	"Icon",
+	"Blending",
 }
 
 type Props = {
@@ -52,27 +52,27 @@ return function(props: Props): TextButton
 		state
 	)
 
-	return Hydrate(New 'TextButton' {
+	return Hydrate(New "TextButton" {
 		Size = UDim2.fromOffset(Theme.CompSizeY.Large, Theme.CompSizeY.Large),
-		Text = '',
+		Text = "",
 		AutoButtonColor = false,
 		BackgroundColor3 = color,
 
-		[OnEvent 'InputBegan'] = function(inputObject)
+		[OnEvent "InputBegan"] = function(inputObject)
 			if inputObject.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(true)
 			elseif inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(true)
 			end
 		end,
-		[OnEvent 'InputEnded'] = function(inputObject)
+		[OnEvent "InputEnded"] = function(inputObject)
 			if inputObject.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(false)
 			elseif inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(false)
 			end
 		end,
-		[OnEvent('Activated')] = function()
+		[OnEvent("Activated")] = function()
 			if props.Activated then
 				props.Activated()
 			end

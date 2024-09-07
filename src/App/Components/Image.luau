@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Fusion = require(Argon.Packages.Fusion)
 
@@ -10,7 +10,7 @@ type Props = {
 }
 
 return function(props: Props): ImageLabel
-	return Hydrate(New('ImageLabel') {
+	return Hydrate(New("ImageLabel") {
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
 	})(props)

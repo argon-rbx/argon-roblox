@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -12,7 +12,7 @@ local New = Fusion.New
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'Radius',
+	"Radius",
 }
 
 type Props = {
@@ -21,7 +21,7 @@ type Props = {
 }
 
 return function(props: Props): UICorner
-	return Hydrate(New 'UICorner' {
+	return Hydrate(New "UICorner" {
 		CornerRadius = UDim.new(0, props.Radius or Theme.CornerRadius),
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

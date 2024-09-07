@@ -16,13 +16,13 @@ function SemVer.new(major: number, minor: number, patch: number)
 end
 
 function SemVer.parse(version: string)
-	local major, minor, patch = version:match('(%d+)%.(%d+)%.(%d+)')
+	local major, minor, patch = version:match("(%d+)%.(%d+)%.(%d+)")
 
 	return SemVer.new(tonumber(major) or 0, tonumber(minor) or 0, tonumber(patch) or 0)
 end
 
 function SemVer:toString()
-	return ('%d.%d.%d'):format(self.major, self.minor, self.patch)
+	return ("%d.%d.%d"):format(self.major, self.minor, self.patch)
 end
 
 function SemVer:isCompatible(other: SemVer)

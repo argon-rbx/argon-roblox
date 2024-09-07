@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 
@@ -25,14 +25,14 @@ return function(): Frame
 	return Box {
 		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large * 2),
 
-		[OnChange 'AbsoluteSize'] = function(size)
+		[OnChange "AbsoluteSize"] = function(size)
 			absoluteSize:set(size)
 		end,
 
 		[Children] = {
 			Padding {},
 			Text {
-				Text = 'Unavailable during playtest! Return to the edit mode to continue using Argon',
+				Text = "Unavailable during playtest! Return to the edit mode to continue using Argon",
 				TextWrapped = true,
 				Font = Theme.Fonts.Mono,
 				TextSize = Theme.TextSize.Medium,

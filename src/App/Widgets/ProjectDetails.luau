@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 
@@ -55,7 +55,7 @@ type Props = {
 
 return function(props: Props): DockWidgetPluginGui
 	return Widget {
-		Name = 'Argon - Project Details',
+		Name = "Argon - Project Details",
 		MinimumSize = Vector2.new(410, 300),
 		Closed = props.Closed,
 
@@ -75,26 +75,26 @@ return function(props: Props): DockWidgetPluginGui
 						Padding = Theme.WidgetPadding,
 					},
 					Entry {
-						Name = 'Name',
+						Name = "Name",
 						Value = Computed(function(use)
 							return use(props.Project).name
 						end),
 					},
 					Entry {
-						Name = 'Game ID',
+						Name = "Game ID",
 						Value = Computed(function(use)
-							return use(props.Project).gameId or 'Any'
+							return use(props.Project).gameId or "Any"
 						end),
 					},
 					Entry {
-						Name = 'Place IDs',
+						Name = "Place IDs",
 						Value = Computed(function(use)
 							local project = use(props.Project)
-							return #project.placeIds > 0 and table.concat(project.placeIds, ', ') or 'Any'
+							return #project.placeIds > 0 and table.concat(project.placeIds, ", ") or "Any"
 						end),
 					},
 					Entry {
-						Name = 'Synced Dirs',
+						Name = "Synced Dirs",
 						Value = Computed(function(use)
 							local rootDirs = {}
 
@@ -102,21 +102,21 @@ return function(props: Props): DockWidgetPluginGui
 								rootDirs[i] = props.App.core.tree:getInstance(id).Name
 							end
 
-							return table.concat(rootDirs, ', ')
+							return table.concat(rootDirs, ", ")
 						end),
 					},
 					Entry {
-						Name = 'Server Version',
+						Name = "Server Version",
 						Value = Computed(function(use)
 							return use(props.Project).version
 						end),
 					},
 					Entry {
-						Name = 'Host',
+						Name = "Host",
 						Value = peek(props.App.host),
 					},
 					Entry {
-						Name = 'Port',
+						Name = "Port",
 						Value = peek(props.App.port),
 					},
 				},

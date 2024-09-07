@@ -48,7 +48,7 @@ local function getDefaultProperties(className)
 	for property, default in pairs(class.DefaultProperties) do
 		local descriptor = findCanonicalPropertyDescriptor(className, property)
 
-		if descriptor and (descriptor.scriptability == 'ReadWrite' or descriptor.scriptability == 'Custom') then
+		if descriptor and (descriptor.scriptability == "ReadWrite" or descriptor.scriptability == "Custom") then
 			properties[property] = default
 		end
 	end
@@ -63,14 +63,14 @@ local function isCreatable(className)
 		return nil
 	end
 
-	return table.find(class.Tags, 'NotCreatable') == nil
+	return table.find(class.Tags, "NotCreatable") == nil
 end
 
 local function readProperty(instance, propertyName)
 	local descriptor = findCanonicalPropertyDescriptor(instance.ClassName, propertyName)
 
 	if descriptor == nil then
-		local fullName = ('%s.%s'):format(instance.className, propertyName)
+		local fullName = ("%s.%s"):format(instance.className, propertyName)
 
 		return false, Error.new(Error.Kind.UnknownProperty, fullName)
 	end
@@ -82,7 +82,7 @@ local function writeProperty(instance, propertyName, value)
 	local descriptor = findCanonicalPropertyDescriptor(instance.ClassName, propertyName)
 
 	if descriptor == nil then
-		local fullName = ('%s.%s'):format(instance.className, propertyName)
+		local fullName = ("%s.%s"):format(instance.className, propertyName)
 
 		return false, Error.new(Error.Kind.UnknownProperty, fullName)
 	end

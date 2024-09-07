@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -18,8 +18,8 @@ local Hydrate = Fusion.Hydrate
 local Computed = Fusion.Computed
 
 local COMPONENT_ONLY_PROPS = {
-	'Changed',
-	'Value',
+	"Changed",
+	"Value",
 }
 
 type Props = {
@@ -36,7 +36,7 @@ return function(props: Props): TextButton
 		Solid = value,
 		Blending = false,
 		Icon = Computed(function(use)
-			return use(value) and Assets.Icons.Checkmark or ''
+			return use(value) and Assets.Icons.Checkmark or ""
 		end),
 
 		Activated = function()

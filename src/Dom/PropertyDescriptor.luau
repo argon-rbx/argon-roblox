@@ -33,7 +33,7 @@ function PropertyDescriptor.fromRaw(data, className, propertyName)
 		-- type:
 		--
 		-- { Value = "<data type>" }
-		dataType = key == 'Enum' and key or value,
+		dataType = key == "Enum" and key or value,
 
 		scriptability = data.Scriptability,
 		className = className,
@@ -42,7 +42,7 @@ function PropertyDescriptor.fromRaw(data, className, propertyName)
 end
 
 function PropertyDescriptor:read(instance)
-	if self.scriptability == 'ReadWrite' or self.scriptability == 'Read' then
+	if self.scriptability == "ReadWrite" or self.scriptability == "Read" then
 		local success, value = xpcall(get, debug.traceback, instance, self.name)
 
 		if success then
@@ -52,9 +52,9 @@ function PropertyDescriptor:read(instance)
 		end
 	end
 
-	if self.scriptability == 'Custom' then
+	if self.scriptability == "Custom" then
 		if customProperties[self.className] == nil then
-			local fullName = ('%s.%s'):format(instance.className, self.name)
+			local fullName = ("%s.%s"):format(instance.className, self.name)
 			return false, Error.new(Error.Kind.PropertyNotReadable, fullName)
 		end
 
@@ -63,8 +63,8 @@ function PropertyDescriptor:read(instance)
 		return interface.read(instance, self.name)
 	end
 
-	if self.scriptability == 'None' or self.scriptability == 'Write' then
-		local fullName = ('%s.%s'):format(instance.className, self.name)
+	if self.scriptability == "None" or self.scriptability == "Write" then
+		local fullName = ("%s.%s"):format(instance.className, self.name)
 
 		return false, Error.new(Error.Kind.PropertyNotReadable, fullName)
 	end
@@ -73,7 +73,7 @@ function PropertyDescriptor:read(instance)
 end
 
 function PropertyDescriptor:write(instance, value)
-	if self.scriptability == 'ReadWrite' or self.scriptability == 'Write' then
+	if self.scriptability == "ReadWrite" or self.scriptability == "Write" then
 		local success, err = xpcall(set, debug.traceback, instance, self.name, value)
 
 		if success then
@@ -83,9 +83,9 @@ function PropertyDescriptor:write(instance, value)
 		end
 	end
 
-	if self.scriptability == 'Custom' then
+	if self.scriptability == "Custom" then
 		if customProperties[self.className] == nil then
-			local fullName = ('%s.%s'):format(instance.className, self.name)
+			local fullName = ("%s.%s"):format(instance.className, self.name)
 			return false, Error.new(Error.Kind.PropertyNotWritable, fullName)
 		end
 
@@ -94,8 +94,8 @@ function PropertyDescriptor:write(instance, value)
 		return interface.write(instance, self.name, value)
 	end
 
-	if self.scriptability == 'None' or self.scriptability == 'Read' then
-		local fullName = ('%s.%s'):format(instance.className, self.name)
+	if self.scriptability == "None" or self.scriptability == "Read" then
+		local fullName = ("%s.%s"):format(instance.className, self.name)
 
 		return false, Error.new(Error.Kind.PropertyNotWritable, fullName)
 	end

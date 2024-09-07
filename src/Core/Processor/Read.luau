@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Types = require(Argon.Types)
 local Dom = require(Argon.Dom)
@@ -12,12 +12,12 @@ local Snapshot = require(script.Parent.Parent.Snapshot)
 local Error = require(script.Parent.Parent.Error)
 
 local function syncProperties(instance: Instance, property: string?): boolean
-	return instance:IsA('LuaSourceContainer') or Config:get('TwoWaySyncProperties') or property == 'Name'
+	return instance:IsA("LuaSourceContainer") or Config:get("TwoWaySyncProperties") or property == "Name"
 end
 
 local function containsScripts(instance: Instance): boolean
 	for _, descendant in ipairs(instance:GetDescendants()) do
-		if descendant:IsA('LuaSourceContainer') then
+		if descendant:IsA("LuaSourceContainer") then
 			return true
 		end
 	end
@@ -44,7 +44,7 @@ function ReadProcessor.new(tree)
 end
 
 function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
-	Log.trace('Detected addition of', instance)
+	Log.trace("Detected addition of", instance)
 
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
@@ -53,7 +53,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 			parentId = buffer.fromstring(parentId)
 		end
 	else
-		Log.trace('Unknown instance. Skipping..')
+		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
 
@@ -114,23 +114,23 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 end
 
 function ReadProcessor:onChange(instance: Instance, property: string?): Types.UpdatedSnapshot?
-	Log.trace('Detected change of', instance, property)
+	Log.trace("Detected change of", instance, property)
 
 	local id = self.tree:getId(instance)
 
 	if id then
 		id = buffer.fromstring(id)
 	else
-		Log.trace('Unknown instance. Skipping..')
+		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
 
 	if not syncProperties(instance, property) and property then
-		Log.trace('Instance does not pass sync filter. Skipping..')
+		Log.trace("Instance does not pass sync filter. Skipping..")
 		return nil
 	end
 
-	if property == 'Name' then
+	if property == "Name" then
 		return Snapshot.newUpdated(id):withName(instance.Name)
 	end
 
@@ -169,12 +169,12 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 end
 
 function ReadProcessor:onRemove(instance: Instance): Types.Ref?
-	Log.trace('Detected removal of', instance)
+	Log.trace("Detected removal of", instance)
 
 	local id = self.tree:getId(instance)
 
 	if not id then
-		Log.trace('Unknown instance. Skipping..')
+		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
 
@@ -184,7 +184,7 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 end
 
 function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
-	Log.trace('Detected addition of', instance, '(only code)')
+	Log.trace("Detected addition of", instance, "(only code)")
 
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
@@ -193,14 +193,14 @@ function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?)
 			parentId = buffer.fromstring(parentId)
 		end
 	else
-		Log.trace('Unknown instance. Skipping..')
+		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
 
-	local isScript = instance:IsA('LuaSourceContainer')
+	local isScript = instance:IsA("LuaSourceContainer")
 
 	if not isScript and not containsScripts(instance) then
-		Log.trace('Instance does not contain any scripts. Skipping..')
+		Log.trace("Instance does not contain any scripts. Skipping..")
 		return nil
 	end
 

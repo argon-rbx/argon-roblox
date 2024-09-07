@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -39,83 +39,83 @@ local peek = Fusion.peek
 
 local SETTINGS_DATA: { SettingData } = {
 	{
-		Setting = 'Host',
-		Name = 'Server Host',
-		Description = 'The host of the server that you want to connect to',
+		Setting = "Host",
+		Name = "Server Host",
+		Description = "The host of the server that you want to connect to",
 	},
 	{
-		Setting = 'Port',
-		Name = 'Server Port',
-		Description = 'The port of the server that you want to connect to',
+		Setting = "Port",
+		Name = "Server Port",
+		Description = "The port of the server that you want to connect to",
 	},
 	{
-		Setting = 'InitialSyncPriority',
-		Name = 'Initial Sync Priority',
-		Description = 'Which side should be considered as up to date when connecting',
-		Options = { 'Server', 'Client' },
+		Setting = "InitialSyncPriority",
+		Name = "Initial Sync Priority",
+		Description = "Which side should be considered as up to date when connecting",
+		Options = { "Server", "Client" },
 	},
 	{
-		Setting = 'OnlyCodeMode',
-		Name = 'Only Code Mode',
-		Description = 'Initially only sync scripts and instances that have descendant scripts',
-		Requires = 'InitialSyncPriority=Client',
+		Setting = "OnlyCodeMode",
+		Name = "Only Code Mode",
+		Description = "Initially only sync scripts and instances that have descendant scripts",
+		Requires = "InitialSyncPriority=Client",
 	},
 	{
-		Setting = 'AutoConnect',
-		Name = 'Auto Connect',
-		Description = 'Automatically attempt to connect to the server when you open a new place',
+		Setting = "AutoConnect",
+		Name = "Auto Connect",
+		Description = "Automatically attempt to connect to the server when you open a new place",
 	},
 	{
-		Setting = 'AutoReconnect',
-		Name = 'Auto Reconnect',
-		Description = 'If the connection is lost, automatically reconnect to the server after delay',
+		Setting = "AutoReconnect",
+		Name = "Auto Reconnect",
+		Description = "If the connection is lost, automatically reconnect to the server after delay",
 	},
 	{
-		Setting = 'DisplayPrompts',
-		Name = 'Display Prompts',
-		Description = 'When to show prompts for actions that require confirmation',
-		Options = { 'Always', 'Initial', 'Never' },
+		Setting = "DisplayPrompts",
+		Name = "Display Prompts",
+		Description = "When to show prompts for actions that require confirmation",
+		Options = { "Always", "Initial", "Never" },
 	},
 	{
-		Setting = 'TwoWaySync',
-		Name = 'Two-Way Sync',
-		Description = 'Sync changes made in Roblox Studio back to the server (local file system)',
+		Setting = "TwoWaySync",
+		Name = "Two-Way Sync",
+		Description = "Sync changes made in Roblox Studio back to the server (local file system)",
 	},
 	{
-		Setting = 'TwoWaySyncProperties',
-		Name = 'Sync Properties',
-		Description = 'Whether all properties should be synced back to the server <b>(does not affect scripts)</b>',
-		Requires = 'TwoWaySync',
+		Setting = "TwoWaySyncProperties",
+		Name = "Sync Properties",
+		Description = "Whether all properties should be synced back to the server <b>(does not affect scripts)</b>",
+		Requires = "TwoWaySync",
 	},
 	{
-		Setting = 'OpenInEditor',
-		Name = 'Open In Editor',
-		Description = 'Open scripts in your OS default editor instead of the Roblox Studio one',
+		Setting = "OpenInEditor",
+		Name = "Open In Editor",
+		Description = "Open scripts in your OS default editor instead of the Roblox Studio one",
 	},
 	{
-		Setting = 'LogLevel',
-		Name = 'Log Level',
-		Description = 'The level of logging you want to see in the output',
-		Options = { 'Off', 'Error', 'Warn', 'Info', 'Debug', 'Trace' },
+		Setting = "LogLevel",
+		Name = "Log Level",
+		Description = "The level of logging you want to see in the output",
+		Options = { "Off", "Error", "Warn", "Info", "Debug", "Trace" },
 	},
 	{
-		Setting = 'KeepUnknowns',
-		Name = 'Keep Unknowns',
-		Description = 'By default keep instances that are not present in the file system',
+		Setting = "KeepUnknowns",
+		Name = "Keep Unknowns",
+		Description = "By default keep instances that are not present in the file system",
 	},
 	{
-		Setting = 'SkipInitialSync',
-		Name = 'Skip Initial Sync',
-		Description = 'Skip the initial sync when connecting to the server <b>(only recommended for large places)</b>',
+		Setting = "SkipInitialSync",
+		Name = "Skip Initial Sync",
+		Description = "Skip the initial sync when connecting to the server <b>(only recommended for large places)</b>",
 	},
 	{
-		Setting = 'OverridePackages',
-		Name = 'Override Packages',
-		Description = 'Whether writing changes to the instances affected by <b>PackageLink</b> should be allowed',
+		Setting = "OverridePackages",
+		Name = "Override Packages",
+		Description = "Whether writing changes to the instances affected by <b>PackageLink</b> should be allowed",
 	},
 }
 
-local LEVELS = { 'Global', 'Game', 'Place' }
+local LEVELS = { "Global", "Game", "Place" }
 
 type SettingData = {
 	Setting: Config.Setting,
@@ -138,16 +138,16 @@ local function Entry(props: EntryProps): Frame
 
 	local valueComponent
 
-	if setting == 'Host' or setting == 'Port' then
+	if setting == "Host" or setting == "Port" then
 		local size
-		if setting == 'Host' then
+		if setting == "Host" then
 			size = UDim2.new(0.31, 0, 0, Theme.CompSizeY.Medium)
 		else
 			size = UDim2.fromOffset(70, Theme.CompSizeY.Medium)
 		end
 
 		local onChanged
-		if setting == 'Host' then
+		if setting == "Host" then
 			onChanged = filterHost
 		else
 			onChanged = filterPort
@@ -159,14 +159,14 @@ local function Entry(props: EntryProps): Frame
 			local value = peek(props.Binding)
 
 			if not userInput and value == Config:getDefault(setting) then
-				props.Binding:set('')
+				props.Binding:set("")
 			end
 
 			userInput = false
 		end)
 
 		if peek(props.Binding) == Config:getDefault(setting) then
-			props.Binding:set('')
+			props.Binding:set("")
 		end
 
 		valueComponent = Box {
@@ -175,7 +175,7 @@ local function Entry(props: EntryProps): Frame
 				Input {
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
-					Scaled = setting == 'Host',
+					Scaled = setting == "Host",
 					PlaceholderText = Config:getDefault(setting),
 
 					Changed = function(text)
@@ -183,7 +183,7 @@ local function Entry(props: EntryProps): Frame
 						props.Binding:set(onChanged(text))
 					end,
 					Finished = function(text)
-						text = text ~= '' and text or Config:getDefault(setting)
+						text = text ~= "" and text or Config:getDefault(setting)
 
 						props.Binding:set(text)
 						Config:set(setting, text, peek(props.Level))
@@ -199,9 +199,9 @@ local function Entry(props: EntryProps): Frame
 							TextSize = Theme.TextSize.Small,
 							Color = Theme.Colors.TextDimmed,
 							AutomaticSize = Enum.AutomaticSize.None,
-							Text = setting == 'Host'
+							Text = setting == "Host"
 									and 'Broken UI?\n1. Go to File > Beta Features\n2. Enable "UIListLayout Flex"\n3. Restart Roblox Studio'
-								or '',
+								or "",
 						},
 					},
 					[Cleanup] = disconnect,
@@ -270,7 +270,7 @@ local function Entry(props: EntryProps): Frame
 									return UDim2.new(1, 0, 0, size.Y)
 								end),
 
-								[OnChange 'AbsoluteSize'] = function(size)
+								[OnChange "AbsoluteSize"] = function(size)
 									absoluteSize:set(size)
 								end,
 							},
@@ -278,7 +278,7 @@ local function Entry(props: EntryProps): Frame
 					},
 					Hydrate(valueComponent) {
 						[Children] = {
-							New 'UIFlexItem' {},
+							New "UIFlexItem" {},
 						},
 					},
 				},
@@ -292,11 +292,11 @@ type Props = {
 }
 
 return function(props: Props): DockWidgetPluginGui
-	local level = Value('Global')
+	local level = Value("Global")
 	local bindings = {}
 
 	return Widget {
-		Name = 'Argon - Settings',
+		Name = "Argon - Settings",
 		MinimumSize = Vector2.new(350, 400),
 		Closed = props.Closed,
 
@@ -331,8 +331,8 @@ return function(props: Props): DockWidgetPluginGui
 
 						local requireBinding
 
-						if data.Requires and data.Requires:find('=') then
-							local name, value = data.Requires:match('(%a+)=(%w+)')
+						if data.Requires and data.Requires:find("=") then
+							local name, value = data.Requires:match("(%a+)=(%w+)")
 
 							requireBinding = Computed(function(use)
 								return use(bindings[name]) == value
@@ -355,7 +355,7 @@ return function(props: Props): DockWidgetPluginGui
 							TextButton {
 								AnchorPoint = Vector2.new(1, 0),
 								Position = UDim2.fromScale(1, 0),
-								Text = 'Restore Defaults',
+								Text = "Restore Defaults",
 								Activated = function()
 									for setting, binding in pairs(bindings) do
 										binding:set(Config:getDefault(setting))

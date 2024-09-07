@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -13,9 +13,9 @@ local Hydrate = Fusion.Hydrate
 local Children = Fusion.Children
 
 local COMPONENT_ONLY_PROPS = {
-	'Font',
-	'Color',
-	'Scaled',
+	"Font",
+	"Color",
+	"Scaled",
 }
 
 type Props = {
@@ -26,7 +26,7 @@ type Props = {
 }
 
 return function(props: Props): TextLabel
-	return Hydrate(New('TextLabel') {
+	return Hydrate(New("TextLabel") {
 		FontFace = props.Font or Theme.Fonts.Regular,
 		TextColor3 = props.Color or Theme.Colors.Text,
 		TextSize = Theme.TextSize.Large,
@@ -36,7 +36,7 @@ return function(props: Props): TextLabel
 		BackgroundTransparency = 1,
 		TextScaled = props.Scaled,
 
-		[Children] = props.Scaled and New('UITextSizeConstraint') {
+		[Children] = props.Scaled and New("UITextSizeConstraint") {
 			MaxTextSize = props.TextSize or Theme.TextSize.Large,
 		} or nil,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))

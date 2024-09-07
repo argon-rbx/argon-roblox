@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -33,10 +33,10 @@ local ForValues = Fusion.ForValues
 local peek = Fusion.peek
 
 local BUTTON_COMPONENT_ONLY_PROPS = {
-	'Activated',
-	'IsSelected',
-	'IsFirst',
-	'IsLast',
+	"Activated",
+	"IsSelected",
+	"IsFirst",
+	"IsLast",
 }
 
 type ButtonProps = {
@@ -63,7 +63,7 @@ local function Button(props: ButtonProps): TextButton
 		state
 	)
 
-	return Hydrate(New 'TextButton' {
+	return Hydrate(New "TextButton" {
 		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Medium),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
@@ -74,21 +74,21 @@ local function Button(props: ButtonProps): TextButton
 			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
 		end),
 
-		[OnEvent 'InputBegan'] = function(input)
+		[OnEvent "InputBegan"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(true)
 			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(true)
 			end
 		end,
-		[OnEvent 'InputEnded'] = function(input)
+		[OnEvent "InputEnded"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(false)
 			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(false)
 			end
 		end,
-		[OnEvent('Activated')] = function()
+		[OnEvent("Activated")] = function()
 			if props.IsFirst then
 				isHovered:set(false)
 				isPressed:set(false)
@@ -107,7 +107,7 @@ local function Button(props: ButtonProps): TextButton
 			if props.IsFirst
 				then {
 					Corner {},
-					New 'Frame' {
+					New "Frame" {
 						AnchorPoint = Vector2.new(0.5, 1),
 						Position = UDim2.fromScale(0.5, 1),
 						Size = UDim2.fromScale(1.2, 0.2),
@@ -120,7 +120,7 @@ local function Button(props: ButtonProps): TextButton
 				}
 				elseif props.IsLast then {
 					Corner {},
-					New 'Frame' {
+					New "Frame" {
 						AnchorPoint = Vector2.new(0.5, 0),
 						Position = UDim2.fromScale(0.5, 0),
 						Size = UDim2.fromScale(1.2, 0.2),
@@ -134,9 +134,9 @@ local function Button(props: ButtonProps): TextButton
 end
 
 local COMPONENT_ONLY_PROPS = {
-	'Selected',
-	'Options',
-	'Value',
+	"Selected",
+	"Options",
+	"Value",
 }
 
 type Props = {

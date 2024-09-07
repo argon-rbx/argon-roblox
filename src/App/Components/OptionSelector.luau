@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -26,10 +26,10 @@ local ForValues = Fusion.ForValues
 local peek = Fusion.peek
 
 local BUTTON_COMPONENT_ONLY_PROPS = {
-	'Activated',
-	'IsSelected',
-	'IsFirst',
-	'IsLast',
+	"Activated",
+	"IsSelected",
+	"IsFirst",
+	"IsLast",
 }
 
 type ButtonProps = {
@@ -57,8 +57,8 @@ local function Button(props: ButtonProps): TextButton
 		state
 	)
 
-	return Hydrate(New 'TextButton' {
-		Text = 'Button',
+	return Hydrate(New "TextButton" {
+		Text = "Button",
 		Size = UDim2.fromScale(1, 1),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,
@@ -68,34 +68,34 @@ local function Button(props: ButtonProps): TextButton
 			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
 		end),
 
-		[OnEvent 'InputBegan'] = function(input)
+		[OnEvent "InputBegan"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(true)
 			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(true)
 			end
 		end,
-		[OnEvent 'InputEnded'] = function(input)
+		[OnEvent "InputEnded"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(false)
 			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(false)
 			end
 		end,
-		[OnEvent('Activated')] = function()
+		[OnEvent("Activated")] = function()
 			if props.Activated then
 				props.Activated()
 			end
 		end,
 
-		[OnChange 'AbsoluteSize'] = function(size)
+		[OnChange "AbsoluteSize"] = function(size)
 			absoluteSize:set(size)
 		end,
 
 		[Children] = if props.IsFirst
 			then {
 				Corner {},
-				New 'Frame' {
+				New "Frame" {
 					AnchorPoint = Vector2.new(1, 0),
 					-- temporary fix as scale with `UIFlexAlignment` combination is currently broken
 					Position = Computed(function(use)
@@ -108,7 +108,7 @@ local function Button(props: ButtonProps): TextButton
 			}
 			elseif props.IsLast then {
 				Corner {},
-				New 'Frame' {
+				New "Frame" {
 					Size = UDim2.fromScale(0.1, 1),
 					BackgroundColor3 = color,
 					BorderSizePixel = 0,
@@ -119,9 +119,9 @@ local function Button(props: ButtonProps): TextButton
 end
 
 local COMPONENT_ONLY_PROPS = {
-	'Selected',
-	'Options',
-	'Value',
+	"Selected",
+	"Options",
+	"Value",
 }
 
 type Props = {

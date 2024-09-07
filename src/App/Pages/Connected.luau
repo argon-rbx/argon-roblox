@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Widgets = App.Widgets
@@ -32,7 +32,7 @@ type Props = {
 }
 
 return function(props: Props): { Instance }
-	local syncedText = Value('just now')
+	local syncedText = Value("just now")
 	local widget = nil
 
 	local function updateSyncedText()
@@ -43,18 +43,18 @@ return function(props: Props): { Instance }
 				local text
 
 				if elapsed < 1 then
-					text = 'just now'
+					text = "just now"
 				elseif elapsed < 60 then
-					text = math.floor(elapsed) .. 's ago'
+					text = math.floor(elapsed) .. "s ago"
 				elseif elapsed < 3600 then
 					interval = 60
-					text = elapsed // interval .. 'm ago'
+					text = elapsed // interval .. "m ago"
 				elseif elapsed < 86400 then
 					interval = 3600
-					text = elapsed // interval .. 'h ago'
+					text = elapsed // interval .. "h ago"
 				else
 					interval = 86400
-					text = elapsed // interval .. 'd ago'
+					text = elapsed // interval .. "d ago"
 				end
 
 				syncedText:set(text)
@@ -96,15 +96,15 @@ return function(props: Props): { Instance }
 					Position = UDim2.new(1, -2, 0.5, 0),
 					Text = Computed(function(use)
 						local lastSyncKind = use(props.App.lastSyncKind)
-						local action = ''
+						local action = ""
 
-						if lastSyncKind == 'Server' then
-							action = '↓'
-						elseif lastSyncKind == 'Client' then
-							action = '↑'
+						if lastSyncKind == "Server" then
+							action = "↓"
+						elseif lastSyncKind == "Client" then
+							action = "↑"
 						end
 
-						return action .. '<i> Synced\n' .. use(syncedText) .. '</i>'
+						return action .. "<i> Synced\n" .. use(syncedText) .. "</i>"
 					end),
 					RichText = true,
 					Color = Theme.Colors.TextDimmed,
@@ -122,7 +122,7 @@ return function(props: Props): { Instance }
 					HorizontalAlignment = Enum.HorizontalAlignment.Right,
 				},
 				TextButton {
-					Text = 'Disconnect',
+					Text = "Disconnect",
 					LayoutOrder = 2,
 					Solid = true,
 

@@ -10,8 +10,8 @@ local function unpackDecoder(f)
 	end
 end
 
-local ALL_AXES = { 'X', 'Y', 'Z' }
-local ALL_FACES = { 'Right', 'Top', 'Back', 'Left', 'Bottom', 'Front' }
+local ALL_AXES = { "X", "Y", "Z" }
+local ALL_FACES = { "Right", "Top", "Back", "Left", "Bottom", "Front" }
 
 local EncodedValue = {}
 
@@ -27,7 +27,7 @@ types = {
 				if ok then
 					output[key] = result
 				else
-					local warning = ('Could not decode attribute value of type %q: %s'):format(
+					local warning = ("Could not decode attribute value of type %q: %s"):format(
 						typeof(value),
 						tostring(result)
 					)
@@ -46,7 +46,7 @@ types = {
 				if ok then
 					output[key] = result
 				else
-					local warning = ('Could not encode attribute value of type %q: %s'):format(
+					local warning = ("Could not encode attribute value of type %q: %s"):format(
 						typeof(value),
 						tostring(result)
 					)
@@ -187,7 +187,7 @@ types = {
 
 		toPod = function(roblox)
 			-- FIXME: More robust handling of enums
-			if typeof(roblox) == 'number' then
+			if typeof(roblox) == "number" then
 				return roblox
 			else
 				return roblox.Value
@@ -315,7 +315,7 @@ types = {
 
 	PhysicalProperties = {
 		fromPod = function(pod)
-			if pod == 'Default' then
+			if pod == "Default" then
 				return nil
 			else
 				return PhysicalProperties.new(
@@ -330,7 +330,7 @@ types = {
 
 		toPod = function(roblox)
 			if roblox == nil then
-				return 'Default'
+				return "Default"
 			else
 				return {
 					Custom = {
@@ -373,21 +373,21 @@ types = {
 
 	Ref = {
 		fromPod = function(_)
-			error('Ref cannot be decoded on its own')
+			error("Ref cannot be decoded on its own")
 		end,
 
 		toPod = function(_)
-			error('Ref can not be encoded on its own')
+			error("Ref can not be encoded on its own")
 		end,
 	},
 
 	Region3 = {
 		fromPod = function(_)
-			error('Region3 is not implemented')
+			error("Region3 is not implemented")
 		end,
 
 		toPod = function(_)
-			error('Region3 is not implemented')
+			error("Region3 is not implemented")
 		end,
 	},
 
@@ -406,11 +406,11 @@ types = {
 
 	SharedString = {
 		fromPod = function(_pod)
-			error('SharedString is not supported')
+			error("SharedString is not supported")
 		end,
 
 		toPod = function(_roblox)
-			error('SharedString is not supported')
+			error("SharedString is not supported")
 		end,
 	},
 
@@ -520,11 +520,11 @@ function EncodedValue.decode(encodedValue)
 end
 
 function EncodedValue.encode(rbxValue, propertyType)
-	assert(propertyType ~= nil, 'Property type descriptor is required')
+	assert(propertyType ~= nil, "Property type descriptor is required")
 
 	local typeImpl = types[propertyType]
 	if typeImpl == nil then
-		return false, ('Missing encoder for property type %q'):format(propertyType)
+		return false, ("Missing encoder for property type %q"):format(propertyType)
 	end
 
 	return true, {
@@ -533,9 +533,9 @@ function EncodedValue.encode(rbxValue, propertyType)
 end
 
 local propertyTypeRenames = {
-	number = 'Float64',
-	boolean = 'Bool',
-	string = 'String',
+	number = "Float64",
+	boolean = "Bool",
+	string = "String",
 }
 
 function EncodedValue.encodeNaive(rbxValue)

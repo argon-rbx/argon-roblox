@@ -1,3 +1,3 @@
 return function(host: string): string
-	return host:gsub('[^%w%.%-]', '')
+	return host:gsub("[^%w%.%-]", "")
 end

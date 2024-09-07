@@ -1,48 +1,48 @@
-local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Util = require(Argon.Util)
 local Log = require(Argon.Log)
 
-export type Level = 'Place' | 'Game' | 'Global'
+export type Level = "Place" | "Game" | "Global"
 export type Setting =
-	'Host'
-	| 'Port'
-	| 'InitialSyncPriority'
-	| 'OnlyCodeMode'
-	| 'AutoConnect'
-	| 'AutoReconnect'
-	| 'DisplayPrompts'
-	| 'TwoWaySync'
-	| 'TwoWaySyncProperties'
-	| 'OpenInEditor'
-	| 'LogLevel'
-	| 'KeepUnknowns'
-	| 'SkipInitialSync'
-	| 'OverridePackages'
+	"Host"
+	| "Port"
+	| "InitialSyncPriority"
+	| "OnlyCodeMode"
+	| "AutoConnect"
+	| "AutoReconnect"
+	| "DisplayPrompts"
+	| "TwoWaySync"
+	| "TwoWaySyncProperties"
+	| "OpenInEditor"
+	| "LogLevel"
+	| "KeepUnknowns"
+	| "SkipInitialSync"
+	| "OverridePackages"
 
 local DEFAULTS = {
-	Host = 'localhost',
+	Host = "localhost",
 	Port = 8000,
-	InitialSyncPriority = 'Server',
+	InitialSyncPriority = "Server",
 	OnlyCodeMode = true,
 	AutoConnect = true,
 	AutoReconnect = false,
-	DisplayPrompts = 'Always',
+	DisplayPrompts = "Always",
 	TwoWaySync = true,
 	TwoWaySyncProperties = false,
 	OpenInEditor = false,
-	LogLevel = 'Warn',
+	LogLevel = "Warn",
 	KeepUnknowns = false,
 	SkipInitialSync = false,
 	OverridePackages = true,
 }
 
 local CONFIGS = {
-	Place = 'ArgonConfigPlace_' .. game.PlaceId,
-	Game = 'ArgonConfigGame_' .. game.GameId,
-	Global = 'ArgonConfigGlobal',
+	Place = "ArgonConfigPlace_" .. game.PlaceId,
+	Game = "ArgonConfigGame_" .. game.GameId,
+	Global = "ArgonConfigGlobal",
 }
 
 local Config = {
@@ -54,7 +54,7 @@ function Config.load()
 	for level, config in pairs(CONFIGS) do
 		config = plugin:GetSetting(config)
 
-		if config and type(config) == 'table' then
+		if config and type(config) == "table" then
 			Config.__configs[level] = config
 		else
 			Config.__configs[level] = {}

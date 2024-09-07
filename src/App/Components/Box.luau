@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -15,10 +15,10 @@ local Hydrate = Fusion.Hydrate
 local Children = Fusion.Children
 
 local COMPONENT_ONLY_PROPS = {
-	'BackgroundColor',
-	'BorderColor',
-	'BackgroundTransparency',
-	'BorderTransparency',
+	"BackgroundColor",
+	"BorderColor",
+	"BackgroundTransparency",
+	"BorderTransparency",
 }
 
 type Props = {

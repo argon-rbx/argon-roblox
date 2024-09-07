@@ -1,6 +1,6 @@
-local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -15,13 +15,13 @@ local Hydrate = Fusion.Hydrate
 local peek = Fusion.peek
 
 local COMPONENT_ONLY_PROPS = {
-	'Id',
-	'InitialDockTo',
-	'InitialEnabled',
-	'OverrideEnabled',
-	'FloatingSize',
-	'MinimumSize',
-	'Closed',
+	"Id",
+	"InitialDockTo",
+	"InitialEnabled",
+	"OverrideEnabled",
+	"FloatingSize",
+	"MinimumSize",
+	"Closed",
 }
 
 type WidgetProps = {

@@ -1,6 +1,6 @@
-local HttpService = game:GetService('HttpService')
+local HttpService = game:GetService("HttpService")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Promise = require(Argon.Packages.Promise)
 
@@ -33,7 +33,7 @@ local function request(method: string, url: string, body: { [string]: any }?): P
 				Url = url,
 				Method = method,
 				Headers = {
-					['Content-Type'] = 'application/msgpack',
+					["Content-Type"] = "application/msgpack",
 				},
 				Body = body and Msgpack.encode(body) or nil,
 			})
@@ -54,11 +54,11 @@ end
 local Http = {}
 
 function Http.get(url)
-	return request('GET', url)
+	return request("GET", url)
 end
 
 function Http.post(url, body)
-	return request('POST', url, body)
+	return request("POST", url, body)
 end
 
 return Http

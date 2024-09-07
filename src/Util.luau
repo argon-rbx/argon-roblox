@@ -1,4 +1,4 @@
-local HttpService = game:GetService('HttpService')
+local HttpService = game:GetService("HttpService")
 
 local Util = {}
 
@@ -27,7 +27,7 @@ function Util.dictionaryToArray(dictionary: { [string]: any }, lastArray: { stri
 	local array = lastArray or {}
 
 	for _, value in pairs(dictionary) do
-		if type(value) == 'table' then
+		if type(value) == "table" then
 			Util.dictionaryToArray(value, array)
 		else
 			table.insert(array, value)
@@ -50,7 +50,7 @@ end
 
 --- Stringify the value
 function Util.stringify(value: any, __indent: number?): string
-	if type(value) == 'table' then
+	if type(value) == "table" then
 		local meta = getmetatable(value)
 
 		if meta and meta.__tostring then
@@ -58,39 +58,39 @@ function Util.stringify(value: any, __indent: number?): string
 		end
 
 		if not next(value) then
-			return '{}'
+			return "{}"
 		end
 
 		local first = next(value)
 
-		if type(first) == 'number' then
-			local str = '{\n'
+		if type(first) == "number" then
+			local str = "{\n"
 			local indent = __indent and __indent + 1 or 1
 
 			for i, v in ipairs(value) do
-				str ..= str.rep('\t', indent)
+				str ..= str.rep("\t", indent)
 				str ..= `[{i}] = {Util.stringify(v, indent)},\n`
 			end
 
-			return str .. string.rep('\t', indent - 1) .. '}'
+			return str .. string.rep("\t", indent - 1) .. "}"
 		else
-			local str = '{\n'
+			local str = "{\n"
 			local indent = __indent and __indent + 1 or 1
 
 			for k, v in pairs(value) do
-				local key = type(k) == 'string' and `"{k}"` or Util.stringify(k, indent)
-				local val = type(v) == 'string' and `"{v}"` or Util.stringify(v, indent)
+				local key = type(k) == "string" and `"{k}"` or Util.stringify(k, indent)
+				local val = type(v) == "string" and `"{v}"` or Util.stringify(v, indent)
 
-				str ..= str.rep('\t', indent)
+				str ..= str.rep("\t", indent)
 				str ..= `[{key}] = {val},\n`
 			end
 
-			return str .. string.rep('\t', indent - 1) .. '}'
+			return str .. string.rep("\t", indent - 1) .. "}"
 		end
-	elseif typeof(value) == 'Instance' then
+	elseif typeof(value) == "Instance" then
 		return value:GetFullName()
-	elseif type(value) == 'buffer' then
-		return buffer.tostring(value) .. ' (buffer)'
+	elseif type(value) == "buffer" then
+		return buffer.tostring(value) .. " (buffer)"
 	else
 		return tostring(value)
 	end
@@ -107,12 +107,12 @@ function Util.cast(value: any, target: string): any
 		return value
 	end
 
-	if target == 'number' then
+	if target == "number" then
 		return tonumber(value)
-	elseif target == 'string' then
+	elseif target == "string" then
 		return tostring(value)
-	elseif target == 'boolean' then
-		return value == 'true'
+	elseif target == "boolean" then
+		return value == "true"
 	else
 		return value
 	end
@@ -123,14 +123,14 @@ function Util.clean(...)
 	local function clean(object: any)
 		local kind = typeof(object)
 
-		if kind == 'function' then
+		if kind == "function" then
 			object()
-		elseif kind == 'RBXScriptConnection' then
+		elseif kind == "RBXScriptConnection" then
 			object:Disconnect()
-		elseif kind == 'Instance' then
+		elseif kind == "Instance" then
 			object:Destroy()
-		elseif kind == 'table' then
-			if typeof(object.Destroy) == 'function' then
+		elseif kind == "table" then
+			if typeof(object.Destroy) == "function" then
 				object:Destroy()
 			else
 				for _, object in pairs(object) do
@@ -147,7 +147,7 @@ end
 
 function Util.isPackageDescendant(instance: Instance): boolean
 	repeat
-		if instance:FindFirstChildWhichIsA('PackageLink') then
+		if instance:FindFirstChildWhichIsA("PackageLink") then
 			return true
 		end
 

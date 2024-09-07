@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 
@@ -32,7 +32,7 @@ return function(props: Props): { Instance }
 			},
 		},
 		TextButton {
-			Text = 'Cancel',
+			Text = "Cancel",
 			Activated = function()
 				props.App:disconnect(true)
 				props.App:home()

@@ -1,6 +1,6 @@
-local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -12,7 +12,7 @@ local stripProps = require(Util.stripProps)
 local Hydrate = Fusion.Hydrate
 
 local COMPONENT_ONLY_PROPS = {
-	'Name',
+	"Name",
 }
 
 type Props = {

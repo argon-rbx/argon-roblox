@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 
@@ -20,7 +20,7 @@ type Props = {
 return function(props: Props): { Instance }
 	return {
 		Corner {},
-		New 'UIStroke' {
+		New "UIStroke" {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			Color = props.Color or Theme.Colors.Border,
 			Thickness = props.Thickness or Theme.BorderThickness,

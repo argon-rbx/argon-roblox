@@ -6,7 +6,7 @@ local char = string.char
 local function encodeBase64(str)
 	local out = {}
 	local nOut = 0
-	local alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+	local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 	local strLen = #str
 
 	-- 3 octets become 4 hextets
@@ -47,7 +47,7 @@ local function encodeBase64(str)
 		out[nOut + 1] = alphabet:sub(h1, h1)
 		out[nOut + 2] = alphabet:sub(h2, h2)
 		out[nOut + 3] = alphabet:sub(h3, h3)
-		out[nOut + 4] = '='
+		out[nOut + 4] = "="
 	elseif remainder == 1 then
 		-- 8 input bits -> 2 hextets (2 full, 1 partial)
 		local b1 = str:byte(-1, -1)
@@ -61,18 +61,18 @@ local function encodeBase64(str)
 
 		out[nOut + 1] = alphabet:sub(h1, h1)
 		out[nOut + 2] = alphabet:sub(h2, h2)
-		out[nOut + 3] = '='
-		out[nOut + 4] = '='
+		out[nOut + 3] = "="
+		out[nOut + 4] = "="
 	end
 	-- if the remainder is 0, then no work is needed
 
-	return table.concat(out, '')
+	return table.concat(out, "")
 end
 
 local function decodeBase64(str)
 	local out = {}
 	local nOut = 0
-	local alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+	local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 	local strLen = #str
 	local acc = 0
 	local nAcc = 0
@@ -127,10 +127,10 @@ local function decodeBase64(str)
 
 		out[nOut + 1] = char(b1)
 	elseif nAcc == 1 then
-		error('Base64 has invalid length')
+		error("Base64 has invalid length")
 	end
 
-	return table.concat(out, '')
+	return table.concat(out, "")
 end
 
 return {

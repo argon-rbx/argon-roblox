@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -54,7 +54,7 @@ return function(props: Props): { Instance }
 				return UDim2.new(1, 0, 0, height)
 			end),
 
-			[OnChange 'AbsoluteSize'] = function(size)
+			[OnChange "AbsoluteSize"] = function(size)
 				absoluteSize:set(size)
 			end,
 

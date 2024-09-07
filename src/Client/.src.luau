@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Promise = require(Argon.Packages.Promise)
 
@@ -33,9 +33,9 @@ function Client:getUrl(): string
 end
 
 function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
-	Log.trace('Client request: details')
+	Log.trace("Client request: details")
 
-	local url = self:getUrl() .. 'details'
+	local url = self:getUrl() .. "details"
 
 	return Http.get(url):andThen(function(response)
 		return response:decode()
@@ -43,9 +43,9 @@ function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
 end
 
 function Client:subscribe(): Promise.Promise
-	Log.trace('Client request: subscribe')
+	Log.trace("Client request: subscribe")
 
-	local url = self:getUrl() .. 'subscribe'
+	local url = self:getUrl() .. "subscribe"
 
 	return Http.post(url, {
 		clientId = self.clientId,
@@ -64,9 +64,9 @@ function Client:subscribe(): Promise.Promise
 end
 
 function Client:unsubscribe(): Promise.Promise
-	Log.trace('Client request: unsubscribe')
+	Log.trace("Client request: unsubscribe")
 
-	local url = self:getUrl() .. 'unsubscribe'
+	local url = self:getUrl() .. "unsubscribe"
 
 	return Http.post(url, {
 		clientId = self.clientId,
@@ -84,9 +84,9 @@ function Client:unsubscribe(): Promise.Promise
 end
 
 function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
-	Log.trace('Client request: snapshot')
+	Log.trace("Client request: snapshot")
 
-	local url = self:getUrl() .. 'snapshot'
+	local url = self:getUrl() .. "snapshot"
 
 	return Http.get(url):andThen(function(response)
 		return response:decode()
@@ -94,7 +94,7 @@ function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
 end
 
 function Client:read(): Promise.TypedPromise<Types.Message>
-	Log.trace('Client request: read')
+	Log.trace("Client request: read")
 
 	local url = self:getUrl() .. `read?clientId={self.clientId}`
 
@@ -113,7 +113,7 @@ function Client:read(): Promise.TypedPromise<Types.Message>
 end
 
 function Client:write(changes: Types.Changes): Promise.Promise
-	Log.trace('Client request: write')
+	Log.trace("Client request: write")
 
 	local url = self:getUrl() .. `write`
 
@@ -124,12 +124,12 @@ function Client:write(changes: Types.Changes): Promise.Promise
 end
 
 function Client:open(instance: Types.Ref, line: number?): Promise.Promise
-	Log.trace('Client request: open')
+	Log.trace("Client request: open")
 
-	local url = self:getUrl() .. 'open'
+	local url = self:getUrl() .. "open"
 
 	return Http.post(url, {
-		instance = type(instance) == 'string' and buffer.fromstring(instance) or instance,
+		instance = type(instance) == "string" and buffer.fromstring(instance) or instance,
 		line = line or 1,
 	})
 end

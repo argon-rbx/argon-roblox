@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Log = require(Argon.Log)
 
@@ -26,9 +26,9 @@ function Executor:execute(code: string)
 		local success, result = pcall(run(code))
 
 		if success then
-			Log.trace('Executed code successfully')
+			Log.trace("Executed code successfully")
 		else
-			Log.warn('Failed to execute code:', result)
+			Log.warn("Failed to execute code:", result)
 		end
 
 		self.thread = nil

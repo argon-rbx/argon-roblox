@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
@@ -27,7 +27,7 @@ function Processor.new(tree)
 end
 
 function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, skipDiff: boolean): Types.Changes
-	Log.trace('Hydrating initial snapshot..')
+	Log.trace("Hydrating initial snapshot..")
 
 	self:hydrate(snapshot, game)
 
@@ -35,7 +35,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, sk
 		return Changes.new()
 	end
 
-	Log.trace('Diffing initial snapshot..')
+	Log.trace("Diffing initial snapshot..")
 
 	local changes = Changes.new()
 
@@ -43,7 +43,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, sk
 		changes:join(self:diff(child, snapshot.id, not initialSyncServer))
 	end
 
-	if not Config:get('OverridePackages') and initialSyncServer then
+	if not Config:get("OverridePackages") and initialSyncServer then
 		local temp = {}
 
 		for _, snapshot in ipairs(changes.additions) do
@@ -198,7 +198,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 			changes:join(self:diff(childSnapshot, snapshot.id, ignoreMeta))
 		elseif
 			(not snapshot.meta.keepUnknowns or ignoreMeta)
-			and (not Config:get('KeepUnknowns') or ignoreMeta)
+			and (not Config:get("KeepUnknowns") or ignoreMeta)
 			and Dom.isCreatable(child.ClassName)
 		then
 			changes:remove(child)
@@ -209,7 +209,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 end
 
 function Processor:reverseChanges(changes: Types.Changes): Types.Changes
-	Log.trace('Reversing changes..')
+	Log.trace("Reversing changes..")
 
 	local reversed = Changes.new()
 
@@ -222,7 +222,7 @@ function Processor:reverseChanges(changes: Types.Changes): Types.Changes
 		reversed:update(self.read:onChange(instance))
 	end
 
-	if not Config:get('OnlyCodeMode') then
+	if not Config:get("OnlyCodeMode") then
 		for _, instance in ipairs(changes.removals) do
 			reversed:add(self.read:onAdd(instance))
 		end

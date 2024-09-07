@@ -1,7 +1,7 @@
-local MarketPlaceService = game:GetService('MarketplaceService')
+local MarketPlaceService = game:GetService("MarketplaceService")
 
 local name = game.Name
-local isFile = name:find('.rbxl') or name:find('.rbxlx')
+local isFile = name:find(".rbxl") or name:find(".rbxlx")
 
 if not isFile then
 	pcall(function()

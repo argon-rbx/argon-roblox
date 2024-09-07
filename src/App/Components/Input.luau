@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -18,12 +18,12 @@ local Children = Fusion.Children
 local peek = Fusion.peek
 
 local COMPONENT_ONLY_PROPS = {
-	'Changed',
-	'Finished',
-	'Font',
-	'Color',
-	'PlaceholderColor',
-	'Scaled',
+	"Changed",
+	"Finished",
+	"Font",
+	"Color",
+	"PlaceholderColor",
+	"Scaled",
 }
 
 type Props = {
@@ -37,9 +37,9 @@ type Props = {
 }
 
 return function(props: Props): TextBox
-	local text = Value('')
+	local text = Value("")
 
-	return Hydrate(New('TextBox') {
+	return Hydrate(New("TextBox") {
 		FontFace = props.Font or Theme.Fonts.Regular,
 		TextColor3 = props.Color or Theme.Colors.Text,
 		PlaceholderColor3 = props.PlaceholderColor or Theme.Colors.TextDimmed,
@@ -49,23 +49,23 @@ return function(props: Props): TextBox
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
 		TextScaled = props.Scaled,
-		PlaceholderText = '...',
+		PlaceholderText = "...",
 
-		[OnChange 'Text'] = function(text)
+		[OnChange "Text"] = function(text)
 			if props.Changed then
 				props.Changed(text)
 			end
 		end,
 
-		[OnEvent 'FocusLost'] = function()
+		[OnEvent "FocusLost"] = function()
 			if props.Finished then
 				props.Finished(peek(text))
 			end
 		end,
 
-		[Out 'Text'] = text,
+		[Out "Text"] = text,
 
-		[Children] = props.Scaled and New('UITextSizeConstraint') {
+		[Children] = props.Scaled and New("UITextSizeConstraint") {
 			MaxTextSize = props.TextSize or Theme.TextSize.Large,
 		} or nil,
 	})(stripProps(props, COMPONENT_ONLY_PROPS))

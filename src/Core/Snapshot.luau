@@ -1,4 +1,4 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Types = require(Argon.Types)
 
@@ -12,8 +12,8 @@ function Snapshot.new(id: Types.Ref)
 
 	self.id = id
 	self.meta = Meta.new()
-	self.name = ''
-	self.class = ''
+	self.name = ""
+	self.class = ""
 	self.properties = {}
 	self.children = {}
 
@@ -26,8 +26,8 @@ function Snapshot.newAdded(id: Types.Ref)
 	self.id = id
 	self.meta = Meta.new()
 	self.parent = buffer.create(16)
-	self.name = ''
-	self.class = ''
+	self.name = ""
+	self.class = ""
 	self.properties = {}
 	self.children = {}
 

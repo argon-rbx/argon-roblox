@@ -1,6 +1,6 @@
-local ChangeHistoryService = game:GetService('ChangeHistoryService')
+local ChangeHistoryService = game:GetService("ChangeHistoryService")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
@@ -11,15 +11,15 @@ local equals = require(Argon.Helpers.equals)
 
 local Error = require(script.Parent.Parent.Error)
 
-local MESH_RERLOAD_PROPERTIES = { 'MeshId', 'InitialSize' }
+local MESH_RELOAD_PROPERTIES = { "MeshId", "InitialSize" }
 
 local function setWaypoint(action: string?)
-	ChangeHistoryService:SetWaypoint(`Argon {action or 'sync'}: {DateTime.now():FormatLocalTime('LTS', 'en-us')}`)
+	ChangeHistoryService:SetWaypoint(`Argon {action or "sync"}: {DateTime.now():FormatLocalTime("LTS", "en-us")}`)
 end
 
 local function loadMesh(path: string)
 	local success, mesh = pcall(function()
-		return game:GetObjects('rbxasset://argon/' .. path)[1]
+		return game:GetObjects("rbxasset://argon/" .. path)[1]
 	end)
 
 	if not success then
@@ -37,7 +37,7 @@ local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
 		return false
 	end
 
-	for _, property in ipairs(MESH_RERLOAD_PROPERTIES) do
+	for _, property in ipairs(MESH_RELOAD_PROPERTIES) do
 		local value = properties[property]
 
 		if not value then
@@ -53,7 +53,7 @@ local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
 			continue
 		end
 
-		property = property == 'InitialSize' and 'MeshSize' or property
+		property = property == "InitialSize" and "MeshSize" or property
 
 		if not equals(mesh[property], snapshotValue) then
 			return true
@@ -73,7 +73,7 @@ function WriteProcessor.new(tree)
 end
 
 function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
-	Log.trace('Applying changes..')
+	Log.trace("Applying changes..")
 
 	setWaypoint()
 
@@ -91,7 +91,7 @@ function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 end
 
 function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
-	Log.trace('Applying addition of', snapshot)
+	Log.trace("Applying addition of", snapshot)
 
 	local parent = self.tree:getInstance(snapshot.parent)
 
@@ -130,7 +130,7 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 	else
 		local err = Error.new(Error.NotCreatable, snapshot.class)
 
-		if snapshot.class == 'PackageLink' and not Config:get('OverridePackages') then
+		if snapshot.class == "PackageLink" and not Config:get("OverridePackages") then
 			Log.info(err)
 		else
 			Log.warn(err)
@@ -171,11 +171,11 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 		self:applyAddition(child)
 	end
 
-	setWaypoint('add')
+	setWaypoint("add")
 end
 
 function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: boolean?)
-	Log.trace('Applying update of', snapshot)
+	Log.trace("Applying update of", snapshot)
 
 	local instance = self.tree:getInstance(snapshot.id)
 
@@ -208,7 +208,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 			newInstance = Instance.new(snapshot.class)
 			defaultProperties = Dom.getDefaultProperties(snapshot.class)
 		else
-			newInstance = loadMesh(snapshot.meta.meshSource or 'Luau LSP fix')
+			newInstance = loadMesh(snapshot.meta.meshSource or "Luau LSP fix")
 
 			if not newInstance then
 				return
@@ -300,13 +300,13 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		end
 	end
 
-	setWaypoint('update')
+	setWaypoint("update")
 end
 
 function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
-	Log.trace('Applying removal of', object)
+	Log.trace("Applying removal of", object)
 
-	if typeof(object) == 'Instance' then
+	if typeof(object) == "Instance" then
 		self.tree:removeByInstance(object)
 		object.Parent = nil
 	else
@@ -330,7 +330,7 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 		instance.Parent = nil
 	end
 
-	setWaypoint('remove')
+	setWaypoint("remove")
 end
 
 return WriteProcessor

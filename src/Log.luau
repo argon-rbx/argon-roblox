@@ -1,12 +1,12 @@
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 
 local Util = require(Argon.Util)
 
 local function format(...): string
-	local args = ''
+	local args = ""
 
 	for _, arg in ipairs({ ... }) do
-		args ..= ' ' .. Util.stringify(arg)
+		args ..= " " .. Util.stringify(arg)
 	end
 
 	return args
@@ -28,7 +28,7 @@ function Log.__setLevel(level: string)
 	local num = Log.Level[level]
 
 	if not num then
-		Log.error('Invalid log level:', level)
+		Log.error("Invalid log level:", level)
 	end
 
 	Log.__level = num
@@ -36,31 +36,31 @@ end
 
 function Log.trace(...)
 	if Log.__level >= Log.Level.Trace then
-		print('TRACE:' .. format(...))
+		print("TRACE:" .. format(...))
 	end
 end
 
 function Log.debug(...)
 	if Log.__level >= Log.Level.Debug then
-		print('DEBUG:' .. format(...))
+		print("DEBUG:" .. format(...))
 	end
 end
 
 function Log.info(...)
 	if Log.__level >= Log.Level.Info then
-		print('INFO:' .. format(...))
+		print("INFO:" .. format(...))
 	end
 end
 
 function Log.warn(...)
 	if Log.__level >= Log.Level.Warn then
-		warn('WARN:' .. format(...))
+		warn("WARN:" .. format(...))
 	end
 end
 
 function Log.error(...)
 	if Log.__level >= Log.Level.Error then
-		error('ERROR:' .. format(...), 0)
+		error("ERROR:" .. format(...), 0)
 	end
 end
 

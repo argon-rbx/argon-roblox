@@ -264,7 +264,7 @@ local function parse(message: buffer, offset: number): (any, number)
 		return readstring(message, offset + 1, length), offset + 1 + length
 	end
 
-	error('Not all decoder cases are handled, report as bug to msgpack-luau maintainer')
+	error("Not all decoder cases are handled, report as bug to msgpack-luau maintainer")
 end
 
 local function computeLength(data: any, tableSet: { [any]: boolean }): number
@@ -272,9 +272,9 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 
 	if data == nil then
 		return 1
-	elseif dtype == 'boolean' then
+	elseif dtype == "boolean" then
 		return 1
-	elseif dtype == 'string' then
+	elseif dtype == "string" then
 		local length = #data
 
 		if length <= 31 then
@@ -287,8 +287,8 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 			return 5 + length
 		end
 
-		error('Could not encode - too long string')
-	elseif dtype == 'buffer' then
+		error("Could not encode - too long string")
+	elseif dtype == "buffer" then
 		local length = bufferLen(data)
 
 		if length <= 0xFF then
@@ -299,8 +299,8 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 			return 5 + length
 		end
 
-		error('Could not encode - too long binary buffer')
-	elseif dtype == 'number' then
+		error("Could not encode - too long binary buffer")
+	elseif dtype == "number" then
 		-- represents NaN, Inf, -Inf as float 32 to save space
 		if data == 0 then
 			return 1
@@ -341,7 +341,7 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 		end
 
 		error(string.format('Could not encode - unhandled number "%s"', typeof(data)))
-	elseif dtype == 'table' then
+	elseif dtype == "table" then
 		local msgpackType = data._msgpackType
 
 		if msgpackType then
@@ -366,12 +366,12 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 					return 6 + length
 				end
 
-				error('Could not encode - too long extension data')
+				error("Could not encode - too long extension data")
 			end
 		end
 
 		if tableSet[data] then
-			error('Can not serialize cyclic table')
+			error("Can not serialize cyclic table")
 		else
 			tableSet[data] = true
 		end
@@ -393,9 +393,9 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 			headerLen = 5
 		else
 			if length == mapLength then
-				error('Could not encode - too long array')
+				error("Could not encode - too long array")
 			else
-				error('Could not encode - too long map')
+				error("Could not encode - too long map")
 			end
 		end
 
@@ -434,15 +434,15 @@ local function encode(result: buffer, offset: number, data: any): number
 	local dtype = type(data)
 
 	if data == nil then
-		writestring(result, offset, '\xC0')
+		writestring(result, offset, "\xC0")
 		return offset + 1
 	elseif data == false then
-		writestring(result, offset, '\xC2')
+		writestring(result, offset, "\xC2")
 		return offset + 1
 	elseif data == true then
-		writestring(result, offset, '\xC3')
+		writestring(result, offset, "\xC3")
 		return offset + 1
-	elseif dtype == 'string' then
+	elseif dtype == "string" then
 		local length = #data
 
 		if length <= 31 then
@@ -466,8 +466,8 @@ local function encode(result: buffer, offset: number, data: any): number
 			return offset + 5 + length
 		end
 
-		error('Could not encode - too long string')
-	elseif dtype == 'buffer' then
+		error("Could not encode - too long string")
+	elseif dtype == "buffer" then
 		local length = bufferLen(data)
 
 		if length <= 0xFF then
@@ -487,20 +487,20 @@ local function encode(result: buffer, offset: number, data: any): number
 			return offset + 5 + length
 		end
 
-		error('Could not encode - too long binary buffer')
-	elseif dtype == 'number' then
+		error("Could not encode - too long binary buffer")
+	elseif dtype == "number" then
 		-- represents NaN, Inf, -Inf as float 32 to save space
 		if data == 0 then
 			writeu8(result, offset, 0)
 			return offset + 1
 		elseif data ~= data then -- NaN
-			writestring(result, offset, '\xCA\x7F\x80\x00\x01')
+			writestring(result, offset, "\xCA\x7F\x80\x00\x01")
 			return offset + 5
 		elseif data == math.huge then
-			writestring(result, offset, '\xCA\x7F\x80\x00\x00')
+			writestring(result, offset, "\xCA\x7F\x80\x00\x00")
 			return offset + 5
 		elseif data == -math.huge then
-			writestring(result, offset, '\xCA\xFF\x80\x00\x00')
+			writestring(result, offset, "\xCA\xFF\x80\x00\x00")
 			return offset + 5
 		end
 
@@ -568,7 +568,7 @@ local function encode(result: buffer, offset: number, data: any): number
 		writeu8(result, offset, 0xCB)
 		writef64(result, offset + 1, data)
 		return offset + 9
-	elseif dtype == 'table' then
+	elseif dtype == "table" then
 		local msgpackType = data._msgpackType
 
 		if msgpackType then
@@ -603,7 +603,7 @@ local function encode(result: buffer, offset: number, data: any): number
 					return offset + 6 + length
 				end
 
-				error('Could not encode - too long extension data')
+				error("Could not encode - too long extension data")
 			end
 		end
 
@@ -629,7 +629,7 @@ local function encode(result: buffer, offset: number, data: any): number
 				writeu32(result, offset + 1, length)
 				newOffset += 5
 			else
-				error('Could not encode - too long array')
+				error("Could not encode - too long array")
 			end
 
 			for _, v in ipairs(data) do
@@ -652,7 +652,7 @@ local function encode(result: buffer, offset: number, data: any): number
 				writeu32(result, offset + 1, mapLength)
 				newOffset += 5
 			else
-				error('Could not encode - too long map')
+				error("Could not encode - too long map")
 			end
 
 			for k, v in pairs(data) do
@@ -739,8 +739,8 @@ function msgpack.utf8Decode(message: string): string
 end
 
 function msgpack.decode(message: string): any
-	if message == '' then
-		error('Could not decode - input string is too short')
+	if message == "" then
+		error("Could not decode - input string is too short")
 	end
 
 	local messageBuf = buffer.fromstring(message)

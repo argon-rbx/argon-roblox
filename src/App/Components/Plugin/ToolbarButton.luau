@@ -1,6 +1,6 @@
-local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
 local Util = Components.Util
@@ -15,10 +15,10 @@ local Observer = Fusion.Observer
 local peek = Fusion.peek
 
 local COMPONENT_ONLY_PROPS = {
-	'Toolbar',
-	'Name',
-	'ToolTip',
-	'Image',
+	"Toolbar",
+	"Name",
+	"ToolTip",
+	"Image",
 }
 
 type ToolbarButtonProps = {

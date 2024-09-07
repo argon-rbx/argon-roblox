@@ -1,8 +1,8 @@
-local RunService = game:GetService('RunService')
+local RunService = game:GetService("RunService")
 
-local plugin = script:FindFirstAncestorWhichIsA('Plugin')
+local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-local Argon = script:FindFirstAncestor('Argon')
+local Argon = script:FindFirstAncestor("Argon")
 local Packages = Argon.Packages
 local Helpers = Argon.Helpers
 
@@ -69,11 +69,11 @@ function App.new()
 	self.lastUpdate = os.clock()
 	self.onCanceled = Signal.new()
 
-	self.host = Config:get('Host')
-	self.port = Config:get('Port')
+	self.host = Config:get("Host")
+	self.port = Config:get("Port")
 
 	self.lastSync = Value(os.time())
-	self.lastSyncKind = Value('Unknown')
+	self.lastSyncKind = Value("Unknown")
 	self.rootSize = Value(Vector2.new(300, 200))
 	self.icon = Value(Assets.Argon.Logo)
 	self.pages = Value({})
@@ -82,27 +82,27 @@ function App.new()
 
 	local toolbarButton = ToolbarButton {
 		Toolbar = Toolbar {
-			Name = 'Dervex Tools',
+			Name = "Dervex Tools",
 		},
-		Name = 'Argon',
-		ToolTip = 'Open Argon UI',
+		Name = "Argon",
+		ToolTip = "Open Argon UI",
 		Image = self.icon,
 
-		[OnEvent 'Click'] = function()
+		[OnEvent "Click"] = function()
 			isOpen:set(not peek(isOpen))
 		end,
 	}
 
 	Widget {
-		Name = 'Argon',
+		Name = "Argon",
 		InitialDockTo = Enum.InitialDockState.Float,
 		MinimumSize = peek(self.rootSize),
 		Enabled = isOpen,
 
-		[OnChange 'Enabled'] = function(isEnabled)
+		[OnChange "Enabled"] = function(isEnabled)
 			isOpen:set(isEnabled)
 		end,
-		[OnChange 'AbsoluteSize'] = function(size)
+		[OnChange "AbsoluteSize"] = function(size)
 			self.rootSize:set(size)
 		end,
 
@@ -118,7 +118,7 @@ function App.new()
 	if RunService:IsEdit() then
 		self:home()
 
-		if Config:get('AutoConnect') then
+		if Config:get("AutoConnect") then
 			self:connect()
 		end
 	else
@@ -128,12 +128,12 @@ function App.new()
 	return self
 end
 
-function App:setIcon(icon: ('Ok' | 'Warn' | 'Error')?)
-	if icon == 'Ok' then
+function App:setIcon(icon: ("Ok" | "Warn" | "Error")?)
+	if icon == "Ok" then
 		self.icon:set(Assets.Argon.LogoOk)
-	elseif icon == 'Warn' then
+	elseif icon == "Warn" then
 		self.icon:set(Assets.Argon.LogoWarn)
-	elseif icon == 'Error' then
+	elseif icon == "Error" then
 		self.icon:set(Assets.Argon.LogoError)
 	else
 		self.icon:set(Assets.Argon.Logo)
@@ -159,7 +159,7 @@ function App:setPage(page)
 	local size = Value(UDim2.fromScale(1, 1))
 
 	page = Computed(function()
-		return New 'CanvasGroup' {
+		return New "CanvasGroup" {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
 			BackgroundColor3 = Theme.Colors.Background,
@@ -204,7 +204,7 @@ function App:setPage(page)
 		end
 
 		for _, descendant in ipairs(page:GetDescendants()) do
-			if descendant:IsA('GuiButton') then
+			if descendant:IsA("GuiButton") then
 				descendant.Active = false
 			end
 		end
@@ -287,11 +287,11 @@ function App:connect()
 		local signal = Signal.new()
 		local result = false
 
-		self:setIcon('Warn')
+		self:setIcon("Warn")
 
 		-- Prompt user to accept or reject incoming changes
 		if changes then
-			local options = { 'Accept', 'Diff', 'Cancel' }
+			local options = { "Accept", "Diff", "Cancel" }
 			message = describeChanges(changes)
 
 			self:setPage(Prompt {
@@ -303,15 +303,15 @@ function App:connect()
 
 			local choice = signal:Wait()
 
-			while choice == 'Diff' do
-				warn('This feature is not yet implemented')
+			while choice == "Diff" do
+				warn("This feature is not yet implemented")
 				choice = signal:Wait()
 			end
 
-			result = choice == 'Accept'
+			result = choice == "Accept"
 		-- Prompt user whether to continue when server ID differs
 		else
-			local options = { 'Continue', 'Cancel' }
+			local options = { "Continue", "Cancel" }
 
 			self:setPage(Prompt {
 				App = self,
@@ -320,7 +320,7 @@ function App:connect()
 				Signal = signal,
 			})
 
-			result = signal:Wait() == 'Continue'
+			result = signal:Wait() == "Continue"
 		end
 
 		if self.core.status == Core.Status.Connected then
@@ -329,7 +329,7 @@ function App:connect()
 				Project = project,
 			})
 
-			self:setIcon('Ok')
+			self:setIcon("Ok")
 		end
 
 		return result
@@ -340,25 +340,25 @@ function App:connect()
 		project:set(projectDetails)
 
 		self.lastSync:set(os.time())
-		self.lastSyncKind:set(Config:get('InitialSyncPriority'))
+		self.lastSyncKind:set(Config:get("InitialSyncPriority"))
 
 		self:setPage(Connected {
 			App = self,
 			Project = project,
 		})
 
-		self:setIcon('Ok')
+		self:setIcon("Ok")
 	end)
 
 	self.core:onSync(function(kind, data)
 		self.lastSync:set(os.time())
 		self.lastSyncKind:set(
-			(kind == 'SyncChanges' or kind == 'SyncDetails') and 'Server'
-				or kind == 'SyncbackChanges' and 'Client'
-				or 'Unknown'
+			(kind == "SyncChanges" or kind == "SyncDetails") and "Server"
+				or kind == "SyncbackChanges" and "Client"
+				or "Unknown"
 		)
 
-		if kind == 'SyncDetails' then
+		if kind == "SyncDetails" then
 			project:set(data)
 		end
 	end)
@@ -377,11 +377,11 @@ function App:connect()
 			Message = err.message or tostring(err),
 		})
 
-		self:setIcon('Error')
+		self:setIcon("Error")
 
 		self:disconnect()
 
-		if Config:get('AutoReconnect') then
+		if Config:get("AutoReconnect") then
 			task.wait(RECONNECT_INTERVAL)
 
 			if self.lastUpdate + RECONNECT_INTERVAL <= os.clock() then
