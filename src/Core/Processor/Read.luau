@@ -12,7 +12,7 @@ local Snapshot = require(script.Parent.Parent.Snapshot)
 local Error = require(script.Parent.Parent.Error)
 
 local function syncProperties(instance: Instance, property: string?): boolean
-	return instance:IsA("LuaSourceContainer") or Config:get("TwoWaySyncProperties") or property == "Name"
+	return instance:IsA("LuaSourceContainer") or Config:get("SyncbackProperties") or property == "Name"
 end
 
 local function containsScripts(instance: Instance): boolean

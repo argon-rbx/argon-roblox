@@ -15,9 +15,9 @@ export type Setting =
 	| "AutoReconnect"
 	| "DisplayPrompts"
 	| "TwoWaySync"
-	| "TwoWaySyncProperties"
 	| "OpenInEditor"
 	| "LogLevel"
+	| "SyncbackProperties"
 	| "KeepUnknowns"
 	| "SkipInitialSync"
 	| "OverridePackages"
@@ -31,9 +31,9 @@ local DEFAULTS = {
 	AutoReconnect = false,
 	DisplayPrompts = "Always",
 	TwoWaySync = true,
-	TwoWaySyncProperties = false,
 	OpenInEditor = false,
 	LogLevel = "Warn",
+	SyncbackProperties = false,
 	KeepUnknowns = false,
 	SkipInitialSync = false,
 	OverridePackages = true,

@@ -82,12 +82,6 @@ local SETTINGS_DATA: { SettingData } = {
 		Description = "Sync changes made in Roblox Studio back to the server (local file system)",
 	},
 	{
-		Setting = "TwoWaySyncProperties",
-		Name = "Sync Properties",
-		Description = "Whether all properties should be synced back to the server <b>(does not affect scripts)</b>",
-		Requires = "TwoWaySync",
-	},
-	{
 		Setting = "OpenInEditor",
 		Name = "Open In Editor",
 		Description = "Open scripts in your OS default editor instead of the Roblox Studio one",
@@ -97,6 +91,11 @@ local SETTINGS_DATA: { SettingData } = {
 		Name = "Log Level",
 		Description = "The level of logging you want to see in the output",
 		Options = { "Off", "Error", "Warn", "Info", "Debug", "Trace" },
+	},
+	{
+		Setting = "SyncbackProperties",
+		Name = "Syncback Properties",
+		Description = "Whether all properties should be synced back to the server <b>(does not affect scripts)</b>",
 	},
 	{
 		Setting = "KeepUnknowns",
@@ -287,6 +286,7 @@ return function(props: Props): DockWidgetPluginGui
 
 	return Widget {
 		Name = "Argon - Settings",
+		OverrideEnabled = true,
 		MinimumSize = Vector2.new(350, 400),
 		Closed = props.Closed,
 
