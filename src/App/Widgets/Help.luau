@@ -80,6 +80,7 @@ type Props = {
 return function(props: Props): DockWidgetPluginGui
 	return Widget {
 		Name = "Argon - Help",
+		OverrideEnabled = true,
 		MinimumSize = Vector2.new(400, 350),
 		Closed = props.Closed,
 

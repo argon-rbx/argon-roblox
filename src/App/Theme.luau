@@ -16,6 +16,7 @@ local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Co
 		Brand = Color3.fromRGB(120, 110, 220),
 
 		Background = background,
+		ActiveBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Titlebar),
 		Border = border ~= background and border
 			or Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground),
 
@@ -41,6 +42,7 @@ local Theme = {
 		Brand = init(),
 
 		Background = init(),
+		ActiveBackground = init(),
 		Border = init(),
 
 		Text = init(),

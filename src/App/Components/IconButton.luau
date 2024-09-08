@@ -25,6 +25,7 @@ local COMPONENT_ONLY_PROPS = {
 	"Activated",
 	"Solid",
 	"Icon",
+	"BackgroundActive",
 	"Blending",
 }
 
@@ -32,6 +33,7 @@ type Props = {
 	Activated: (() -> ())?,
 	Solid: Fusion.CanBeState<boolean>?,
 	Icon: Fusion.CanBeState<string>?,
+	BackgroundActive: Fusion.Computed<boolean>?,
 	Blending: boolean?,
 	[any]: any,
 }
@@ -47,7 +49,11 @@ return function(props: Props): TextButton
 
 	local color = animate(
 		Computed(function(use)
-			return use(props.Solid) and use(Theme.Colors.Brand) or use(Theme.Colors.Background)
+			return if use(props.Solid)
+				then use(Theme.Colors.Brand)
+				else use(props.BackgroundActive) and use(Theme.Colors.ActiveBackground) or use(
+					Theme.Colors.Background
+				)
 		end),
 		state
 	)

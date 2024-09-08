@@ -65,8 +65,6 @@ function App.new()
 	local self = setmetatable({}, App)
 
 	self.core = nil
-	self.helpWidget = nil
-	self.settingsWidget = nil
 	self.lastUpdate = os.clock()
 	self.onCanceled = Signal.new()
 
@@ -75,9 +73,13 @@ function App.new()
 
 	self.lastSync = Value(os.time())
 	self.lastSyncKind = Value("Unknown")
+
 	self.rootSize = Value(Vector2.new(300, 200))
 	self.icon = Value(Assets.Argon.Logo)
 	self.pages = Value({})
+
+	self.settingsWidget = Value(nil)
+	self.helpWidget = Value(nil)
 
 	local isOpen = Value(false)
 
@@ -257,29 +259,39 @@ function App:home()
 end
 
 function App:settings()
-	if self.settingsWidget then
-		self.settingsWidget:Destroy()
+	local widget = peek(self.settingsWidget)
+
+	if widget then
+		widget:Destroy()
+		widget = nil
+	else
+		widget = Settings {
+			Closed = function()
+				peek(self.settingsWidget):Destroy()
+				self.settingsWidget:set(nil)
+			end,
+		}
 	end
 
-	self.settingsWidget = Settings {
-		Closed = function()
-			self.settingsWidget:Destroy()
-			self.settingsWidget = nil
-		end,
-	}
+	self.settingsWidget:set(widget)
 end
 
 function App:help()
-	if self.helpWidget then
-		self.helpWidget:Destroy()
+	local widget = peek(self.helpWidget)
+
+	if widget then
+		widget:Destroy()
+		widget = nil
+	else
+		widget = Help {
+			Closed = function()
+				peek(self.helpWidget):Destroy()
+				self.helpWidget:set(nil)
+			end,
+		}
 	end
 
-	self.helpWidget = Help {
-		Closed = function()
-			self.helpWidget:Destroy()
-			self.helpWidget = nil
-		end,
-	}
+	self.helpWidget:set(widget)
 end
 
 function App:connect()
@@ -362,7 +374,10 @@ function App:connect()
 		project:set(projectDetails)
 
 		self.lastSync:set(os.time())
-		self.lastSyncKind:set(Config:get("InitialSyncPriority"))
+
+		if not Config:get("SkipInitialSync") then
+			self.lastSyncKind:set(Config:get("InitialSyncPriority"))
+		end
 
 		self:setPage(Connected {
 			App = self,

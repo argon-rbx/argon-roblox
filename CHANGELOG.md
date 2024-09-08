@@ -10,7 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Floating point errors no longer cause some properties to be detected as changed
 - Argon UI quality no longer drops with extreme widget sizes
-- Minor UI performance improvements
+- General UI visual and performance improvements
+- Settings, Help and Project Details widgets now open properly after begin closed with `x` button
+
+### Changed
+
+- `Sync Properties` setting is now `Syncback Properties` and doesn't require `Two-Way Sync`
+- Settings, Help and Project Details buttons now toggle their widgets
 
 ## [2.0.10] - 2024-07-19
 

@@ -21,6 +21,7 @@ local Text = require(Components.Text)
 local Box = require(Components.Box)
 
 local Value = Fusion.Value
+local Computed = Fusion.Computed
 local Children = Fusion.Children
 
 type Props = {
@@ -102,13 +103,19 @@ return function(props: Props): { Instance }
 				},
 				IconButton {
 					Icon = Assets.Icons.Settings,
-					LayoutOrder = 1,
+					BackgroundActive = Computed(function(use)
+						return use(props.App.settingsWidget) ~= nil
+					end),
 					Activated = function()
 						props.App:settings()
 					end,
+					LayoutOrder = 1,
 				},
 				IconButton {
 					Icon = Assets.Icons.Help,
+					BackgroundActive = Computed(function(use)
+						return use(props.App.helpWidget) ~= nil
+					end),
 					Activated = function()
 						props.App:help()
 					end,

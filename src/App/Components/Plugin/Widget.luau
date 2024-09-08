@@ -26,7 +26,6 @@ local COMPONENT_ONLY_PROPS = {
 
 type WidgetProps = {
 	Id: string?,
-	Name: Fusion.CanBeState<string>,
 	InitialDockTo: Enum.InitialDockState?,
 	InitialEnabled: boolean?,
 	OverrideEnabled: boolean?,

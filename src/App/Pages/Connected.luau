@@ -33,7 +33,7 @@ type Props = {
 
 return function(props: Props): { Instance }
 	local syncedText = Value("just now")
-	local widget = nil
+	local projectDetailsWidget = Value(nil)
 
 	local function updateSyncedText()
 		return task.spawn(function()
@@ -133,29 +133,42 @@ return function(props: Props): { Instance }
 				},
 				IconButton {
 					Icon = Assets.Icons.Settings,
-					LayoutOrder = 1,
+					BackgroundActive = Computed(function(use)
+						return use(props.App.settingsWidget) ~= nil
+					end),
 					Activated = function()
 						props.App:settings()
 					end,
+					LayoutOrder = 1,
 				},
 				IconButton {
 					Icon = Assets.Icons.Info,
+					BackgroundActive = Computed(function(use)
+						return use(projectDetailsWidget) ~= nil
+					end),
 					Activated = function()
+						local widget = peek(projectDetailsWidget)
+
 						if widget then
 							widget:Destroy()
+							widget = nil
+						else
+							widget = ProjectDetails {
+								App = props.App,
+								Project = props.Project,
+
+								Closed = function()
+									peek(projectDetailsWidget):Destroy()
+									projectDetailsWidget:set(nil)
+								end,
+							}
 						end
 
-						widget = ProjectDetails {
-							App = props.App,
-							Project = props.Project,
-
-							Closed = function()
-								widget:Destroy()
-								widget = nil
-							end,
-						}
+						projectDetailsWidget:set(widget)
 					end,
 					[Cleanup] = function()
+						local widget = peek(projectDetailsWidget)
+
 						if widget then
 							widget:Destroy()
 							widget = nil

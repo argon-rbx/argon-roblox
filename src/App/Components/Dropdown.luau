@@ -27,8 +27,10 @@ local Value = Fusion.Value
 local Spring = Fusion.Spring
 local Hydrate = Fusion.Hydrate
 local OnEvent = Fusion.OnEvent
+local Cleanup = Fusion.Cleanup
 local Computed = Fusion.Computed
 local Children = Fusion.Children
+local Observer = Fusion.Observer
 local ForValues = Fusion.ForValues
 local peek = Fusion.peek
 
@@ -55,6 +57,7 @@ local function Button(props: ButtonProps): TextButton
 		Hovered = isHovered,
 		Pressed = isPressed,
 	})
+	local lastState = peek(state)
 
 	local color = animate(
 		Computed(function(use)
@@ -62,6 +65,25 @@ local function Button(props: ButtonProps): TextButton
 		end),
 		state
 	)
+
+	-- Hide very minor hover flicker of the first button when the dropdown is expanded
+	local disconnect = Observer(state):onChange(function()
+		if props.IsFirst and not peek(props.IsFirst) then
+			local state = peek(state)
+
+			if state == Enum.GuiState.Idle and lastState == Enum.GuiState.Press then
+				task.defer(function()
+					if peek(props.IsFirst) then
+						color:setPosition(
+							peek(props.IsSelected) and peek(Theme.Colors.Brand) or peek(Theme.Colors.Background)
+						)
+					end
+				end)
+			end
+
+			lastState = state
+		end
+	end)
 
 	return Hydrate(New "TextButton" {
 		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Medium),
@@ -97,6 +119,7 @@ local function Button(props: ButtonProps): TextButton
 			props.Activated()
 		end,
 
+		[Cleanup] = disconnect,
 		[Children] = GlobalUtil.join(
 			{
 				Padding {
