@@ -373,12 +373,10 @@ function Core:__handleOpenInEditor(enabled: boolean)
 			return
 		end
 
-		-- We currently don't support opening document lines anyway
-		-- task.wait()
-		-- local line = document:GetSelectionStart()
+		local line = document:GetSelectionStart()
 
 		self.client
-			:open(id)
+			:open(id, line)
 			:andThen(function()
 				document:CloseAsync()
 			end)

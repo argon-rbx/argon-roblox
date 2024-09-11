@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- External code execution works again
+
 ## [2.0.11] - 2024-09-08
 
 ### Fixed

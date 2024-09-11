@@ -21,7 +21,13 @@ function Executor:execute(code: string)
 
 	self.thread = task.spawn(function()
 		local success, result = pcall(function()
-			loadstring(code)
+			local fn = loadstring(code)
+
+			if fn then
+				fn()
+			else
+				Log.error("Code execution error: 'loadstring' did not return a function!")
+			end
 		end)
 
 		if success then

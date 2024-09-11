@@ -103,7 +103,7 @@ function Client:read(): Promise.TypedPromise<Types.Message>
 			return response:decode()
 		end)
 		:catch(function(err)
-			-- We no longer need this as Rust queue now uses `recv_timeout`
+			-- We don't need to handle this as Rust queue uses `recv_timeout`
 			if err == Error.Timedout then
 				return self:read()
 			else
@@ -123,14 +123,14 @@ function Client:write(changes: Types.Changes): Promise.Promise
 	})
 end
 
-function Client:open(instance: Types.Ref, line: number?): Promise.Promise
+function Client:open(instance: Types.Ref, line: number): Promise.Promise
 	Log.trace("Client request: open")
 
 	local url = self:getUrl() .. "open"
 
 	return Http.post(url, {
 		instance = type(instance) == "string" and buffer.fromstring(instance) or instance,
-		line = line or 1,
+		line = line,
 	})
 end
 

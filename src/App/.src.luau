@@ -302,7 +302,7 @@ function App:connect()
 	self.core = Core.new(self.host, self.port)
 
 	task.spawn(function()
-		task.wait(0.15)
+		task.wait(0.2)
 
 		if not self:isConnected() and loading then
 			self:setPage(Connecting {
