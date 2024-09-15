@@ -53,11 +53,11 @@ end
 
 local Http = {}
 
-function Http.get(url)
+function Http.get(url: string)
 	return request("GET", url)
 end
 
-function Http.post(url, body)
+function Http.post(url: string, body: { [string]: any }?)
 	return request("POST", url, body)
 end
 

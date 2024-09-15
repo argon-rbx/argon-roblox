@@ -48,11 +48,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
-	if parentId then
-		if not __parentId then
-			parentId = buffer.fromstring(parentId)
-		end
-	else
+	if not parentId then
 		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
@@ -102,7 +98,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 		snapshot = Snapshot.newAdded(id):withParent(parentId)
 	end
 
-	self.tree:insertInstance(instance, buffer.tostring(id), snapshot.meta)
+	self.tree:insertInstance(instance, id, snapshot.meta)
 
 	validateProperties(properties)
 
@@ -118,9 +114,7 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 
 	local id = self.tree:getId(instance)
 
-	if id then
-		id = buffer.fromstring(id)
-	else
+	if not id then
 		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
@@ -180,7 +174,7 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 
 	self.tree:removeById(id)
 
-	return buffer.fromstring(id)
+	return id
 end
 
 function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
@@ -188,11 +182,7 @@ function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?)
 
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
-	if parentId then
-		if not __parentId then
-			parentId = buffer.fromstring(parentId)
-		end
-	else
+	if not parentId then
 		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
@@ -253,7 +243,7 @@ function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?)
 		snapshot = Snapshot.newAdded(id):withParent(parentId)
 	end
 
-	self.tree:insertInstance(instance, buffer.tostring(id), snapshot.meta)
+	self.tree:insertInstance(instance, id, snapshot.meta)
 
 	validateProperties(properties)
 

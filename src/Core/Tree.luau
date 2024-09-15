@@ -1,3 +1,5 @@
+--!native
+
 local Argon = script:FindFirstAncestor("Argon")
 
 local Types = require(Argon.Types)
@@ -16,14 +18,17 @@ function Tree.new()
 end
 
 function Tree:insertInstance(instance: Instance, id: Types.Ref, meta: Types.Meta)
-	self.instanceMap[id] = instance
-	self.idMap[instance] = id
+	local strId = buffer.tostring(id)
+
+	self.instanceMap[strId] = instance
+	self.idMap[instance] = strId
 
 	self:insertMeta(id, meta)
 end
 
 function Tree:updateInstance(id: Types.Ref, instance: Instance)
-	local old = self.instanceMap[id]
+	local strId = buffer.tostring(id)
+	local old = self.instanceMap[strId]
 
 	if not old then
 		return
@@ -31,27 +36,30 @@ function Tree:updateInstance(id: Types.Ref, instance: Instance)
 
 	self.idMap[old] = nil
 
-	self.instanceMap[id] = instance
-	self.idMap[instance] = id
+	self.instanceMap[strId] = instance
+	self.idMap[instance] = strId
 end
 
 function Tree:getId(instance: Instance): Types.Ref?
-	return self.idMap[instance]
+	local strId = self.idMap[instance]
+	return strId and buffer.fromstring(strId)
 end
 
 function Tree:getInstance(id: Types.Ref): Instance?
-	return self.instanceMap[id]
+	return self.instanceMap[buffer.tostring(id)]
 end
 
 function Tree:removeByInstance(instance: Instance): Types.Ref?
-	local id = self.idMap[instance]
+	local strId = self.idMap[instance]
 
-	if not id then
+	if not strId then
 		return nil
 	end
 
-	self.instanceMap[id] = nil
+	self.instanceMap[strId] = nil
 	self.idMap[instance] = nil
+
+	local id = buffer.fromstring(strId)
 
 	self:removeMeta(id)
 
@@ -59,13 +67,14 @@ function Tree:removeByInstance(instance: Instance): Types.Ref?
 end
 
 function Tree:removeById(id: Types.Ref): Instance?
-	local instance = self.instanceMap[id]
+	local strId = buffer.tostring(id)
+	local instance = self.instanceMap[strId]
 
 	if not instance then
 		return nil
 	end
 
-	self.instanceMap[id] = nil
+	self.instanceMap[strId] = nil
 	self.idMap[instance] = nil
 
 	self:removeMeta(id)
@@ -74,27 +83,29 @@ function Tree:removeById(id: Types.Ref): Instance?
 end
 
 function Tree:insertMeta(id: Types.Ref, meta: Types.Meta)
-	self.metaMap[id] = meta
+	self.metaMap[buffer.tostring(id)] = meta
 end
 
 function Tree:getMeta(id: Types.Ref): Types.Meta?
-	return self.metaMap[id]
+	return self.metaMap[buffer.tostring(id)]
 end
 
 function Tree:updateMeta(id: Types.Ref, meta: Types.Meta)
-	local old = self.metaMap[id]
+	local strId = buffer.tostring(id)
+	local old = self.metaMap[strId]
 
 	if not old then
 		return
 	end
 
-	self.metaMap[id] = meta
+	self.metaMap[strId] = meta
 end
 
 function Tree:removeMeta(id: Types.Ref): Types.Meta?
-	local meta = self.metaMap[id]
+	local strId = buffer.tostring(id)
+	local meta = self.metaMap[strId]
 
-	self.metaMap[id] = nil
+	self.metaMap[strId] = nil
 
 	return meta
 end

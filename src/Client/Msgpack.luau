@@ -1,3 +1,4 @@
+--!native
 --!strict
 local msgpack = {}
 
@@ -114,17 +115,17 @@ local function parse(message: buffer, offset: number): (any, number)
 		local length = readu8(message, offset + 1)
 		local newBuf = bufferCreate(length)
 		bufferCopy(newBuf, 0, message, offset + 2, length)
-		return bufferToString(newBuf), offset + 2 + length
+		return newBuf, offset + 2 + length
 	elseif byte == 0xC5 then -- bin 16
 		local length = readu16(message, offset + 1)
 		local newBuf = bufferCreate(length)
 		bufferCopy(newBuf, 0, message, offset + 3, length)
-		return bufferToString(newBuf), offset + 3 + length
+		return newBuf, offset + 3 + length
 	elseif byte == 0xC6 then -- bin 32
 		local length = readu32(message, offset + 1)
 		local newBuf = bufferCreate(length)
 		bufferCopy(newBuf, 0, message, offset + 5, length)
-		return bufferToString(newBuf), offset + 5 + length
+		return newBuf, offset + 5 + length
 	elseif byte == 0xC7 then -- ext 8
 		local length = readu8(message, offset + 1)
 		local newBuf = bufferCreate(length)

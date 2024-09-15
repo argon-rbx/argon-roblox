@@ -28,14 +28,14 @@ function Client.new(host: string, port: number)
 	return self
 end
 
-function Client:getUrl(): string
-	return `http://{self.host}:{self.port}/`
+function Client:getUrl(endpoint: string?): string
+	return `http://{self.host}:{self.port}/{endpoint or ""}`
 end
 
 function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
 	Log.trace("Client request: details")
 
-	local url = self:getUrl() .. "details"
+	local url = self:getUrl("details")
 
 	return Http.get(url):andThen(function(response)
 		return response:decode()
@@ -45,7 +45,7 @@ end
 function Client:subscribe(): Promise.Promise
 	Log.trace("Client request: subscribe")
 
-	local url = self:getUrl() .. "subscribe"
+	local url = self:getUrl("subscribe")
 
 	return Http.post(url, {
 		clientId = self.clientId,
@@ -66,7 +66,7 @@ end
 function Client:unsubscribe(): Promise.Promise
 	Log.trace("Client request: unsubscribe")
 
-	local url = self:getUrl() .. "unsubscribe"
+	local url = self:getUrl("unsubscribe")
 
 	return Http.post(url, {
 		clientId = self.clientId,
@@ -83,12 +83,14 @@ function Client:unsubscribe(): Promise.Promise
 		end)
 end
 
-function Client:getSnapshot(): Promise.TypedPromise<Types.Snapshot>
+function Client:getSnapshot(parent: Types.Ref?): Promise.TypedPromise<Types.Snapshot>
 	Log.trace("Client request: snapshot")
 
-	local url = self:getUrl() .. "snapshot"
+	local url = self:getUrl("snapshot")
 
-	return Http.get(url):andThen(function(response)
+	return Http.post(url, {
+		parent = parent or buffer.create(16),
+	}):andThen(function(response)
 		return response:decode()
 	end)
 end
@@ -96,9 +98,11 @@ end
 function Client:read(): Promise.TypedPromise<Types.Message>
 	Log.trace("Client request: read")
 
-	local url = self:getUrl() .. `read?clientId={self.clientId}`
+	local url = self:getUrl("read")
 
-	return Http.get(url)
+	return Http.post(url, {
+		clientId = self.clientId,
+	})
 		:andThen(function(response)
 			return response:decode()
 		end)
@@ -115,7 +119,7 @@ end
 function Client:write(changes: Types.Changes): Promise.Promise
 	Log.trace("Client request: write")
 
-	local url = self:getUrl() .. `write`
+	local url = self:getUrl("write")
 
 	return Http.post(url, {
 		clientId = self.clientId,
@@ -126,10 +130,10 @@ end
 function Client:open(instance: Types.Ref, line: number): Promise.Promise
 	Log.trace("Client request: open")
 
-	local url = self:getUrl() .. "open"
+	local url = self:getUrl("open")
 
 	return Http.post(url, {
-		instance = type(instance) == "string" and buffer.fromstring(instance) or instance,
+		instance = instance,
 		line = line,
 	})
 end
