@@ -83,8 +83,7 @@ function Core:run(): Promise.Promise
 	return Promise.new(function(_, reject)
 		self.status = Core.Status.Connecting
 
-		local skipInitialSync = Config:get("SkipInitialSync")
-		local initialSyncServer = Config:get("InitialSyncPriority") == "Server"
+		local initialSyncPriority = Config:get("InitialSyncPriority")
 
 		Log.trace("Fetching server details..")
 
@@ -103,7 +102,7 @@ function Core:run(): Promise.Promise
 
 		Log.trace("Initializing processor..")
 
-		local changes = self.processor:init(snapshot, initialSyncServer, skipInitialSync)
+		local changes = self.processor:init(snapshot, initialSyncPriority)
 
 		if self.status ~= Core.Status.Connecting then
 			return reject(Error.new(Error.Terminated))
@@ -113,10 +112,10 @@ function Core:run(): Promise.Promise
 			self.rootDirs[i] = self.tree:getInstance(id)
 		end
 
-		if not skipInitialSync then
+		if initialSyncPriority ~= "None" then
 			Log.trace("Processing initial snapshot..")
 
-			if initialSyncServer then
+			if initialSyncPriority == "Server" then
 				self:__verifyChanges(changes, true):expect()
 				self.processor.write:applyChanges(changes, true)
 			elseif changes:total() > 0 then
@@ -269,9 +268,9 @@ function Core:__startSyncLoop()
 			elseif kind == "ExecuteCode" then
 				self.executor:execute(data.code)
 			elseif kind == "Disconnect" then
-				if not Config:get("SkipInitialSync") then
-					reject(Error.new(Error.Disconnected, data.message))
-				end
+				reject(Error.new(Error.Disconnected, data.message))
+				-- if not Config:get("SkipInitialSync") then
+				-- end
 			else
 				local err = Error.new(Error.UnknownEvent, kind, data)
 				Log.warn(err)

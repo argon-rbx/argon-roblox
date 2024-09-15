@@ -13,13 +13,13 @@ export type Setting =
 	| "OnlyCodeMode"
 	| "AutoConnect"
 	| "AutoReconnect"
+	| "AutoHydrate"
 	| "DisplayPrompts"
 	| "TwoWaySync"
 	| "OpenInEditor"
 	| "LogLevel"
 	| "SyncbackProperties"
 	| "KeepUnknowns"
-	| "SkipInitialSync"
 	| "OverridePackages"
 
 local DEFAULTS = {
@@ -29,13 +29,13 @@ local DEFAULTS = {
 	OnlyCodeMode = true,
 	AutoConnect = true,
 	AutoReconnect = false,
+	AutoHydrate = true,
 	DisplayPrompts = "Always",
 	TwoWaySync = true,
 	OpenInEditor = false,
 	LogLevel = "Warn",
 	SyncbackProperties = false,
 	KeepUnknowns = false,
-	SkipInitialSync = false,
 	OverridePackages = true,
 }
 

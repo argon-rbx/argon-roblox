@@ -375,9 +375,7 @@ function App:connect()
 
 		self.lastSync:set(os.time())
 
-		if not Config:get("SkipInitialSync") then
-			self.lastSyncKind:set(Config:get("InitialSyncPriority"))
-		end
+		self.lastSyncKind:set(Config:get("InitialSyncPriority"))
 
 		self:setPage(Connected {
 			App = self,
@@ -392,7 +390,7 @@ function App:connect()
 		self.lastSyncKind:set(
 			(kind == "SyncChanges" or kind == "SyncDetails") and "Server"
 				or kind == "SyncbackChanges" and "Client"
-				or "Unknown"
+				or "None"
 		)
 
 		if kind == "SyncDetails" then

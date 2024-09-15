@@ -26,12 +26,12 @@ function Processor.new(tree)
 	return setmetatable(self, Processor)
 end
 
-function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, skipDiff: boolean): Types.Changes
+function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): Types.Changes
 	Log.trace("Hydrating initial snapshot..")
 
 	self:hydrate(snapshot, game)
 
-	if skipDiff then
+	if initialSyncPriority == "None" then
 		return Changes.new()
 	end
 
@@ -40,10 +40,10 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncServer: boolean, sk
 	local changes = Changes.new()
 
 	for _, child in ipairs(snapshot.children) do
-		changes:join(self:diff(child, snapshot.id, not initialSyncServer))
+		changes:join(self:diff(child, snapshot.id, initialSyncPriority == "Client"))
 	end
 
-	if not Config:get("OverridePackages") and initialSyncServer then
+	if not Config:get("OverridePackages") and initialSyncPriority == "Server" then
 		local temp = {}
 
 		for _, snapshot in ipairs(changes.additions) do

@@ -52,13 +52,12 @@ local SETTINGS_DATA: { SettingData } = {
 		Setting = "InitialSyncPriority",
 		Name = "Initial Sync Priority",
 		Description = "Which side should be considered as up to date when connecting",
-		Options = { "Server", "Client" },
+		Options = { "Server", "Client", "None" },
 	},
 	{
 		Setting = "OnlyCodeMode",
 		Name = "Only Code Mode",
-		Description = "Initially only sync scripts and instances that have descendant scripts",
-		Requires = "InitialSyncPriority=Client",
+		Description = "Syncback only scripts and instances that have descendant scripts",
 	},
 	{
 		Setting = "AutoConnect",
@@ -69,6 +68,11 @@ local SETTINGS_DATA: { SettingData } = {
 		Setting = "AutoReconnect",
 		Name = "Auto Reconnect",
 		Description = "If the connection is lost, automatically reconnect to the server after delay",
+	},
+	{
+		Setting = "AutoHydrate",
+		Name = "Auto Hydrate",
+		Description = "If the target instance doesn't exist in Studio, automatically hydrate it with the server",
 	},
 	{
 		Setting = "DisplayPrompts",
@@ -103,11 +107,6 @@ local SETTINGS_DATA: { SettingData } = {
 		Description = "By default keep instances that are not present in the file system",
 	},
 	{
-		Setting = "SkipInitialSync",
-		Name = "Skip Initial Sync",
-		Description = "Skip the initial sync when connecting to the server <b>(only recommended for large places)</b>",
-	},
-	{
 		Setting = "OverridePackages",
 		Name = "Override Packages",
 		Description = "Whether writing changes to the instances affected by <b>PackageLink</b> should be allowed",
@@ -120,7 +119,6 @@ type SettingData = {
 	Setting: Config.Setting,
 	Name: string,
 	Description: string,
-	Requires: Config.Setting?,
 	Options: { string }?,
 }
 
@@ -128,7 +126,6 @@ type EntryProps = {
 	Data: SettingData,
 	Level: Fusion.Value<Config.Level>,
 	Binding: Fusion.Value<any>,
-	Requires: Fusion.Value<boolean>?,
 }
 
 local function Entry(props: EntryProps): Frame
@@ -217,9 +214,6 @@ local function Entry(props: EntryProps): Frame
 	return Box {
 		ZIndex = props.Data.Options and 2 or 1,
 		Size = UDim2.fromScale(1, 0),
-		Visible = Computed(function(use)
-			return default(use(props.Requires), true)
-		end),
 
 		[Children] = {
 			Padding {},
@@ -319,23 +313,10 @@ return function(props: Props): DockWidgetPluginGui
 
 						bindings[setting] = binding
 
-						local requireBinding
-
-						if data.Requires and data.Requires:find("=") then
-							local name, value = data.Requires:match("(%a+)=(%w+)")
-
-							requireBinding = Computed(function(use)
-								return use(bindings[name]) == value
-							end)
-						else
-							requireBinding = bindings[data.Requires]
-						end
-
 						return Entry {
 							Data = data,
 							Level = level,
 							Binding = binding,
-							Requires = requireBinding,
 						}
 					end, Fusion.cleanup),
 					Container {

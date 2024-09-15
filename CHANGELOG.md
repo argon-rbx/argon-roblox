@@ -6,9 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `AutoHydrate` setting to automatically hydrate with the server when target instance doesn't exist
+
 ### Fixed
 
 - External code execution works again
+
+### Changed
+
+- Moved `SkipInitialSync` setting to a new option `None` in `InitialSyncPriority` setting
 
 ## [2.0.11] - 2024-09-08
 

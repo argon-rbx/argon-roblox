@@ -96,10 +96,15 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 	local parent = self.tree:getInstance(snapshot.parent)
 
 	if not parent then
-		local err = Error.new(Error.NoInstanceAdd, snapshot)
-		Log.warn(err)
+		if Config:get("AutoHydrate") then
+			-- TODO: Hydrate
+			return
+		else
+			local err = Error.new(Error.NoInstanceAdd, snapshot)
+			Log.warn(err)
 
-		return
+			return
+		end
 	end
 
 	local instance
@@ -180,10 +185,15 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	local instance = self.tree:getInstance(snapshot.id)
 
 	if not instance then
-		local err = Error.new(Error.NoInstanceUpdate, snapshot)
-		Log.warn(err)
+		if Config:get("AutoHydrate") then
+			-- TODO: Hydrate
+			return
+		else
+			local err = Error.new(Error.NoInstanceUpdate, snapshot)
+			Log.warn(err)
 
-		return
+			return
+		end
 	end
 
 	local defaultProperties
