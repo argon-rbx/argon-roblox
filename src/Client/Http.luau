@@ -5,7 +5,7 @@ local Argon = script:FindFirstAncestor("Argon")
 local Promise = require(Argon.Packages.Promise)
 
 local Error = require(script.Parent.Error)
-local Msgpack = require(script.Parent.Msgpack)
+local MsgPack = require(script.Parent.MsgPack)
 
 type Response = {
 	Body: string,
@@ -20,7 +20,7 @@ local function methodify(response: { [string]: any }): any
 	return setmetatable(response, {
 		__index = {
 			decode = function(self)
-				return Msgpack.decode(self.Body)
+				return MsgPack.decode(self.Body)
 			end,
 		},
 	})
@@ -35,7 +35,7 @@ local function request(method: string, url: string, body: { [string]: any }?): P
 				Headers = {
 					["Content-Type"] = "application/msgpack",
 				},
-				Body = body and Msgpack.encode(body) or nil,
+				Body = body and MsgPack.encode(body) or nil,
 			})
 		end)
 

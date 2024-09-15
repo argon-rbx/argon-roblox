@@ -66,9 +66,10 @@ end
 local WriteProcessor = {}
 WriteProcessor.__index = WriteProcessor
 
-function WriteProcessor.new(tree)
+function WriteProcessor.new(tree, client)
 	return setmetatable({
 		tree = tree,
+		client = client,
 	}, WriteProcessor)
 end
 
@@ -90,20 +91,36 @@ function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 	end
 end
 
-function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
+function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot, skipExisting: boolean?): Instance?
 	Log.trace("Applying addition of", snapshot)
 
 	local parent = self.tree:getInstance(snapshot.parent)
 
 	if not parent then
 		if Config:get("AutoHydrate") then
-			-- TODO: Hydrate
-			return
-		else
+			local addedSnapshot = self.client:getSnapshot(snapshot.parent):expect()
+
+			if addedSnapshot then
+				parent = self:applyAddition(addedSnapshot, true)
+				skipExisting = true
+
+				Log.info("Live hydrated parent:", parent)
+			end
+		end
+
+		if not parent then
 			local err = Error.new(Error.NoInstanceAdd, snapshot)
 			Log.warn(err)
 
 			return
+		end
+	end
+
+	if skipExisting then
+		local instance = parent:FindFirstChild(snapshot.name)
+
+		if instance and instance:IsA(snapshot.class) then
+			return instance
 		end
 	end
 
@@ -177,18 +194,26 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot)
 	end
 
 	setWaypoint("add")
+
+	return instance
 end
 
-function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: boolean?)
+function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: boolean?): Instance?
 	Log.trace("Applying update of", snapshot)
 
 	local instance = self.tree:getInstance(snapshot.id)
 
 	if not instance then
 		if Config:get("AutoHydrate") then
-			-- TODO: Hydrate
-			return
-		else
+			local addedSnapshot = self.client:getSnapshot(snapshot.id):expect()
+
+			if addedSnapshot then
+				instance = self:applyAddition(addedSnapshot)
+				Log.info("Live hydrated instance:", instance)
+			end
+		end
+
+		if not instance then
 			local err = Error.new(Error.NoInstanceUpdate, snapshot)
 			Log.warn(err)
 
@@ -311,9 +336,11 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	end
 
 	setWaypoint("update")
+
+	return instance
 end
 
-function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
+function WriteProcessor:applyRemoval(object: Types.Ref | Instance): Instance?
 	Log.trace("Applying removal of", object)
 
 	if typeof(object) == "Instance" then
@@ -338,9 +365,13 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance)
 
 		self.tree:removeById(object)
 		instance.Parent = nil
+
+		object = instance
 	end
 
 	setWaypoint("remove")
+
+	return object
 end
 
 return WriteProcessor

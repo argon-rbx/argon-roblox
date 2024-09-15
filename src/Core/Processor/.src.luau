@@ -16,11 +16,11 @@ local WriteProcessor = require(script.Write)
 local Processor = {}
 Processor.__index = Processor
 
-function Processor.new(tree)
+function Processor.new(tree, client)
 	local self = {
 		tree = tree,
 		read = ReadProcessor.new(tree),
-		write = WriteProcessor.new(tree),
+		write = WriteProcessor.new(tree, client),
 	}
 
 	return setmetatable(self, Processor)
@@ -214,7 +214,7 @@ function Processor:reverseChanges(changes: Types.Changes): Types.Changes
 	local reversed = Changes.new()
 
 	for _, snapshot in ipairs(changes.additions) do
-		reversed:remove(buffer.fromstring(snapshot.id))
+		reversed:remove(snapshot.id)
 	end
 
 	for _, snapshot in ipairs(changes.updates) do

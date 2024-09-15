@@ -44,7 +44,7 @@ function Core.new(host: string?, port: string?)
 
 	self.tree = Tree.new()
 	self.client = Client.new(host or Config:get("Host"), port or Config:get("Port"))
-	self.processor = Processor.new(self.tree)
+	self.processor = Processor.new(self.tree, self.client)
 	self.watcher = Watcher.new()
 	self.executor = Executor.new()
 
@@ -329,10 +329,10 @@ function Core:__startSyncbackLoop()
 					changes:update(snapshot)
 				end
 			elseif kind == "Remove" then
-				local snapshot = self.processor.read:onRemove(event.instance)
+				local id = self.processor.read:onRemove(event.instance)
 
-				if snapshot then
-					changes:remove(snapshot)
+				if id then
+					changes:remove(id)
 				end
 			end
 

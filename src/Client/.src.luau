@@ -83,13 +83,13 @@ function Client:unsubscribe(): Promise.Promise
 		end)
 end
 
-function Client:getSnapshot(parent: Types.Ref?): Promise.TypedPromise<Types.Snapshot>
+function Client:getSnapshot(instance: Types.Ref?): Promise.TypedPromise<Types.AddedSnapshot>
 	Log.trace("Client request: snapshot")
 
 	local url = self:getUrl("snapshot")
 
 	return Http.post(url, {
-		parent = parent or buffer.create(16),
+		instance = instance or buffer.create(16),
 	}):andThen(function(response)
 		return response:decode()
 	end)
