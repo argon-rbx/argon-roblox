@@ -31,7 +31,7 @@ type Props = {
 }
 
 return function(props: Props): { Instance }
-	local absoluteSize = Value(Vector2.new())
+	local absoluteSize = Value(Vector2.zero)
 
 	return {
 		List {

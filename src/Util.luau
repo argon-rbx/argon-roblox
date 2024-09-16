@@ -3,7 +3,7 @@ local HttpService = game:GetService("HttpService")
 local Util = {}
 
 --- Get length of non-numerically indexed table
-function Util.len(table: { any }): number
+function Util.len(table: { [any]: any }): number
 	local count = 0
 
 	for _ in pairs(table) do

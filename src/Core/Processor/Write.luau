@@ -97,7 +97,7 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot, skipExistin
 	local parent = self.tree:getInstance(snapshot.parent)
 
 	if not parent then
-		if Config:get("AutoHydrate") then
+		if Config:get("LiveHydrate") then
 			local addedSnapshot = self.client:getSnapshot(snapshot.parent):expect()
 
 			if addedSnapshot then
@@ -204,7 +204,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	local instance = self.tree:getInstance(snapshot.id)
 
 	if not instance then
-		if Config:get("AutoHydrate") then
+		if Config:get("LiveHydrate") then
 			local addedSnapshot = self.client:getSnapshot(snapshot.id):expect()
 
 			if addedSnapshot then

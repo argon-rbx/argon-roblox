@@ -46,6 +46,8 @@ local function Entry(props: EntryProps): Frame
 				Position = UDim2.fromScale(1, 0),
 				Size = UDim2.new(1, -160, 1, 0),
 				AutomaticSize = Enum.AutomaticSize.Y,
+				TextColor3 = Theme.Colors.TextDimmed,
+				TextSize = Theme.TextSize.Medium,
 				TextWrapped = true,
 				Text = props.Value,
 			},
@@ -53,7 +55,7 @@ local function Entry(props: EntryProps): Frame
 	}
 end
 
-type ListEntryProps = {
+type IconListEntryProps = {
 	Name: string,
 	Values: {
 		{
@@ -67,7 +69,7 @@ type ListEntryProps = {
 	},
 }
 
-local function ListEntry(props: ListEntryProps): Frame
+local function IconListEntry(props: IconListEntryProps): Frame
 	return Box {
 		Size = UDim2.fromScale(1, 0),
 		[Children] = {
@@ -99,8 +101,10 @@ local function ListEntry(props: ListEntryProps): Frame
 								Text {
 									Position = UDim2.fromOffset(Theme.TextSize.Large + 4, 0),
 									Size = UDim2.new(1, -(Theme.TextSize.Large + 4), 1, 0),
+									TextColor3 = Theme.Colors.TextDimmed,
+									TextSize = Theme.TextSize.Medium,
+									AutomaticSize = Enum.AutomaticSize.Y,
 									TextWrapped = true,
-									ManualWidth = true,
 									Text = value.Name,
 								},
 							},
@@ -159,7 +163,7 @@ return function(props: Props): DockWidgetPluginGui
 							return #project.placeIds > 0 and table.concat(project.placeIds, ", ") or "Any"
 						end),
 					},
-					ListEntry {
+					IconListEntry {
 						Name = "Root Instances",
 						Values = Computed(function(use)
 							use(props.Project)

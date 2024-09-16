@@ -20,7 +20,6 @@ local Changes = require(script.Changes)
 local Tree = require(script.Tree)
 local Error = require(script.Error)
 
-local CHANGES_THRESHOLD = 5
 local SYNCBACK_RATE = 0.5
 local SYNCBACK_DEBOUNCE = 0.01
 
@@ -231,7 +230,7 @@ function Core:__verifyChanges(changes: Types.Changes, initial: boolean?): Promis
 		return Promise.resolve()
 	end
 
-	if Changes.Total(changes) > CHANGES_THRESHOLD then
+	if Changes.Total(changes) > Config:get("ChangesThreshold") then
 		local err = Error.new(Error.TooManyChanges, #changes.additions, #changes.updates, #changes.removals)
 
 		if not self.__prompt(err.message, changes) then

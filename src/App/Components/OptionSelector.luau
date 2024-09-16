@@ -56,7 +56,6 @@ local function Button(props: ButtonProps): TextButton
 	)
 
 	return Hydrate(New "TextButton" {
-		Text = "Button",
 		Size = UDim2.fromScale(1, 1),
 		FontFace = Theme.Fonts.Regular,
 		AutoButtonColor = false,

@@ -8,8 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- `AutoHydrate` setting to automatically hydrate with the server when target instance doesn't exist
+- `LiveHydrate` setting to automatically hydrate with the server when target instance doesn't exist
 - Improved project details widget and support for displaying latest project root instances
+- New `ChangesThreshold` setting to limit the number of changes that will be applied before prompting the user
 
 ### Fixed
 
@@ -19,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Moved `SkipInitialSync` setting to a new option `None` in `InitialSyncPriority` setting
+- Settings are now categorized and collapsible to help with readability
 
 ## [2.0.11] - 2024-09-08
 

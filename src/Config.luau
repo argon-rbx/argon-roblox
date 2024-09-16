@@ -7,35 +7,37 @@ local Log = require(Argon.Log)
 
 export type Level = "Place" | "Game" | "Global"
 export type Setting =
-	"Host"
+	"InitialSyncPriority"
+	| "Host"
 	| "Port"
-	| "InitialSyncPriority"
-	| "OnlyCodeMode"
 	| "AutoConnect"
 	| "AutoReconnect"
-	| "AutoHydrate"
-	| "DisplayPrompts"
-	| "TwoWaySync"
-	| "OpenInEditor"
-	| "LogLevel"
-	| "SyncbackProperties"
+	| "LiveHydrate"
 	| "KeepUnknowns"
+	| "TwoWaySync"
+	| "SyncbackProperties"
+	| "OnlyCodeMode"
+	| "OpenInEditor"
+	| "DisplayPrompts"
+	| "ChangesThreshold"
+	| "LogLevel"
 	| "OverridePackages"
 
 local DEFAULTS = {
+	InitialSyncPriority = "Server",
 	Host = "localhost",
 	Port = 8000,
-	InitialSyncPriority = "Server",
-	OnlyCodeMode = true,
 	AutoConnect = true,
 	AutoReconnect = false,
-	AutoHydrate = true,
-	DisplayPrompts = "Always",
-	TwoWaySync = true,
-	OpenInEditor = false,
-	LogLevel = "Warn",
-	SyncbackProperties = false,
+	LiveHydrate = true,
 	KeepUnknowns = false,
+	TwoWaySync = true,
+	SyncbackProperties = false,
+	OnlyCodeMode = true,
+	OpenInEditor = false,
+	DisplayPrompts = "Always",
+	ChangesThreshold = 5,
+	LogLevel = "Warn",
 	OverridePackages = true,
 }
 
