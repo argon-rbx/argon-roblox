@@ -9,10 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - `AutoHydrate` setting to automatically hydrate with the server when target instance doesn't exist
+- Improved project details widget and support for displaying latest project root instances
 
 ### Fixed
 
 - External code execution works again
+- Two-way sync now works with the new root instances added after the initial sync
 
 ### Changed
 

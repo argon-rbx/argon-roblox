@@ -60,7 +60,7 @@ export type Project = {
 	version: string,
 	gameId: number?,
 	placeIds: { number },
-	rootDirs: { string },
+	rootRefs: { Ref },
 }
 
 -- Messages

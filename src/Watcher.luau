@@ -12,7 +12,8 @@ Watcher.__index = Watcher
 
 function Watcher.new()
 	local self = {
-		rootDirs = {},
+		isActive = false,
+		rootInstances = {},
 		connections = {},
 		tagConnections = {},
 		valueInstances = {},
@@ -22,12 +23,13 @@ function Watcher.new()
 	return setmetatable(self, Watcher)
 end
 
-function Watcher:start(rootDirs: { Instance })
+function Watcher:start(rootInstances: { Instance })
 	Log.trace("Starting watcher..")
 
-	self.rootDirs = rootDirs
+	self.isActive = true
+	self.rootInstances = rootInstances
 
-	for _, instance in ipairs(rootDirs) do
+	for _, instance in ipairs(rootInstances) do
 		self:__connectEvents(instance)
 
 		for _, descendant in ipairs(instance:GetDescendants()) do
@@ -75,8 +77,22 @@ function Watcher:stop()
 		end
 	end
 
+	self.isActive = false
+	self.rootInstances = {}
 	self.connections = {}
 	self.tagConnections = {}
+	self.valueInstances = {}
+end
+
+function Watcher:restart(instances: { Instance })
+	if not self.isActive then
+		return
+	end
+
+	Log.trace("Restarting watcher..")
+
+	self:stop()
+	self:start(instances)
 end
 
 function Watcher:listen(): Types.WatcherEvent

@@ -1,3 +1,5 @@
+local StudioService = game:GetService("StudioService")
+
 local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
 local Components = App.Components
@@ -10,13 +12,17 @@ local Theme = require(App.Theme)
 
 local Widget = require(Components.Plugin.Widget)
 local ScrollingContainer = require(Components.ScrollingContainer)
+local Container = require(Components.Container)
 local Padding = require(Components.Padding)
+local Image = require(Components.Image)
 local Text = require(Components.Text)
 local List = require(Components.List)
 local Box = require(Components.Box)
 
+local Hydrate = Fusion.Hydrate
 local Children = Fusion.Children
 local Computed = Fusion.Computed
+local ForValues = Fusion.ForValues
 local peek = Fusion.peek
 
 type EntryProps = {
@@ -32,16 +38,75 @@ local function Entry(props: EntryProps): Frame
 			Text {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Position = UDim2.fromScale(0, 0.5),
-				Size = UDim2.new(0, 180, 1, 0),
+				Size = UDim2.new(0, 160, 1, 0),
 				Text = props.Name,
 			},
 			Text {
 				AnchorPoint = Vector2.new(1, 0),
 				Position = UDim2.fromScale(1, 0),
-				Size = UDim2.new(1, -180, 1, 0),
+				Size = UDim2.new(1, -160, 1, 0),
 				AutomaticSize = Enum.AutomaticSize.Y,
 				TextWrapped = true,
 				Text = props.Value,
+			},
+		},
+	}
+end
+
+type ListEntryProps = {
+	Name: string,
+	Values: {
+		{
+			Name: string,
+			Icon: {
+				Image: string,
+				ImageRectOffset: Vector2,
+				ImageRectSize: Vector2,
+			},
+		}
+	},
+}
+
+local function ListEntry(props: ListEntryProps): Frame
+	return Box {
+		Size = UDim2.fromScale(1, 0),
+		[Children] = {
+			Padding {},
+			Text {
+				AnchorPoint = Vector2.new(0, 0.5),
+				Position = UDim2.fromScale(0, 0.5),
+				Size = UDim2.new(0, 160, 1, 0),
+				Text = props.Name,
+			},
+			Container {
+				AnchorPoint = Vector2.new(1, 0),
+				Position = UDim2.fromScale(1, 0),
+				Size = UDim2.new(1, -160, 1, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				[Children] = {
+					List {
+						Spacing = 0,
+					},
+					ForValues(props.Values, function(_, value)
+						return Container {
+							Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Small),
+							[Children] = {
+								Hydrate(Image {
+									AnchorPoint = Vector2.new(0, 0.5),
+									Position = UDim2.fromScale(0, 0.5),
+									Size = UDim2.fromOffset(Theme.TextSize.Large, Theme.TextSize.Large),
+								})(value.Icon),
+								Text {
+									Position = UDim2.fromOffset(Theme.TextSize.Large + 4, 0),
+									Size = UDim2.new(1, -(Theme.TextSize.Large + 4), 1, 0),
+									TextWrapped = true,
+									ManualWidth = true,
+									Text = value.Name,
+								},
+							},
+						}
+					end, Fusion.cleanup),
+				},
 			},
 		},
 	}
@@ -94,16 +159,21 @@ return function(props: Props): DockWidgetPluginGui
 							return #project.placeIds > 0 and table.concat(project.placeIds, ", ") or "Any"
 						end),
 					},
-					Entry {
-						Name = "Synced Dirs",
-						Value = Computed(function(use)
-							local rootDirs = {}
+					ListEntry {
+						Name = "Root Instances",
+						Values = Computed(function(use)
+							use(props.Project)
 
-							for i, id in ipairs(use(props.Project).rootDirs) do
-								rootDirs[i] = props.App.core.tree:getInstance(id).Name
+							local values = {}
+
+							for i, instance in ipairs(props.App.core.rootInstances) do
+								values[i] = {
+									Name = instance.Name,
+									Icon = StudioService:GetClassIcon(instance.ClassName),
+								}
 							end
 
-							return table.concat(rootDirs, ", ")
+							return values
 						end),
 					},
 					Entry {

@@ -13,6 +13,7 @@ local Watcher = require(Argon.Watcher)
 local Executor = require(Argon.Executor)
 local SemVer = require(Argon.SemVer)
 local manifest = require(Argon.manifest)
+local equals = require(Argon.Helpers.equals)
 
 local Processor = require(script.Processor)
 local Changes = require(script.Changes)
@@ -37,7 +38,7 @@ function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
 
 	self.project = nil
-	self.rootDirs = {}
+	self.rootInstances = {}
 	self.connections = {}
 	self.status = 0
 	self.lastSync = os.clock()
@@ -69,7 +70,7 @@ function Core.new(host: string?, port: string?)
 		self.connections,
 		Config:onChanged("TwoWaySync", function(enabled)
 			if enabled then
-				self.watcher:start(self.rootDirs)
+				self.watcher:start(self.rootInstances)
 			else
 				self.watcher:stop()
 			end
@@ -108,8 +109,8 @@ function Core:run(): Promise.Promise
 			return reject(Error.new(Error.Terminated))
 		end
 
-		for i, id in ipairs(project.rootDirs) do
-			self.rootDirs[i] = self.tree:getInstance(id)
+		for i, id in ipairs(project.rootRefs) do
+			self.rootInstances[i] = self.tree:getInstance(id)
 		end
 
 		if initialSyncPriority ~= "None" then
@@ -125,7 +126,7 @@ function Core:run(): Promise.Promise
 		end
 
 		if Config:get("TwoWaySync") then
-			self.watcher:start(self.rootDirs)
+			self.watcher:start(self.rootInstances)
 		end
 
 		self.status = Core.Status.Connected
@@ -263,14 +264,25 @@ function Core:__startSyncLoop()
 
 				self.__sync(kind, data)
 			elseif kind == "SyncDetails" then
-				self.__sync(kind, data)
 				self:__verifyProject(data):expect()
+
+				if not equals(self.project.rootRefs, data.rootRefs) then
+					self.rootInstances = {}
+
+					for i, id in ipairs(data.rootRefs) do
+						self.rootInstances[i] = self.tree:getInstance(id)
+					end
+
+					self.watcher:restart(self.rootInstances)
+				end
+
+				self.project = data
+
+				self.__sync(kind, data)
 			elseif kind == "ExecuteCode" then
 				self.executor:execute(data.code)
 			elseif kind == "Disconnect" then
 				reject(Error.new(Error.Disconnected, data.message))
-				-- if not Config:get("SkipInitialSync") then
-				-- end
 			else
 				local err = Error.new(Error.UnknownEvent, kind, data)
 				Log.warn(err)

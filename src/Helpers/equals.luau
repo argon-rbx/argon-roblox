@@ -62,6 +62,8 @@ local function equals(a: any, b: any): boolean
 		end
 
 		return true
+	elseif tA == "buffer" and tB == "buffer" then
+		return buffer.tostring(a) == buffer.tostring(b)
 	end
 
 	return false
