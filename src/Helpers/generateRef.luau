@@ -1,3 +1,4 @@
+--!strict
 local Argon = script:FindFirstAncestor("Argon")
 
 local Types = require(Argon.Types)

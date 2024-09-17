@@ -1,3 +1,4 @@
+--!strict
 local Config = require(script.Config)
 local Log = require(script.Log)
 local App = require(script.App)

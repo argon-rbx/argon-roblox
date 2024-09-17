@@ -23,6 +23,17 @@ export type Setting =
 	| "LogLevel"
 	| "OverridePackages"
 
+type Config = {
+	__configs: { [Level]: { [Setting]: any } },
+	__callbacks: { [Setting]: { (value: any) -> () } },
+	load: () -> (),
+	get: (self: Config, setting: Setting, level: Level?) -> any,
+	getDefault: (self: Config, setting: Setting) -> any,
+	set: (self: Config, setting: Setting, value: any, level: Level) -> (),
+	restoreDefaults: (self: Config, level: Level) -> (),
+	onChanged: (self: Config, setting: Setting, callback: (value: any) -> ()) -> () -> (),
+}
+
 local DEFAULTS = {
 	InitialSyncPriority = "Server",
 	Host = "localhost",
@@ -47,10 +58,10 @@ local CONFIGS = {
 	Global = "ArgonConfigGlobal",
 }
 
-local Config = {
+local Config: Config = {
 	__configs = {},
 	__callbacks = {},
-}
+} :: Config
 
 function Config.load()
 	for level, config in pairs(CONFIGS) do
@@ -64,7 +75,7 @@ function Config.load()
 	end
 end
 
-function Config:get(setting: Setting, level: Level?): any
+function Config:get(setting, level)
 	local default = DEFAULTS[setting]
 
 	if default == nil then
@@ -84,17 +95,17 @@ function Config:get(setting: Setting, level: Level?): any
 	return default
 end
 
-function Config:getDefault(settings: Setting): any
-	local default = DEFAULTS[settings]
+function Config:getDefault(setting)
+	local default = DEFAULTS[setting]
 
 	if default == nil then
-		Log.error(`Setting '{settings}' does not exist!`)
+		Log.error(`Setting '{setting}' does not exist!`)
 	end
 
 	return default
 end
 
-function Config:set(setting: Setting, value: any, level: Level)
+function Config:set(setting, value, level)
 	local default = DEFAULTS[setting]
 
 	if default == nil then
@@ -120,7 +131,7 @@ function Config:set(setting: Setting, value: any, level: Level)
 	end
 end
 
-function Config:restoreDefaults(level: Level)
+function Config:restoreDefaults(level)
 	for setting, _ in pairs(self.__configs[level]) do
 		if self.__callbacks[setting] then
 			for _, callback in pairs(self.__callbacks[setting]) do
@@ -134,7 +145,7 @@ function Config:restoreDefaults(level: Level)
 	plugin:SetSetting(CONFIGS[level], nil)
 end
 
-function Config:onChanged(setting: Setting, callback: (value: any) -> ()): () -> ()
+function Config:onChanged(setting, callback)
 	if not self.__callbacks[setting] then
 		self.__callbacks[setting] = {}
 	end

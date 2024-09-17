@@ -1,3 +1,4 @@
+--!strict
 local CollectionService = game:GetService("CollectionService")
 
 local Argon = script:FindFirstAncestor("Argon")
@@ -7,23 +8,48 @@ local Signal = require(Argon.Packages.Signal)
 local Types = require(Argon.Types)
 local Log = require(Argon.Log)
 
-local Watcher = {}
+type Watcher = typeof(setmetatable(
+	{} :: {
+		isActive: boolean,
+		rootInstances: { Instance },
+		connections: { [Instance]: { RBXScriptConnection } },
+		tagConnections: { [string | CollectionService]: { RBXScriptConnection } },
+		valueInstances: { [Instance]: boolean },
+		signal: Signal.Signal,
+	},
+	{} :: WatcherImpl
+))
+
+type WatcherImpl = {
+	__index: WatcherImpl,
+	new: () -> Watcher,
+	start: (self: Watcher, rootInstances: { Instance }) -> (),
+	stop: (self: Watcher) -> (),
+	listen: (self: Watcher) -> Types.WatcherEvent,
+	restart: (self: Watcher, instances: { Instance }) -> (),
+	__connectEvents: (self: Watcher, instance: Instance) -> (),
+	__watchTag: (self: Watcher, tag: string) -> (),
+	__unwatchTag: (self: Watcher, tag: string) -> (),
+	__onAdded: (self: Watcher, instance: Instance) -> (),
+	__onChanged: (self: Watcher, instance: Instance, property: string) -> (),
+	__onRemoved: (self: Watcher, instance: Instance) -> (),
+}
+
+local Watcher: WatcherImpl = {} :: WatcherImpl
 Watcher.__index = Watcher
 
 function Watcher.new()
-	local self = {
+	return setmetatable({
 		isActive = false,
 		rootInstances = {},
 		connections = {},
 		tagConnections = {},
 		valueInstances = {},
 		signal = Signal.new(),
-	}
-
-	return setmetatable(self, Watcher)
+	}, Watcher)
 end
 
-function Watcher:start(rootInstances: { Instance })
+function Watcher:start(rootInstances)
 	Log.trace("Starting watcher..")
 
 	self.isActive = true
@@ -84,7 +110,7 @@ function Watcher:stop()
 	self.valueInstances = {}
 end
 
-function Watcher:restart(instances: { Instance })
+function Watcher:restart(instances)
 	if not self.isActive then
 		return
 	end
@@ -95,11 +121,11 @@ function Watcher:restart(instances: { Instance })
 	self:start(instances)
 end
 
-function Watcher:listen(): Types.WatcherEvent
+function Watcher:listen()
 	return self.signal:Wait()
 end
 
-function Watcher:__connectEvents(instance: Instance)
+function Watcher:__connectEvents(instance)
 	if instance == workspace.CurrentCamera then
 		return
 	end
@@ -154,7 +180,7 @@ function Watcher:__connectEvents(instance: Instance)
 	self.connections[instance] = connections
 end
 
-function Watcher:__watchTag(tag: string)
+function Watcher:__watchTag(tag)
 	if self.tagConnections[tag] then
 		return
 	end
@@ -182,7 +208,7 @@ function Watcher:__watchTag(tag: string)
 	self.tagConnections[tag] = tagConnections
 end
 
-function Watcher:__unwatchTag(tag: string)
+function Watcher:__unwatchTag(tag)
 	local tagConnections = self.tagConnections[tag]
 
 	if tagConnections then
@@ -194,7 +220,7 @@ function Watcher:__unwatchTag(tag: string)
 	end
 end
 
-function Watcher:__onAdded(instance: Instance)
+function Watcher:__onAdded(instance)
 	self:__connectEvents(instance)
 
 	self.signal:Fire({
@@ -203,7 +229,7 @@ function Watcher:__onAdded(instance: Instance)
 	})
 end
 
-function Watcher:__onChanged(instance: Instance, property: string)
+function Watcher:__onChanged(instance, property)
 	self.signal:Fire({
 		kind = "Change",
 		instance = instance,
@@ -211,7 +237,7 @@ function Watcher:__onChanged(instance: Instance, property: string)
 	})
 end
 
-function Watcher:__onRemoved(instance: Instance)
+function Watcher:__onRemoved(instance)
 	local connections = self.connections[instance]
 
 	if connections then

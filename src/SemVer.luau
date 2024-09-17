@@ -1,13 +1,28 @@
-type SemVer = {
-	major: number,
-	minor: number,
-	patch: number,
+--!strict
+type SemVer = typeof(setmetatable(
+	{} :: {
+		major: number,
+		minor: number,
+		patch: number,
+	},
+	{} :: SemVerImpl
+))
+
+type SemVerImpl = {
+	__index: SemVerImpl,
+	new: (major: number, minor: number, patch: number) -> SemVer,
+	parse: (version: string) -> SemVer,
+	toString: (self: SemVer) -> string,
+	isCompatible: (self: SemVer, other: SemVer) -> boolean,
+	__eq: (self: SemVer, other: SemVer) -> boolean,
+	__lt: (self: SemVer, other: SemVer) -> boolean,
+	__le: (self: SemVer, other: SemVer) -> boolean,
 }
 
-local SemVer = {}
+local SemVer: SemVerImpl = {} :: SemVerImpl
 SemVer.__index = SemVer
 
-function SemVer.new(major: number, minor: number, patch: number)
+function SemVer.new(major, minor, patch)
 	return setmetatable({
 		major = major,
 		minor = minor,
@@ -15,7 +30,7 @@ function SemVer.new(major: number, minor: number, patch: number)
 	}, SemVer)
 end
 
-function SemVer.parse(version: string)
+function SemVer.parse(version)
 	local major, minor, patch = version:match("(%d+)%.(%d+)%.(%d+)")
 
 	return SemVer.new(tonumber(major) or 0, tonumber(minor) or 0, tonumber(patch) or 0)
@@ -25,15 +40,15 @@ function SemVer:toString()
 	return ("%d.%d.%d"):format(self.major, self.minor, self.patch)
 end
 
-function SemVer:isCompatible(other: SemVer)
+function SemVer:isCompatible(other)
 	return self.major == other.major and self.minor == other.minor
 end
 
-function SemVer:__eq(other: SemVer)
+function SemVer:__eq(other)
 	return self.major == other.major and self.minor == other.minor and self.patch == other.patch
 end
 
-function SemVer:__lt(other: SemVer)
+function SemVer:__lt(other)
 	if self.major < other.major then
 		return true
 	elseif self.major > other.major then
@@ -49,7 +64,7 @@ function SemVer:__lt(other: SemVer)
 	return self.patch < other.patch
 end
 
-function SemVer:__le(other: SemVer)
+function SemVer:__le(other)
 	return self == other or self < other
 end
 

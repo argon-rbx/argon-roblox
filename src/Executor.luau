@@ -1,19 +1,31 @@
+--!strict
 local Argon = script:FindFirstAncestor("Argon")
 
 local Log = require(Argon.Log)
 
-local Executor = {}
+type ExecutorImpl = {
+	__index: ExecutorImpl,
+	new: () -> Executor,
+	execute: (self: Executor, code: string) -> (),
+}
+
+type Executor = typeof(setmetatable(
+	{} :: {
+		thread: thread?,
+	},
+	{} :: ExecutorImpl
+))
+
+local Executor: ExecutorImpl = {} :: ExecutorImpl
 Executor.__index = Executor
 
 function Executor.new()
-	local self = setmetatable({}, Executor)
-
-	self.thread = nil
-
-	return self
+	return setmetatable({
+		thread = nil,
+	}, Executor)
 end
 
-function Executor:execute(code: string)
+function Executor:execute(code)
 	if self.thread then
 		task.cancel(self.thread)
 		self.thread = nil

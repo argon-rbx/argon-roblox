@@ -1,3 +1,4 @@
+--!strict
 local HttpService = game:GetService("HttpService")
 
 local Util = {}
@@ -14,7 +15,7 @@ function Util.len(table: { [any]: any }): number
 end
 
 --- Join second table to the first one
-function Util.join(table1: { any }, table2: { any }): { any }
+function Util.join<T>(table1: { T }, table2: { T }): { T }
 	for _, value in pairs(table2) do
 		table.insert(table1, value)
 	end
@@ -23,8 +24,8 @@ function Util.join(table1: { any }, table2: { any }): { any }
 end
 
 --- Convert dictionary to array, ignoring keys
-function Util.dictionaryToArray(dictionary: { [string]: any }, lastArray: { string }?): { string }
-	local array = lastArray or {}
+function Util.dictionaryToArray(dictionary: { [any]: any }, __lastArray: { any }?): { any }
+	local array = __lastArray or {}
 
 	for _, value in pairs(dictionary) do
 		if type(value) == "table" then
@@ -38,7 +39,7 @@ function Util.dictionaryToArray(dictionary: { [string]: any }, lastArray: { stri
 end
 
 --- Find the value and key of the first element that passes the filter
-function Util.filter(table: { any }, filter: (value: any, key: any) -> boolean): (any?, any?)
+function Util.filter<K, V>(table: { [K]: V }, filter: (value: V, key: K) -> boolean): (V?, K?)
 	for key, value in pairs(table) do
 		if filter(value, key) then
 			return value, key
@@ -132,7 +133,7 @@ function Util.cast(value: any, target: string): any
 end
 
 --- Clean all provided connections and instances
-function Util.clean(...)
+function Util.clean(...: () -> () | RBXScriptConnection | Instance | { [any]: any })
 	local function clean(object: any)
 		local kind = typeof(object)
 

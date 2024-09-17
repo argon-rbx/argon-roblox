@@ -192,7 +192,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 
 		if childId then
 			local childSnapshot = Util.filter(snapshot.children, function(child)
-				return child.id == childId
+				return equals(child.id, childId)
 			end)
 
 			changes:join(self:diff(childSnapshot, snapshot.id, ignoreMeta))
