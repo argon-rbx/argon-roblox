@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.13] - 2024-09-19
+
 ### Fixed
 
 - GitHub release is no longer corrupted ("MsgPack is not a valid member of ModuleScript" error)
@@ -203,7 +205,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.12...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.13...HEAD
+[2.0.13]: https://github.com/argon-rbx/argon-roblox/compare/2.0.12...2.0.13
 [2.0.12]: https://github.com/argon-rbx/argon-roblox/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/argon-rbx/argon-roblox/compare/2.0.10...2.0.11
 [2.0.10]: https://github.com/argon-rbx/argon-roblox/compare/2.0.9...2.0.10
