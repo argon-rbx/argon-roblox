@@ -25,7 +25,7 @@ local function containsScripts(instance: Instance): boolean
 	return false
 end
 
--- Temporary solution for serde failing to deserialize empty HashMap
+-- Temporary solution for empty Luau maps being serialized as arrays
 local function validateProperties(properties: Types.Properties)
 	if not next(properties) then
 		properties.ArgonEmpty = {
