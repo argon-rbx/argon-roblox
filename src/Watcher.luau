@@ -89,8 +89,6 @@ end
 function Watcher:stop()
 	Log.trace("Stopping watcher..")
 
-	self.signal:UnbindAll()
-
 	for _, connections in pairs(self.connections) do
 		for _, connection in ipairs(connections) do
 			connection:Disconnect()

@@ -98,7 +98,6 @@ function App.new()
 
 	Widget {
 		Name = "Argon",
-		InitialDockTo = Enum.InitialDockState.Float,
 		MinimumSize = peek(self.rootSize),
 		Enabled = isOpen,
 
@@ -338,7 +337,8 @@ function App:connect()
 			local choice = signal:Wait()
 
 			while choice == "Diff" do
-				warn("This feature is not yet implemented")
+				warn("This feature is not yet implemented!")
+				print("You can see raw changes here:", changes)
 				choice = signal:Wait()
 			end
 

@@ -11,27 +11,8 @@ local generateRef = require(Argon.Helpers.generateRef)
 local Snapshot = require(script.Parent.Parent.Snapshot)
 local Error = require(script.Parent.Parent.Error)
 
-local function syncProperties(instance: Instance, property: string?): boolean
-	return instance:IsA("LuaSourceContainer") or Config:get("SyncbackProperties") or property == "Name"
-end
-
-local function containsScripts(instance: Instance): boolean
-	for _, descendant in ipairs(instance:GetDescendants()) do
-		if descendant:IsA("LuaSourceContainer") then
-			return true
-		end
-	end
-
-	return false
-end
-
--- Temporary solution for empty Luau maps being serialized as arrays
-local function validateProperties(properties: Types.Properties)
-	if not next(properties) then
-		properties.ArgonEmpty = {
-			Bool = true,
-		}
-	end
+local function isScriptRelated(instance: Instance): boolean
+	return instance:IsA("LuaSourceContainer") or instance:FindFirstChildWhichIsA("LuaSourceContainer", true) ~= nil
 end
 
 local ReadProcessor = {}
@@ -46,9 +27,16 @@ end
 function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
 	Log.trace("Detected addition of", instance)
 
+	local isScriptRelated = isScriptRelated(instance)
+
+	if not isScriptRelated then
+		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
+		return nil
+	end
+
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
-	if not parentId then
+	if not parentId and not (Config:get("OnlyCodeMode") and isScriptRelated) then
 		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
@@ -57,7 +45,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 	local properties = {}
 	local children = {}
 
-	if syncProperties(instance) then
+	if ReadProcessor.shouldSyncProperties(instance) then
 		for property, default in Dom.getDefaultProperties(instance.ClassName) do
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
@@ -87,26 +75,60 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 	end
 
 	for _, child in ipairs(instance:GetChildren()) do
-		table.insert(children, self:onAdd(child, id))
+		local snapshot = self:onAdd(child, id)
+
+		if snapshot then
+			table.insert(children, snapshot)
+		end
 	end
 
-	local snapshot
-
-	if __parentId then
-		snapshot = Snapshot.new(id)
-	else
-		snapshot = Snapshot.newAdded(id):withParent(parentId)
-	end
-
-	self.tree:insertInstance(instance, id, snapshot.meta)
-
-	validateProperties(properties)
-
-	return snapshot
+	local snapshot = Snapshot.new(id)
 		:withName(instance.Name)
 		:withClass(instance.ClassName)
 		:withProperties(properties)
 		:withChildren(children)
+
+	self.tree:insertInstance(instance, id, snapshot.meta)
+
+	if __parentId then
+		return snapshot
+	end
+
+	if parentId then
+		snapshot.parent = parentId
+	else
+		local currentInstance = instance
+		local currentSnapshot = nil
+		local rootId = nil
+
+		repeat
+			parentId = generateRef()
+			currentInstance = currentInstance.Parent
+			rootId = self.tree:getId(currentInstance)
+
+			if rootId then
+				break
+			end
+
+			-- In theory this should never happen
+			if currentInstance == game then
+				Log.warn("Failed to find root instance for", instance)
+				return nil
+			end
+
+			currentSnapshot = Snapshot.new(parentId)
+				:withName(currentInstance.Name)
+				:withClass(currentInstance.ClassName)
+				:withChildren({ snapshot })
+
+			self.tree:insertInstance(currentInstance, parentId, currentSnapshot.meta)
+		until rootId
+
+		currentSnapshot.parent = rootId
+		snapshot = currentSnapshot
+	end
+
+	return snapshot
 end
 
 function ReadProcessor:onChange(instance: Instance, property: string?): Types.UpdatedSnapshot?
@@ -119,7 +141,14 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 		return nil
 	end
 
-	if not syncProperties(instance, property) and property then
+	local isScriptRelated = isScriptRelated(instance)
+
+	if not isScriptRelated then
+		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
+		return nil
+	end
+
+	if property and not ReadProcessor.shouldSyncProperties(instance, property) then
 		Log.trace("Instance does not pass sync filter. Skipping..")
 		return nil
 	end
@@ -157,8 +186,6 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 		end
 	end
 
-	validateProperties(properties)
-
 	return Snapshot.newUpdated(id):withProperties(properties)
 end
 
@@ -177,81 +204,8 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 	return id
 end
 
-function ReadProcessor:onAddOnlyCode(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
-	Log.trace("Detected addition of", instance, "(only code)")
-
-	local parentId = __parentId or self.tree:getId(instance.Parent)
-
-	if not parentId then
-		Log.trace("Unknown instance. Skipping..")
-		return nil
-	end
-
-	local isScript = instance:IsA("LuaSourceContainer")
-
-	if not isScript and not containsScripts(instance) then
-		Log.trace("Instance does not contain any scripts. Skipping..")
-		return nil
-	end
-
-	local id = generateRef()
-	local properties = {}
-	local children = {}
-
-	if isScript then
-		for property, default in Dom.getDefaultProperties(instance.ClassName) do
-			local readSuccess, instanceValue = Dom.readProperty(instance, property)
-
-			if not readSuccess then
-				local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
-				Log.warn(err)
-
-				continue
-			end
-
-			local _, defaultValue = Dom.EncodedValue.decode(default)
-
-			if not equals(instanceValue, defaultValue) then
-				local propertyType = next(default)
-				local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, propertyType)
-
-				if not encodeSuccess then
-					local err = Error.new(Error.EncodeFailed, property, instanceValue)
-					Log.warn(err)
-
-					continue
-				end
-
-				properties[property] = encodedValue
-			end
-		end
-	end
-
-	for _, child in ipairs(instance:GetChildren()) do
-		local snapshot = self:onAddOnlyCode(child, id)
-
-		if snapshot then
-			table.insert(children, snapshot)
-		end
-	end
-
-	local snapshot
-
-	if __parentId then
-		snapshot = Snapshot.new(id)
-	else
-		snapshot = Snapshot.newAdded(id):withParent(parentId)
-	end
-
-	self.tree:insertInstance(instance, id, snapshot.meta)
-
-	validateProperties(properties)
-
-	return snapshot
-		:withName(instance.Name)
-		:withClass(instance.ClassName)
-		:withProperties(properties)
-		:withChildren(children)
+function ReadProcessor.shouldSyncProperties(instance: Instance, property: string?): boolean
+	return instance:IsA("LuaSourceContainer") or Config:get("SyncbackProperties") or property == "Name"
 end
 
 return ReadProcessor

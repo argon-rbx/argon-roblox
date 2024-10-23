@@ -13,6 +13,18 @@ local Changes = require(script.Parent.Changes)
 local ReadProcessor = require(script.Read)
 local WriteProcessor = require(script.Write)
 
+local function isPackageDescendant(instance: Instance): boolean
+	repeat
+		if instance:FindFirstChildWhichIsA("PackageLink") then
+			return true
+		end
+
+		instance = instance.Parent or game
+	until instance == game
+
+	return false
+end
+
 local Processor = {}
 Processor.__index = Processor
 
@@ -49,7 +61,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 		for _, snapshot in ipairs(changes.additions) do
 			local instance = self.tree:getInstance(snapshot.parent)
 
-			if instance and Util.isPackageDescendant(instance) then
+			if instance and isPackageDescendant(instance) then
 				table.insert(temp, snapshot)
 			end
 		end
@@ -62,7 +74,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 		for _, snapshot in ipairs(changes.updates) do
 			local instance = self.tree:getInstance(snapshot.id)
 
-			if instance and Util.isPackageDescendant(instance) then
+			if instance and isPackageDescendant(instance) then
 				table.insert(temp, snapshot)
 			end
 		end
@@ -73,7 +85,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 		end
 
 		for _, instance in ipairs(changes.removals) do
-			if Util.isPackageDescendant(instance) then
+			if isPackageDescendant(instance) then
 				table.insert(temp, instance)
 			end
 		end
@@ -108,7 +120,7 @@ function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	end
 end
 
-function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta: boolean): Types.Changes
+function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, clientPriority: boolean): Types.Changes
 	local changes = Changes.new()
 
 	local instance = self.tree:getInstance(snapshot.id)
@@ -120,7 +132,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 	end
 
 	-- Diff properties, find updated ones
-	do
+	if not clientPriority or ReadProcessor.shouldSyncProperties(instance) then
 		local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
 		local updatedProperties = {}
 
@@ -195,10 +207,9 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, ignoreMeta:
 				return equals(child.id, childId)
 			end)
 
-			changes:join(self:diff(childSnapshot, snapshot.id, ignoreMeta))
+			changes:join(self:diff(childSnapshot, snapshot.id, clientPriority))
 		elseif
-			(not snapshot.meta.keepUnknowns or ignoreMeta)
-			and (not Config:get("KeepUnknowns") or ignoreMeta)
+			(clientPriority or not (snapshot.meta.keepUnknowns or Config:get("KeepUnknowns")))
 			and Dom.isCreatable(child.ClassName)
 		then
 			changes:remove(child)
@@ -218,21 +229,18 @@ function Processor:reverseChanges(changes: Types.Changes): Types.Changes
 	end
 
 	for _, snapshot in ipairs(changes.updates) do
-		local instance = self.tree:getInstance(snapshot.id)
-		reversed:update(self.read:onChange(instance))
+		snapshot = self.read:onChange(self.tree:getInstance(snapshot.id))
+
+		if snapshot then
+			reversed:update(snapshot)
+		end
 	end
 
-	if not Config:get("OnlyCodeMode") then
-		for _, instance in ipairs(changes.removals) do
-			reversed:add(self.read:onAdd(instance))
-		end
-	else
-		for _, instance in ipairs(changes.removals) do
-			local snapshot = self.read:onAddOnlyCode(instance)
+	for _, instance in ipairs(changes.removals) do
+		local snapshot = self.read:onAdd(instance)
 
-			if snapshot then
-				reversed:add(snapshot)
-			end
+		if snapshot then
+			reversed:add(snapshot)
 		end
 	end
 

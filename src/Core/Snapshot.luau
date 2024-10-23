@@ -4,6 +4,17 @@ local Types = require(Argon.Types)
 
 local Meta = require(script.Parent.Meta)
 
+-- Temporary solution for empty Luau maps being serialized as arrays
+local function validateProperties(properties: Types.Properties): Types.Properties
+	if not next(properties) then
+		properties.ArgonEmpty = {
+			Bool = true,
+		}
+	end
+
+	return properties
+end
+
 local Snapshot = {}
 Snapshot.__index = Snapshot
 
@@ -12,23 +23,10 @@ function Snapshot.new(id: Types.Ref)
 
 	self.id = id
 	self.meta = Meta.new()
+	self.parent = nil
 	self.name = ""
 	self.class = ""
-	self.properties = {}
-	self.children = {}
-
-	return self
-end
-
-function Snapshot.newAdded(id: Types.Ref)
-	local self = setmetatable({}, Snapshot)
-
-	self.id = id
-	self.meta = Meta.new()
-	self.parent = buffer.create(16)
-	self.name = ""
-	self.class = ""
-	self.properties = {}
+	self.properties = validateProperties({})
 	self.children = {}
 
 	return self
@@ -67,7 +65,7 @@ function Snapshot:withClass(class: string)
 end
 
 function Snapshot:withProperties(properties: Types.Properties)
-	self.properties = properties
+	self.properties = validateProperties(properties)
 	return self
 end
 

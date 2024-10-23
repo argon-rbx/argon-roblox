@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Changing parent instance class no longer causes children to be removed
+- Properties of non-script instances are no longer included when syncing from client and `SyncbackProperties` setting is disabled
+- Two-way sync toggle now properly enables two-way sync when changed during sync session
+- Two-way sync now respects `Only Code Mode` setting
+
 ## [2.0.13] - 2024-09-19
 
 ### Fixed
