@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.14] - 2024-10-24
+
 ### Fixed
 
 - Changing parent instance class no longer causes children to be removed
@@ -212,7 +214,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.13...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.14...HEAD
+[2.0.14]: https://github.com/argon-rbx/argon-roblox/compare/2.0.13...2.0.14
 [2.0.13]: https://github.com/argon-rbx/argon-roblox/compare/2.0.12...2.0.13
 [2.0.12]: https://github.com/argon-rbx/argon-roblox/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/argon-rbx/argon-roblox/compare/2.0.10...2.0.11
