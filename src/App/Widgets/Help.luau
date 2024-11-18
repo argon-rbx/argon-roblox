@@ -63,6 +63,7 @@ local function Link(text: string, url: string)
 				[Children] = {
 					Padding {},
 					Input {
+						AutomaticSize = Enum.AutomaticSize.XY,
 						Text = url,
 						TextEditable = false,
 						TextSize = Theme.TextSize.Large,
