@@ -8,17 +8,20 @@ local Fusion = require(Argon.Packages.Fusion)
 local Value = Fusion.Value
 
 local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Color3 } } }
-	local border = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
 	local background = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
-
+	local border =
+		if background == Color3.fromRGB(46, 46, 46) then Color3.fromRGB(75, 75, 75)
+		elseif background == Color3.fromRGB(255, 255, 255) then Color3.fromRGB(220, 220, 220)
+		else Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
+	
 	return {
 		-- It's actually 130, 120, 230
 		Brand = Color3.fromRGB(120, 110, 220),
 
 		Background = background,
+		ContrastBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Mid),
 		ActiveBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Titlebar),
-		Border = border ~= background and border
-			or Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground),
+		Border = border,
 
 		Text = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.BrightText),
 		TextDimmed = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.SubText),
@@ -42,6 +45,7 @@ local Theme = {
 		Brand = init(),
 
 		Background = init(),
+		ContrastBackground = init(),
 		ActiveBackground = init(),
 		Border = init(),
 

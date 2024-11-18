@@ -33,6 +33,7 @@ end
 local function Header(text: string)
 	return Text {
 		Font = Theme.Fonts.Bold,
+		Color = Theme.Colors.Brand,
 		Text = text,
 	}
 end
@@ -42,7 +43,6 @@ local function Paragraph(text: string)
 		Text = text,
 		TextWrapped = true,
 		TextSize = Theme.TextSize.Small,
-		Color = Theme.Colors.TextDimmed,
 	}
 end
 
