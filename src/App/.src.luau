@@ -99,6 +99,7 @@ function App.new()
 	Widget {
 		Name = "Argon",
 		MinimumSize = peek(self.rootSize),
+		InitialEnabled = false,
 		Enabled = isOpen,
 
 		[OnChange "Enabled"] = function(isEnabled)

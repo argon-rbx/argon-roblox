@@ -42,7 +42,7 @@ return function(props: WidgetProps): DockWidgetPluginGui
 		props.Id or peek(props.Name),
 		DockWidgetPluginGuiInfo.new(
 			props.InitialDockTo or Enum.InitialDockState.Float,
-			default(props.InitialEnabled, false),
+			default(props.InitialEnabled, true),
 			default(props.OverrideEnabled, false),
 			floatingSize.X,
 			floatingSize.Y,
