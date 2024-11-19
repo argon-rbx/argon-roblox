@@ -46,7 +46,7 @@ return function(props: Props): TextBox
 		FontFace = props.Font or Theme.Fonts.Regular,
 		TextColor3 = props.Color or Theme.Colors.Text,
 		PlaceholderColor3 = props.PlaceholderColor or Theme.Colors.TextDimmed,
-		TextXAlignment = (Enum.TextXAlignment.Left),
+		TextXAlignment = Enum.TextXAlignment.Left,
 		TextSize = Theme.TextSize.Large,
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,

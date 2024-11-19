@@ -64,8 +64,8 @@ return function(props: Props): { Instance }
 					[Children] = {
 						New "UIFlexItem" {
 							FlexMode = Enum.UIFlexMode.Fill,
-						}
-					}
+						},
+					},
 				},
 				Text {
 					AutomaticSize = Enum.AutomaticSize.XY,
