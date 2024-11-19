@@ -20,6 +20,7 @@ local List = require(Components.List)
 local Text = require(Components.Text)
 local Box = require(Components.Box)
 
+local New = Fusion.New
 local Value = Fusion.Value
 local Computed = Fusion.Computed
 local Children = Fusion.Children
@@ -38,13 +39,19 @@ return function(props: Props): { Instance }
 		List {},
 		Box {
 			Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large),
+			AutomaticSize = Enum.AutomaticSize.None,
+
 			[Children] = {
+				List {
+					Spacing = 4,
+					FillDirection = Enum.FillDirection.Horizontal,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+				},
 				Input {
 					Size = UDim2.fromScale(0.75, 1),
 					Font = Theme.Fonts.Mono,
 					PlaceholderText = "localhost",
 					Text = hostInput,
-					Scaled = true,
 
 					Changed = function(text)
 						hostInput:set(filterHost(text))
@@ -53,8 +60,23 @@ return function(props: Props): { Instance }
 					Finished = function(host)
 						props.App:setHost(host ~= "" and host or Config:getDefault("Host"))
 					end,
+
+					[Children] = {
+						New "UIFlexItem" {
+							FlexMode = Enum.UIFlexMode.Fill,
+						},
+					},
+				},
+				Text {
+					AutomaticSize = Enum.AutomaticSize.XY,
+					AnchorPoint = Vector2.new(1, 0.5),
+					Position = UDim2.fromScale(0, 0.5),
+					Text = ":",
+					Font = Theme.Fonts.Mono,
+					Color = Theme.Colors.TextDimmed,
 				},
 				Input {
+					AutomaticSize = Enum.AutomaticSize.X,
 					AnchorPoint = Vector2.new(1, 0),
 					Position = UDim2.fromScale(1, 0),
 					Size = UDim2.fromScale(0, 1),
@@ -69,16 +91,6 @@ return function(props: Props): { Instance }
 					Finished = function(port)
 						props.App:setPort(port ~= "" and tonumber(port) or Config:getDefault("Port"))
 					end,
-
-					[Children] = {
-						Text {
-							AnchorPoint = Vector2.new(1, 0.5),
-							Position = UDim2.fromScale(0, 0.5),
-							Text = ": ",
-							Font = Theme.Fonts.Mono,
-							Color = Theme.Colors.TextDimmed,
-						},
-					},
 				},
 				Padding {
 					Padding = 10,

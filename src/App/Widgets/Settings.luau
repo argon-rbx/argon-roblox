@@ -197,7 +197,6 @@ local function Entry(props: EntryProps): Frame
 				Input {
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
-					Scaled = setting == "Host",
 					PlaceholderText = Config:getDefault(setting),
 
 					Changed = function(text)

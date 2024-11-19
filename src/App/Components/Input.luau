@@ -6,6 +6,7 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
+local default = require(Util.default)
 local stripProps = require(Util.stripProps)
 
 local New = Fusion.New
@@ -29,6 +30,7 @@ local COMPONENT_ONLY_PROPS = {
 type Props = {
 	Changed: ((text: string) -> ())?,
 	Finished: ((text: string) -> ())?,
+	AutomaticSize: Enum.AutomaticSize?,
 	Font: Fusion.CanBeState<Font>?,
 	Color: Fusion.CanBeState<Color3>?,
 	PlaceholderColor: Fusion.CanBeState<Color3>?,
@@ -40,16 +42,18 @@ return function(props: Props): TextBox
 	local text = Value("")
 
 	return Hydrate(New("TextBox") {
+		AutomaticSize = default(props.AutomaticSize, Enum.AutomaticSize.None),
 		FontFace = props.Font or Theme.Fonts.Regular,
 		TextColor3 = props.Color or Theme.Colors.Text,
 		PlaceholderColor3 = props.PlaceholderColor or Theme.Colors.TextDimmed,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		AutomaticSize = props.Scaled and Enum.AutomaticSize.None or Enum.AutomaticSize.XY,
 		TextSize = Theme.TextSize.Large,
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
-		TextScaled = props.Scaled,
 		PlaceholderText = "...",
+		TextScaled = props.Scaled,
+		-- If the text is not scaled, enable ClipsDescendants so text scrolling works correctly.
+		ClipsDescendants = not props.Scaled,
 
 		[OnChange "Text"] = function(text)
 			if props.Changed then
