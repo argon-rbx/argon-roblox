@@ -9,11 +9,11 @@ local Value = Fusion.Value
 
 local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Color3 } } }
 	local background = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
-	local border =
-		if background == Color3.fromRGB(46, 46, 46) then Color3.fromRGB(75, 75, 75)
+	local border = if background == Color3.fromRGB(46, 46, 46)
+		then Color3.fromRGB(75, 75, 75)
 		elseif background == Color3.fromRGB(255, 255, 255) then Color3.fromRGB(220, 220, 220)
 		else Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
-	
+
 	return {
 		-- It's actually 130, 120, 230
 		Brand = Color3.fromRGB(120, 110, 220),
