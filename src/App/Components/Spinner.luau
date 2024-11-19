@@ -34,6 +34,7 @@ return function(props: Props): ImageLabel
 	return Hydrate(Image {
 		Size = UDim2.fromOffset(Theme.CompSizeY.Medium, Theme.CompSizeY.Medium),
 		Image = Assets.Icons.Spinner,
+		ImageColor3 = Theme.Colors.Text,
 		Rotation = Tween(
 			rotation,
 			TweenInfo.new(props.Duration or 1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1)

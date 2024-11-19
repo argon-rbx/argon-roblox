@@ -117,6 +117,7 @@ return function(props: Props): Frame
 								Position = UDim2.fromScale(1, 0.5),
 								Size = UDim2.fromOffset(16, 16),
 								Image = Assets.Icons.Expand,
+								ImageColor3 = Theme.Colors.Text,
 								Rotation = Spring(
 									Computed(function(use)
 										return use(isExpanded) and 180 or 0
