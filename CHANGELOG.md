@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Some icon setting are no longer invisible in light mode ([#8](https://github.com/argon-rbx/argon-roblox/pull/8))
+- Argon widget doesn't pop up in playtest anymore on Windows ([#9](https://github.com/argon-rbx/argon-roblox/pull/9))
+- Updated obsolete commands in Help widget
+
+### Changed
+
+- TextBoxes now scroll instead of scale when text is too long ([#10](https://github.com/argon-rbx/argon-roblox/pull/10))
+
 ## [2.0.14] - 2024-10-24
 
 ### Fixed

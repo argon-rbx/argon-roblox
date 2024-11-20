@@ -92,7 +92,7 @@ return function(props: Props): Frame
 						isPressed:set(false)
 					end
 				end,
-				[OnEvent("Activated")] = function()
+				[OnEvent "Activated"] = function()
 					isExpanded:set(not peek(isExpanded))
 				end,
 

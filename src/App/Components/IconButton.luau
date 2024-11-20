@@ -78,7 +78,7 @@ return function(props: Props): TextButton
 				isPressed:set(false)
 			end
 		end,
-		[OnEvent("Activated")] = function()
+		[OnEvent "Activated"] = function()
 			if props.Activated then
 				props.Activated()
 			end

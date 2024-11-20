@@ -110,7 +110,7 @@ local function Button(props: ButtonProps): TextButton
 				isPressed:set(false)
 			end
 		end,
-		[OnEvent("Activated")] = function()
+		[OnEvent "Activated"] = function()
 			if props.IsFirst then
 				isHovered:set(false)
 				isPressed:set(false)

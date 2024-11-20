@@ -108,7 +108,7 @@ return function(props: Props): DockWidgetPluginGui
 					},
 					Entry {
 						Header "2. Starting the server",
-						Paragraph 'To start the server run "argon run" command in your terminal or use "Argon: Start Server" command in VS Code.',
+						Paragraph 'To start the server run "argon serve" command in your terminal or use "Argon: Open Menu" -> "Serve" command in VS Code.',
 					},
 					Entry {
 						Header "3. Connecting to the server",
