@@ -113,6 +113,13 @@ return function(props: Props): { Instance }
 						props.App:connect()
 					end,
 				},
+				TextButton {
+					LayoutOrder = 3,
+					Text = "test diff",
+					Activated = function()
+						props.App:testDiff__REMOVE_LATER__()
+					end,
+				},
 				IconButton {
 					Icon = Assets.Icons.Settings,
 					BackgroundActive = Computed(function(use)
