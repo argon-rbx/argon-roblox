@@ -125,7 +125,7 @@ do
 	-- :P
 	local now = DateTime.now():ToLocalTime()
 	if now.Month == 4 and now.Day == 1 then
-		Theme.Colors.Brand = Color3.fromRGB(255, 72, 69)
+		Theme.Colors.Brand = Color3.fromHex("e13835")
 		Theme.CornerRadius = 0
 	end
 end
