@@ -90,6 +90,7 @@ local Theme = {
 	},
 
 	SpringSpeed = 30,
+	SpringFastSpeed = 60,
 	SpringDamping = 1.5,
 
 	IsDark = Value(true),

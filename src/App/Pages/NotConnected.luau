@@ -24,6 +24,7 @@ local New = Fusion.New
 local Value = Fusion.Value
 local Computed = Fusion.Computed
 local Children = Fusion.Children
+local Spring = Fusion.Spring
 
 type Props = {
 	App: { [string]: any },
@@ -43,13 +44,17 @@ return function(props: Props): { Instance }
 		Box {
 			Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large),
 			AutomaticSize = Enum.AutomaticSize.None,
-			BorderColor = Computed(function(use)
-				if use(hostFocused) or use(portFocused) then
-					return use(Theme.Colors.Brand)
-				else
-					return use(Theme.Colors.Border)
-				end
-			end),
+			BorderColor = Spring(
+				Computed(function(use)
+					if use(hostFocused) or use(portFocused) then
+						return use(Theme.Colors.Brand)
+					else
+						return use(Theme.Colors.Border)
+					end
+				end),
+				Theme.SpringFastSpeed,
+				Theme.SpringDamping
+			),
 
 			[Children] = {
 				List {
