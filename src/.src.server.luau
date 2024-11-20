@@ -1,4 +1,10 @@
 --!strict
+local RunService = game:GetService("RunService")
+
+if RunService:IsRunning() then
+	return
+end
+
 local Config = require(script.Config)
 local Log = require(script.Log)
 local App = require(script.App)
