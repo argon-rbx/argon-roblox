@@ -77,6 +77,11 @@ return function(props: Props): { Instance }
 					end,
 
 					[Children] = {
+						-- The cursor will not be visible when it is all the way at the left because of ClipsDescendants,
+						-- so this padding makes sure there's always 1 pixel of space from the left.
+						Padding {
+							Left = 1,
+						},
 						New "UIFlexItem" {
 							FlexMode = Enum.UIFlexMode.Fill,
 						},
