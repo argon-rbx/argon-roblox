@@ -188,22 +188,35 @@ local function Entry(props: EntryProps): Frame
 			props.Binding:set("")
 		end
 
+		local focused = Value(false)
+
 		valueComponent = Box {
 			Size = props.Data.CustomWidth
 					and math.floor(props.Data.CustomWidth) == props.Data.CustomWidth
 					and UDim2.fromOffset(props.Data.CustomWidth, Theme.CompSizeY.Medium)
 				or UDim2.new(props.Data.CustomWidth or 0.2, 0, 0, Theme.CompSizeY.Medium),
+			BorderColor = Computed(function(use)
+				if use(focused) then
+					return use(Theme.Colors.Brand)
+				else
+					return use(Theme.Colors.Border)
+				end
+			end),
 			[Children] = {
 				Input {
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
 					PlaceholderText = Config:getDefault(setting),
 
+					Started = function()
+						focused:set(true)
+					end,
 					Changed = function(text)
 						userInput = true
 						props.Binding:set(props.Data.Filter(text))
 					end,
 					Finished = function(text)
+						focused:set(false)
 						text = text ~= "" and text or Config:getDefault(setting)
 
 						props.Binding:set(text)

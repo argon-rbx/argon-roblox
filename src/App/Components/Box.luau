@@ -37,6 +37,7 @@ return function(props: Props): Frame
 
 		[Children] = {
 			Border {
+				Color = props.BorderColor,
 				Transparency = props.BorderTransparency,
 			},
 		},
