@@ -109,7 +109,7 @@ return function(props: Props): { Instance }
 					PlaceholderText = "8000",
 					Text = portInput,
 
-					Started = function(text)
+					Started = function()
 						portFocused:set(true)
 					end,
 
