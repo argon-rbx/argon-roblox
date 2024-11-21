@@ -325,7 +325,8 @@ return function(props: Props): DockWidgetPluginGui
 							Expanded = index == 1,
 							Elements = ForValues(data.Settings, function(_, data)
 								local setting = data.Setting
-								local binding = Value(default(Config:get(setting, use(level)), Config:getDefault(setting)))
+								local binding =
+									Value(default(Config:get(setting, use(level)), Config:getDefault(setting)))
 
 								bindings[setting] = binding
 
@@ -364,13 +365,13 @@ return function(props: Props): DockWidgetPluginGui
 						Options = LEVELS,
 						Selected = function(option)
 							level:set(option)
-							
+
 							for setting, binding in pairs(bindings) do
 								binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
 							end
 						end,
 					},
-					
+
 					entriesContainer,
 
 					Container {
@@ -385,7 +386,7 @@ return function(props: Props): DockWidgetPluginGui
 									for setting, binding in pairs(bindings) do
 										binding:set(Config:getDefault(setting))
 									end
-		
+
 									Config:restoreDefaults(peek(level))
 								end,
 							},
