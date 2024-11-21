@@ -313,6 +313,34 @@ return function(props: Props): DockWidgetPluginGui
 	local level = Value("Global")
 	local bindings = {}
 
+	local entriesContainer = Computed(function(use)
+		return Container {
+			AutomaticSize = Enum.AutomaticSize.XY,
+			[Children] = {
+				List {},
+				ForPairs(SETTINGS_DATA, function(_, index, data)
+					return index,
+						Collapsible {
+							Title = `{index}. {data.Title}`,
+							Expanded = index == 1,
+							Elements = ForValues(data.Settings, function(_, data)
+								local setting = data.Setting
+								local binding = Value(default(Config:get(setting, use(level)), Config:getDefault(setting)))
+
+								bindings[setting] = binding
+
+								return Entry {
+									Data = data,
+									Level = level,
+									Binding = binding,
+								}
+							end, Fusion.cleanup),
+						}
+				end, Fusion.cleanup),
+			},
+		}
+	end, Fusion.cleanup)
+
 	return Widget {
 		Name = "Argon - Settings",
 		OverrideEnabled = true,
@@ -336,32 +364,15 @@ return function(props: Props): DockWidgetPluginGui
 						Options = LEVELS,
 						Selected = function(option)
 							level:set(option)
-
+							
 							for setting, binding in pairs(bindings) do
 								binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
 							end
 						end,
 					},
-					ForPairs(SETTINGS_DATA, function(_, index, data)
-						return index,
-							Collapsible {
-								Title = `{index}. {data.Title}`,
-								Expanded = index == 1,
-								Elements = ForValues(data.Settings, function(_, data)
-									local setting = data.Setting
-									local binding =
-										Value(default(Config:get(setting, peek(level)), Config:getDefault(setting)))
+					
+					entriesContainer,
 
-									bindings[setting] = binding
-
-									return Entry {
-										Data = data,
-										Level = level,
-										Binding = binding,
-									}
-								end, Fusion.cleanup),
-							}
-					end, Fusion.cleanup),
 					Container {
 						Size = UDim2.fromScale(1, 0),
 						LayoutOrder = GlobalUtil.len(SETTINGS_DATA) + 1,
@@ -374,7 +385,7 @@ return function(props: Props): DockWidgetPluginGui
 									for setting, binding in pairs(bindings) do
 										binding:set(Config:getDefault(setting))
 									end
-
+		
 									Config:restoreDefaults(peek(level))
 								end,
 							},
