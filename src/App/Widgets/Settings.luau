@@ -39,6 +39,7 @@ local Children = Fusion.Children
 local OnChange = Fusion.OnChange
 local ForValues = Fusion.ForValues
 local ForPairs = Fusion.ForPairs
+local Spring = Fusion.Spring
 local peek = Fusion.peek
 
 local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
@@ -188,22 +189,39 @@ local function Entry(props: EntryProps): Frame
 			props.Binding:set("")
 		end
 
+		local focused = Value(false)
+
 		valueComponent = Box {
 			Size = props.Data.CustomWidth
 					and math.floor(props.Data.CustomWidth) == props.Data.CustomWidth
 					and UDim2.fromOffset(props.Data.CustomWidth, Theme.CompSizeY.Medium)
 				or UDim2.new(props.Data.CustomWidth or 0.2, 0, 0, Theme.CompSizeY.Medium),
+			BorderColor = Spring(
+				Computed(function(use)
+					if use(focused) then
+						return use(Theme.Colors.Brand)
+					else
+						return use(Theme.Colors.Border)
+					end
+				end),
+				Theme.SpringFastSpeed,
+				Theme.SpringDamping
+			),
 			[Children] = {
 				Input {
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
 					PlaceholderText = Config:getDefault(setting),
 
+					Started = function()
+						focused:set(true)
+					end,
 					Changed = function(text)
 						userInput = true
 						props.Binding:set(props.Data.Filter(text))
 					end,
 					Finished = function(text)
+						focused:set(false)
 						text = text ~= "" and text or Config:getDefault(setting)
 
 						props.Binding:set(text)

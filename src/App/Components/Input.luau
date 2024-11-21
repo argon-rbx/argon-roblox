@@ -19,6 +19,7 @@ local Children = Fusion.Children
 local peek = Fusion.peek
 
 local COMPONENT_ONLY_PROPS = {
+	"Started",
 	"Changed",
 	"Finished",
 	"Font",
@@ -28,6 +29,7 @@ local COMPONENT_ONLY_PROPS = {
 }
 
 type Props = {
+	Started: (() -> ())?,
 	Changed: ((text: string) -> ())?,
 	Finished: ((text: string) -> ())?,
 	AutomaticSize: Enum.AutomaticSize?,
@@ -58,6 +60,12 @@ return function(props: Props): TextBox
 		[OnChange "Text"] = function(text)
 			if props.Changed then
 				props.Changed(text)
+			end
+		end,
+
+		[OnEvent "Focused"] = function()
+			if props.Started then
+				props.Started()
 			end
 		end,
 

@@ -24,6 +24,7 @@ local New = Fusion.New
 local Value = Fusion.Value
 local Computed = Fusion.Computed
 local Children = Fusion.Children
+local Spring = Fusion.Spring
 
 type Props = {
 	App: { [string]: any },
@@ -35,11 +36,25 @@ return function(props: Props): { Instance }
 	local hostInput = Value(props.Host ~= Config:getDefault("Host") and props.Host or "")
 	local portInput = Value(props.Port ~= Config:getDefault("Port") and props.Port or "")
 
+	local hostFocused = Value(false)
+	local portFocused = Value(false)
+
 	return {
 		List {},
 		Box {
 			Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large),
 			AutomaticSize = Enum.AutomaticSize.None,
+			BorderColor = Spring(
+				Computed(function(use)
+					if use(hostFocused) or use(portFocused) then
+						return use(Theme.Colors.Brand)
+					else
+						return use(Theme.Colors.Border)
+					end
+				end),
+				Theme.SpringFastSpeed,
+				Theme.SpringDamping
+			),
 
 			[Children] = {
 				List {
@@ -53,15 +68,25 @@ return function(props: Props): { Instance }
 					PlaceholderText = "localhost",
 					Text = hostInput,
 
+					Started = function()
+						hostFocused:set(true)
+					end,
+
 					Changed = function(text)
 						hostInput:set(filterHost(text))
 					end,
 
 					Finished = function(host)
+						hostFocused:set(false)
 						props.App:setHost(host ~= "" and host or Config:getDefault("Host"))
 					end,
 
 					[Children] = {
+						-- The cursor will not be visible when it is all the way at the left because of ClipsDescendants,
+						-- so this padding makes sure there's always 1 pixel of space from the left.
+						Padding {
+							Left = 1,
+						},
 						New "UIFlexItem" {
 							FlexMode = Enum.UIFlexMode.Fill,
 						},
@@ -84,11 +109,16 @@ return function(props: Props): { Instance }
 					PlaceholderText = "8000",
 					Text = portInput,
 
+					Started = function()
+						portFocused:set(true)
+					end,
+
 					Changed = function(text)
 						portInput:set(filterPort(text))
 					end,
 
 					Finished = function(port)
+						portFocused:set(false)
 						props.App:setPort(port ~= "" and tonumber(port) or Config:getDefault("Port"))
 					end,
 				},
