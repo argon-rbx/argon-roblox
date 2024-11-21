@@ -11,7 +11,7 @@ local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Co
 	local background = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
 	local border = if background == Color3.fromRGB(46, 46, 46)
 		then Color3.fromRGB(75, 75, 75)
-		elseif background == Color3.fromRGB(255, 255, 255) then Color3.fromRGB(220, 220, 220)
+		elseif background == Color3.fromRGB(255, 255, 255) then Color3.fromHSV(0.000000, 0.000000, 0.862745)
 		else Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
 
 	return {
@@ -21,7 +21,10 @@ local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Co
 		Background = background,
 		ContrastBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Mid),
 		ActiveBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Titlebar),
-		Border = border,
+		-- Fallback to ScrollBarBackground if custom themes use same color for background and shadow
+		Border = if background == border
+			then Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground)
+			else border,
 
 		Text = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.BrightText),
 		TextDimmed = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.SubText),
