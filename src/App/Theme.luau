@@ -8,8 +8,15 @@ local Fusion = require(Argon.Packages.Fusion)
 local Value = Fusion.Value
 
 local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Color3 } } }
-	local border = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
 	local background = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
+	local border = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
+
+	if border == background then
+		border = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground)
+	end
+
+	local h, s, v = border:ToHSV()
+	border = Color3.fromHSV(h, s, v * (isDark and 1.2 or 0.85))
 
 	return {
 		-- It's actually 130, 120, 230
@@ -17,8 +24,7 @@ local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Co
 
 		Background = background,
 		ActiveBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Titlebar),
-		Border = border ~= background and border
-			or Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground),
+		Border = border,
 
 		Text = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.BrightText),
 		TextDimmed = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.SubText),

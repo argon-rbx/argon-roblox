@@ -67,6 +67,7 @@ local function Link(text: string, url: string)
 						Text = url,
 						TextEditable = false,
 						TextSize = Theme.TextSize.Large,
+						Color = Theme.Colors.Brand,
 					},
 				},
 			},
