@@ -33,7 +33,6 @@ end
 local function Header(text: string)
 	return Text {
 		Font = Theme.Fonts.Bold,
-		Color = Theme.Colors.Brand,
 		Text = text,
 	}
 end
@@ -43,6 +42,7 @@ local function Paragraph(text: string)
 		Text = text,
 		TextWrapped = true,
 		TextSize = Theme.TextSize.Small,
+		Color = Theme.Colors.TextDimmed,
 	}
 end
 
@@ -66,6 +66,7 @@ local function Link(text: string, url: string)
 						Text = url,
 						TextEditable = false,
 						TextSize = Theme.TextSize.Large,
+						Color = Theme.Colors.Brand,
 					},
 				},
 			},

@@ -9,22 +9,22 @@ local Value = Fusion.Value
 
 local function getColors(isDark: boolean): { [string]: { Color3 | { [string]: Color3 } } }
 	local background = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
-	local border = if background == Color3.fromRGB(46, 46, 46)
-		then Color3.fromRGB(75, 75, 75)
-		elseif background == Color3.fromRGB(255, 255, 255) then Color3.fromHSV(0.000000, 0.000000, 0.862745)
-		else Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
+	local border = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Shadow)
+
+	if border == background then
+		border = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground)
+	end
+
+	local h, s, v = border:ToHSV()
+	border = Color3.fromHSV(h, s, v * (isDark and 1.2 or 0.85))
 
 	return {
 		-- It's actually 130, 120, 230
 		Brand = Color3.fromRGB(120, 110, 220),
 
 		Background = background,
-		ContrastBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Mid),
 		ActiveBackground = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.Titlebar),
-		-- Fallback to ScrollBarBackground if custom themes use same color for background and shadow
-		Border = if background == border
-			then Studio.Theme:GetColor(Enum.StudioStyleGuideColor.ScrollBarBackground)
-			else border,
+		Border = border,
 
 		Text = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.BrightText),
 		TextDimmed = Studio.Theme:GetColor(Enum.StudioStyleGuideColor.SubText),
@@ -48,7 +48,6 @@ local Theme = {
 		Brand = init(),
 
 		Background = init(),
-		ContrastBackground = init(),
 		ActiveBackground = init(),
 		Border = init(),
 

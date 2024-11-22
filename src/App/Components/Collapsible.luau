@@ -56,7 +56,7 @@ return function(props: Props): Frame
 
 	local color = animate(
 		Computed(function(use)
-			return use(Theme.Colors.ContrastBackground)
+			return use(isExpanded) and use(Theme.Colors.ActiveBackground) or use(Theme.Colors.Background)
 		end),
 		state
 	)
