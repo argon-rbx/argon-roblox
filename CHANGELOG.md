@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- TextBox is now highlighted when editing its contents ([#13](https://github.com/argon-rbx/argon-roblox/pull/13))
+
 ### Fixed
 
 - Some icon setting are no longer invisible in light mode ([#8](https://github.com/argon-rbx/argon-roblox/pull/8))
@@ -15,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - TextBoxes now scroll instead of scale when text is too long ([#10](https://github.com/argon-rbx/argon-roblox/pull/10))
+- Improved border contrast and added setting category highlight ([#11](https://github.com/argon-rbx/argon-roblox/pull/11))
 
 ## [2.0.14] - 2024-10-24
 
