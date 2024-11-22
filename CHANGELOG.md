@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.15] - 2024-11-22
+
 ### Added
 
 - TextBox is now highlighted when editing its contents ([#13](https://github.com/argon-rbx/argon-roblox/pull/13))
@@ -229,7 +231,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.14...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.15...HEAD
+[2.0.15]: https://github.com/argon-rbx/argon-roblox/compare/2.0.14...2.0.15
 [2.0.14]: https://github.com/argon-rbx/argon-roblox/compare/2.0.13...2.0.14
 [2.0.13]: https://github.com/argon-rbx/argon-roblox/compare/2.0.12...2.0.13
 [2.0.12]: https://github.com/argon-rbx/argon-roblox/compare/2.0.11...2.0.12
