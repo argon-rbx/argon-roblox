@@ -42,6 +42,7 @@ local Error = require(Pages.Error)
 
 local Settings = require(Widgets.Settings)
 local Help = require(Widgets.Help)
+local Diff = require(Widgets.Diff)
 
 local New = Fusion.New
 local Value = Fusion.Value
@@ -80,6 +81,7 @@ function App.new()
 
 	self.settingsWidget = Value(nil)
 	self.helpWidget = Value(nil)
+	self.diffWidget = Value(nil)
 
 	local isOpen = Value(false)
 
@@ -291,6 +293,67 @@ function App:help()
 	end
 
 	self.helpWidget:set(widget)
+end
+
+function App:testDiff__REMOVE_LATER__()
+	local widget = peek(self.diffWidget)
+
+	if widget then
+		widget:Destroy()
+		widget = nil
+	else
+		widget = Diff {
+			Changes = {
+				additions = {
+					{
+						id = buffer.fromstring("idk"),
+						meta = {
+							keepUnknowns = false
+						},
+						parent = buffer.fromstring("parent"),
+						name = "Test",
+						class = "Part",
+						properties = {
+							anchored = true,
+						},
+						children = {
+							id = buffer.fromstring("idk2"),
+							meta = {
+								keepUnknowns = false
+							},
+							name = "Test",
+							class = "Part",
+							properties = {
+								anchored = true,
+							},
+						}
+					}
+				},
+				updates = {
+					{
+						id = buffer.fromstring("idk3"),
+						meta = {
+							keepUnknowns = false
+						},
+						name = "Test",
+						class = "Part",
+						properties = {
+							Locked = true,
+						},
+					}
+				},
+				removals = {
+					workspace.Terrain
+				},
+			},
+			Closed = function()
+				peek(self.diffWidget):Destroy()
+				self.diffWidget:set(nil)
+			end,
+		}
+	end
+
+	self.diffWidget:set(widget)
 end
 
 function App:connect()
