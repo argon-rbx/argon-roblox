@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Synced `rbx_dom_lua` with upstream, fixing various issues with syncing binary strings and enum items
+
 ## [2.0.15] - 2024-11-22
 
 ### Added
