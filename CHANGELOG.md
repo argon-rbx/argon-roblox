@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Synced `rbx_dom_lua` with upstream, fixing various issues with syncing binary strings and enum items
 
+### Changed
+
+- Two-way sync is now disabled by default to prevent accidental data loss
+
 ## [2.0.15] - 2024-11-22
 
 ### Added
