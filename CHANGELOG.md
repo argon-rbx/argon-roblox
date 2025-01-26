@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.16] - 2025-01-26
+
 ### Fixed
 
 - Synced `rbx_dom_lua` with upstream, fixing various issues with syncing binary strings and enum items
@@ -239,7 +241,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.15...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.16...HEAD
+[2.0.16]: https://github.com/argon-rbx/argon-roblox/compare/2.0.15...2.0.16
 [2.0.15]: https://github.com/argon-rbx/argon-roblox/compare/2.0.14...2.0.15
 [2.0.14]: https://github.com/argon-rbx/argon-roblox/compare/2.0.13...2.0.14
 [2.0.13]: https://github.com/argon-rbx/argon-roblox/compare/2.0.12...2.0.13
