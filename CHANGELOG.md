@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.17] - 2025-02-05
+
 ### Fixed
 
 - Some new instance properties no longer cause critical error when syncing with `Client` priority
@@ -246,7 +248,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.16...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.17...HEAD
+[2.0.17]: https://github.com/argon-rbx/argon-roblox/compare/2.0.16...2.0.17
 [2.0.16]: https://github.com/argon-rbx/argon-roblox/compare/2.0.15...2.0.16
 [2.0.15]: https://github.com/argon-rbx/argon-roblox/compare/2.0.14...2.0.15
 [2.0.14]: https://github.com/argon-rbx/argon-roblox/compare/2.0.13...2.0.14
