@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Some new instance properties no longer cause critical error when syncing with `Client` priority
+- Two-way sync now works as intended for non-script instances when `Only Code Mode` is disabled
 
 ## [2.0.16] - 2025-01-26
 
@@ -42,7 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Changing parent instance class no longer causes children to be removed
-- Properties of non-script instances are no longer included when syncing from client and `SyncbackProperties` setting is disabled
+- Properties of non-script instances are no longer included when syncing from client and `Syncback Properties` setting is disabled
 - Two-way sync toggle now properly enables two-way sync when changed during sync session
 - Two-way sync now respects `Only Code Mode` setting
 
@@ -56,9 +57,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- `LiveHydrate` setting to automatically hydrate with the server when target instance doesn't exist
+- `Live Hydrate` setting to automatically hydrate with the server when target instance doesn't exist
 - Improved project details widget and support for displaying latest project root instances
-- New `ChangesThreshold` setting to limit the number of changes that will be applied before prompting the user
+- New `Changes Threshold` setting to limit the number of changes that will be applied before prompting the user
 
 ### Fixed
 
@@ -67,7 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Moved `SkipInitialSync` setting to a new option `None` in `InitialSyncPriority` setting
+- Moved `Skip Initial Sync` setting to a new option `None` in `Initial Sync Priority` setting
 - Settings are now categorized and collapsible to help with readability
 
 ## [2.0.11] - 2024-09-08
@@ -88,7 +89,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- `KeepUnknowns` setting now works at the level of diffing changes rather than applying them
+- `Keep Unknowns` setting now works at the level of diffing changes rather than applying them
 - Syncing `PhysicalProperties` from Studio to the file system no longer causes `Bad Request` error
 
 ## [2.0.9] - 2024-07-11

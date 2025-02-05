@@ -11,10 +11,6 @@ local generateRef = require(Argon.Helpers.generateRef)
 local Snapshot = require(script.Parent.Parent.Snapshot)
 local Error = require(script.Parent.Parent.Error)
 
-local function isScriptRelated(instance: Instance): boolean
-	return instance:IsA("LuaSourceContainer") or instance:FindFirstChildWhichIsA("LuaSourceContainer", true) ~= nil
-end
-
 local ReadProcessor = {}
 ReadProcessor.__index = ReadProcessor
 
@@ -27,16 +23,14 @@ end
 function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
 	Log.trace("Detected addition of", instance)
 
-	local isScriptRelated = isScriptRelated(instance)
-
-	if not isScriptRelated then
+	if not self.isScriptRelated(instance) and Config:get("OnlyCodeMode") then
 		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
 		return nil
 	end
 
 	local parentId = __parentId or self.tree:getId(instance.Parent)
 
-	if not parentId and not (Config:get("OnlyCodeMode") and isScriptRelated) then
+	if not parentId then
 		Log.trace("Unknown instance. Skipping..")
 		return nil
 	end
@@ -45,7 +39,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 	local properties = {}
 	local children = {}
 
-	if ReadProcessor.shouldSyncProperties(instance) then
+	if self.shouldSyncProperties(instance) then
 		for property, default in Dom.getDefaultProperties(instance.ClassName) do
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
@@ -141,14 +135,12 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 		return nil
 	end
 
-	local isScriptRelated = isScriptRelated(instance)
-
-	if not isScriptRelated then
+	if not self.isScriptRelated(instance) and Config:get("OnlyCodeMode") then
 		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
 		return nil
 	end
 
-	if property and not ReadProcessor.shouldSyncProperties(instance, property) then
+	if property and not self.shouldSyncProperties(instance, property) then
 		Log.trace("Instance does not pass sync filter. Skipping..")
 		return nil
 	end
@@ -206,6 +198,10 @@ end
 
 function ReadProcessor.shouldSyncProperties(instance: Instance, property: string?): boolean
 	return instance:IsA("LuaSourceContainer") or Config:get("SyncbackProperties") or property == "Name"
+end
+
+function ReadProcessor.isScriptRelated(instance: Instance): boolean
+	return instance:IsA("LuaSourceContainer") or instance:FindFirstChildWhichIsA("LuaSourceContainer", true) ~= nil
 end
 
 return ReadProcessor
