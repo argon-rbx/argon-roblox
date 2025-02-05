@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Some new instance properties no longer cause critical error when syncing with `Client` priority
+
 ## [2.0.16] - 2025-01-26
 
 ### Fixed
