@@ -13,8 +13,9 @@ local Error = require(script.Parent.Parent.Error)
 
 local MESH_RELOAD_PROPERTIES = { "MeshId", "InitialSize" }
 
-local function setWaypoint(action: string?)
-	ChangeHistoryService:SetWaypoint(`Argon {action or "sync"}: {DateTime.now():FormatLocalTime("LTS", "en-us")}`)
+local function setWaypoint(action: string, name: string?)
+	name = name and ` "{name}"` or ""
+	ChangeHistoryService:SetWaypoint(`Argon: {action}{name} [{DateTime.now():FormatLocalTime("LTS", "en-us")}]`)
 end
 
 local function loadMesh(path: string)
@@ -76,10 +77,10 @@ end
 function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 	Log.trace("Applying changes..")
 
-	setWaypoint()
+	setWaypoint("Sync")
 
 	for _, snapshot in ipairs(changes.additions) do
-		self:applyAddition(snapshot)
+		self:applyAddition(snapshot, initial)
 	end
 
 	for _, snapshot in ipairs(changes.updates) do
@@ -87,11 +88,19 @@ function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 	end
 
 	for _, object in ipairs(changes.removals) do
-		self:applyRemoval(object)
+		self:applyRemoval(object, initial)
+	end
+
+	if initial then
+		setWaypoint("Initial Sync")
 	end
 end
 
-function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot, skipExisting: boolean?): Instance?
+function WriteProcessor:applyAddition(
+	snapshot: Types.AddedSnapshot,
+	initial: boolean?,
+	skipExisting: boolean?
+): Instance?
 	Log.trace("Applying addition of", snapshot)
 
 	local parent = self.tree:getInstance(snapshot.parent)
@@ -101,7 +110,7 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot, skipExistin
 			local addedSnapshot = self.client:getSnapshot(snapshot.parent):expect()
 
 			if addedSnapshot then
-				parent = self:applyAddition(addedSnapshot, true)
+				parent = self:applyAddition(addedSnapshot, initial, true)
 				skipExisting = true
 
 				Log.info("Live hydrated parent:", parent)
@@ -190,10 +199,12 @@ function WriteProcessor:applyAddition(snapshot: Types.AddedSnapshot, skipExistin
 	for _, child in ipairs(snapshot.children) do
 		child.parent = snapshot.id
 
-		self:applyAddition(child)
+		self:applyAddition(child, initial)
 	end
 
-	setWaypoint("add")
+	if not initial then
+		setWaypoint("Add", instance.Name)
+	end
 
 	return instance
 end
@@ -208,7 +219,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 			local addedSnapshot = self.client:getSnapshot(snapshot.id):expect()
 
 			if addedSnapshot then
-				instance = self:applyAddition(addedSnapshot)
+				instance = self:applyAddition(addedSnapshot, initial)
 				Log.info("Live hydrated instance:", instance)
 			end
 		end
@@ -339,12 +350,14 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		end
 	end
 
-	setWaypoint("update")
+	if not initial then
+		setWaypoint("Update", instance.Name)
+	end
 
 	return instance
 end
 
-function WriteProcessor:applyRemoval(object: Types.Ref | Instance): Instance?
+function WriteProcessor:applyRemoval(object: Types.Ref | Instance, initial: boolean?): Instance?
 	Log.trace("Applying removal of", object)
 
 	if typeof(object) == "Instance" then
@@ -373,7 +386,9 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance): Instance?
 		object = instance
 	end
 
-	setWaypoint("remove")
+	if not initial then
+		setWaypoint("Remove", (object :: Instance).Name)
+	end
 
 	return object
 end
