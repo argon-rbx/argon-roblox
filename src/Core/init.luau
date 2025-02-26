@@ -108,7 +108,7 @@ function Core:run(): Promise.Promise
 			return reject(Error.new(Error.Terminated))
 		end
 
-		for i, id in ipairs(project.rootRefs) do
+		for i, id in project.rootRefs do
 			self.rootInstances[i] = self.tree:getInstance(id)
 		end
 
@@ -268,7 +268,7 @@ function Core:__startSyncLoop()
 				if not equals(self.project.rootRefs, data.rootRefs) then
 					self.rootInstances = {}
 
-					for i, id in ipairs(data.rootRefs) do
+					for i, id in data.rootRefs do
 						self.rootInstances[i] = self.tree:getInstance(id)
 					end
 

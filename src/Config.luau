@@ -64,7 +64,7 @@ local Config: Config = {
 } :: Config
 
 function Config.load()
-	for level, config in pairs(CONFIGS) do
+	for level, config in CONFIGS do
 		config = plugin:GetSetting(config)
 
 		if config and type(config) == "table" then
@@ -86,7 +86,7 @@ function Config:get(setting, level)
 		return self.__configs[level][setting]
 	end
 
-	for _, config in pairs(self.__configs) do
+	for _, config in self.__configs do
 		if config[setting] ~= nil then
 			return config[setting]
 		end
@@ -115,7 +115,7 @@ function Config:set(setting, value, level)
 	value = Util.cast(value, type(default))
 
 	if value ~= self.__configs[level][setting] and self.__callbacks[setting] then
-		for _, callback in pairs(self.__callbacks[setting]) do
+		for _, callback in self.__callbacks[setting] do
 			callback(value)
 		end
 	end
@@ -132,9 +132,9 @@ function Config:set(setting, value, level)
 end
 
 function Config:restoreDefaults(level)
-	for setting, _ in pairs(self.__configs[level]) do
+	for setting, _ in self.__configs[level] do
 		if self.__callbacks[setting] then
-			for _, callback in pairs(self.__callbacks[setting]) do
+			for _, callback in self.__callbacks[setting] do
 				callback(self:getDefault(setting))
 			end
 		end

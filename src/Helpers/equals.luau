@@ -43,10 +43,10 @@ local function equals(a: any, b: any): boolean
 			return false
 		end
 
-		for kA, vA in pairs(a) do
+		for kA, vA in a do
 			local found = false
 
-			for kB, vB in pairs(b) do
+			for kB, vB in b do
 				if equals(kA, kB) then
 					if not equals(vA, vB) then
 						return false

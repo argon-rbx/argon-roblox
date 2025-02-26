@@ -7,7 +7,7 @@ local Util = {}
 function Util.len(table: { [any]: any }): number
 	local count = 0
 
-	for _ in pairs(table) do
+	for _ in table do
 		count += 1
 	end
 
@@ -15,8 +15,8 @@ function Util.len(table: { [any]: any }): number
 end
 
 --- Join second table to the first one
-function Util.join<T>(table1: { T }, table2: { T }): { T }
-	for _, value in pairs(table2) do
+function Util.join(table1: { any }, table2: { any }): { any }
+	for _, value in table2 do
 		table.insert(table1, value)
 	end
 
@@ -27,7 +27,7 @@ end
 function Util.dictionaryToArray(dictionary: { [any]: any }, __lastArray: { any }?): { any }
 	local array = __lastArray or {}
 
-	for _, value in pairs(dictionary) do
+	for _, value in dictionary do
 		if type(value) == "table" then
 			Util.dictionaryToArray(value, array)
 		else
@@ -40,7 +40,7 @@ end
 
 --- Find the value and key of the first element that passes the filter
 function Util.filter<K, V>(table: { [K]: V }, filter: (value: V, key: K) -> boolean): (V?, K?)
-	for key, value in pairs(table) do
+	for key, value in table do
 		if filter(value, key) then
 			return value, key
 		end
@@ -67,7 +67,7 @@ function Util.stringify(value: any, __indent: number?): string
 		if type(first) == "number" then
 			local containsTable = false
 
-			for _, v in ipairs(value) do
+			for _, v in value do
 				if type(v) == "table" then
 					containsTable = true
 					break
@@ -81,7 +81,7 @@ function Util.stringify(value: any, __indent: number?): string
 			local str = "{\n"
 			local indent = __indent and __indent + 1 or 1
 
-			for i, v in ipairs(value) do
+			for i, v in value do
 				str ..= str.rep("\t", indent)
 				str ..= `[{i}] = {Util.stringify(v, indent)},\n`
 			end
@@ -91,7 +91,7 @@ function Util.stringify(value: any, __indent: number?): string
 			local str = "{\n"
 			local indent = __indent and __indent + 1 or 1
 
-			for k, v in pairs(value) do
+			for k, v in value do
 				local key = type(k) == "string" and `"{k}"` or Util.stringify(k, indent)
 				local val = type(v) == "string" and `"{v}"` or Util.stringify(v, indent)
 
@@ -147,14 +147,14 @@ function Util.clean(...: () -> () | RBXScriptConnection | Instance | { [any]: an
 			if typeof(object.Destroy) == "function" then
 				object:Destroy()
 			else
-				for _, object in pairs(object) do
+				for _, object in object do
 					clean(object)
 				end
 			end
 		end
 	end
 
-	for _, arg in ipairs({ ... }) do
+	for _, arg in { ... } do
 		clean(arg)
 	end
 end

@@ -170,7 +170,7 @@ return function(props: Props): DockWidgetPluginGui
 
 							local values = {}
 
-							for i, instance in ipairs(props.App.core.rootInstances) do
+							for i, instance in props.App.core.rootInstances do
 								values[i] = {
 									Name = instance.Name,
 									Icon = StudioService:GetClassIcon(instance.ClassName),

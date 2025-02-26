@@ -6,7 +6,7 @@ local Util = require(Argon.Util)
 local function format(...: any): string
 	local args = ""
 
-	for _, arg in ipairs({ ... }) do
+	for _, arg in { ... } do
 		args ..= " " .. Util.stringify(arg)
 	end
 

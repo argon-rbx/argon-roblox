@@ -30,7 +30,7 @@ end
 function Error.new(err: Error, ...): Error
 	err = table.clone(err)
 
-	for i, v in pairs({ ... }) do
+	for i, v in { ... } do
 		err.message = err.message:gsub("$" .. i, Util.stringify(v))
 	end
 
@@ -43,7 +43,7 @@ function Error.fromResponse(response: { [string]: any }): Error
 end
 
 function Error.fromMessage(message: string): Error
-	for kind, err in pairs(Error) do
+	for kind, err in Error do
 		if type(err) == "table" and message:find(kind) and kind ~= "Unknown" then
 			return Error.__new(err.message, kind)
 		end
@@ -65,7 +65,7 @@ function Error:__tostring(): string
 end
 
 -- Convert all strings to Error objects
-for kind, message in pairs(Error) do
+for kind, message in Error do
 	if type(message) == "string" then
 		Error[kind] = Error.__new(message, kind)
 	end

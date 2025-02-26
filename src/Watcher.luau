@@ -55,10 +55,10 @@ function Watcher:start(rootInstances)
 	self.isActive = true
 	self.rootInstances = rootInstances
 
-	for _, instance in ipairs(rootInstances) do
+	for _, instance in rootInstances do
 		self:__connectEvents(instance)
 
-		for _, descendant in ipairs(instance:GetDescendants()) do
+		for _, descendant in instance:GetDescendants() do
 			self:__connectEvents(descendant)
 		end
 	end
@@ -70,7 +70,7 @@ function Watcher:start(rootInstances)
 		CollectionService.TagAdded:Connect(function(tag)
 			self:__watchTag(tag)
 
-			for _, instance in ipairs(CollectionService:GetTagged(tag)) do
+			for _, instance in CollectionService:GetTagged(tag) do
 				self:__onChanged(instance, "Tags")
 			end
 		end)
@@ -89,14 +89,14 @@ end
 function Watcher:stop()
 	Log.trace("Stopping watcher..")
 
-	for _, connections in pairs(self.connections) do
-		for _, connection in ipairs(connections) do
+	for _, connections in self.connections do
+		for _, connection in connections do
 			connection:Disconnect()
 		end
 	end
 
-	for _, tagConnections in pairs(self.tagConnections) do
-		for _, tagConnection in ipairs(tagConnections) do
+	for _, tagConnections in self.tagConnections do
+		for _, tagConnection in tagConnections do
 			tagConnection:Disconnect()
 		end
 	end
@@ -170,7 +170,7 @@ function Watcher:__connectEvents(instance)
 			end)
 		)
 
-		for _, tag in ipairs(instance:GetTags()) do
+		for _, tag in instance:GetTags() do
 			self:__watchTag(tag)
 		end
 	end
@@ -210,7 +210,7 @@ function Watcher:__unwatchTag(tag)
 	local tagConnections = self.tagConnections[tag]
 
 	if tagConnections then
-		for _, tagConnection in ipairs(tagConnections) do
+		for _, tagConnection in tagConnections do
 			tagConnection:Disconnect()
 		end
 
@@ -239,7 +239,7 @@ function Watcher:__onRemoved(instance)
 	local connections = self.connections[instance]
 
 	if connections then
-		for _, connection in ipairs(connections) do
+		for _, connection in connections do
 			connection:Disconnect()
 		end
 

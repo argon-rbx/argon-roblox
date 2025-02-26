@@ -51,14 +51,14 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 
 	local changes = Changes.new()
 
-	for _, child in ipairs(snapshot.children) do
+	for _, child in snapshot.children do
 		changes:join(self:diff(child, snapshot.id, initialSyncPriority == "Client"))
 	end
 
 	if not Config:get("OverridePackages") and initialSyncPriority == "Server" then
 		local temp = {}
 
-		for _, snapshot in ipairs(changes.additions) do
+		for _, snapshot in changes.additions do
 			local instance = self.tree:getInstance(snapshot.parent)
 
 			if instance and isPackageDescendant(instance) then
@@ -66,12 +66,12 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 			end
 		end
 
-		for i, snapshot in ipairs(temp) do
+		for i, snapshot in temp do
 			table.remove(changes.additions, table.find(changes.additions, snapshot))
 			temp[i] = nil
 		end
 
-		for _, snapshot in ipairs(changes.updates) do
+		for _, snapshot in changes.updates do
 			local instance = self.tree:getInstance(snapshot.id)
 
 			if instance and isPackageDescendant(instance) then
@@ -79,18 +79,18 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 			end
 		end
 
-		for i, snapshot in ipairs(temp) do
+		for i, snapshot in temp do
 			table.remove(changes.updates, table.find(changes.updates, snapshot))
 			temp[i] = nil
 		end
 
-		for _, instance in ipairs(changes.removals) do
+		for _, instance in changes.removals do
 			if isPackageDescendant(instance) then
 				table.insert(temp, instance)
 			end
 		end
 
-		for i, instance in ipairs(temp) do
+		for i, instance in temp do
 			table.remove(changes.removals, table.find(changes.removals, instance))
 			temp[i] = nil
 		end
@@ -105,7 +105,7 @@ function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	local children = instance:GetChildren()
 	local hydrated = table.create(#children, false)
 
-	for _, snapshotChild in ipairs(snapshot.children) do
+	for _, snapshotChild in snapshot.children do
 		for index, child in children do
 			if hydrated[index] then
 				continue
@@ -136,7 +136,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, clientPrior
 		local defaultProperties = Dom.getDefaultProperties(instance.ClassName)
 		local updatedProperties = {}
 
-		for property, default in pairs(defaultProperties) do
+		for property, default in defaultProperties do
 			local value = snapshot.properties[property]
 
 			if value then
@@ -224,11 +224,11 @@ function Processor:reverseChanges(changes: Types.Changes): Types.Changes
 
 	local reversed = Changes.new()
 
-	for _, snapshot in ipairs(changes.additions) do
+	for _, snapshot in changes.additions do
 		reversed:remove(snapshot.id)
 	end
 
-	for _, snapshot in ipairs(changes.updates) do
+	for _, snapshot in changes.updates do
 		snapshot = self.read:onChange(self.tree:getInstance(snapshot.id))
 
 		if snapshot then
@@ -236,7 +236,7 @@ function Processor:reverseChanges(changes: Types.Changes): Types.Changes
 		end
 	end
 
-	for _, instance in ipairs(changes.removals) do
+	for _, instance in changes.removals do
 		local snapshot = self.read:onAdd(instance)
 
 		if snapshot then

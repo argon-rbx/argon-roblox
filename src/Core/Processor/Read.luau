@@ -11,6 +11,10 @@ local generateRef = require(Argon.Helpers.generateRef)
 local Snapshot = require(script.Parent.Parent.Snapshot)
 local Error = require(script.Parent.Parent.Error)
 
+local function isScriptRelated(instance: Instance): boolean
+	return instance:IsA("LuaSourceContainer") or instance:FindFirstChildWhichIsA("LuaSourceContainer", true) ~= nil
+end
+
 local ReadProcessor = {}
 ReadProcessor.__index = ReadProcessor
 
@@ -23,7 +27,7 @@ end
 function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
 	Log.trace("Detected addition of", instance)
 
-	if not self.isScriptRelated(instance) and Config:get("OnlyCodeMode") then
+	if not isScriptRelated(instance) and Config:get("OnlyCodeMode") then
 		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
 		return nil
 	end
@@ -68,7 +72,7 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 		end
 	end
 
-	for _, child in ipairs(instance:GetChildren()) do
+	for _, child in instance:GetChildren() do
 		local snapshot = self:onAdd(child, id)
 
 		if snapshot then
@@ -135,7 +139,7 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 		return nil
 	end
 
-	if not self.isScriptRelated(instance) and Config:get("OnlyCodeMode") then
+	if not isScriptRelated(instance) and Config:get("OnlyCodeMode") then
 		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
 		return nil
 	end
@@ -198,10 +202,6 @@ end
 
 function ReadProcessor.shouldSyncProperties(instance: Instance, property: string?): boolean
 	return instance:IsA("LuaSourceContainer") or Config:get("SyncbackProperties") or property == "Name"
-end
-
-function ReadProcessor.isScriptRelated(instance: Instance): boolean
-	return instance:IsA("LuaSourceContainer") or instance:FindFirstChildWhichIsA("LuaSourceContainer", true) ~= nil
 end
 
 return ReadProcessor

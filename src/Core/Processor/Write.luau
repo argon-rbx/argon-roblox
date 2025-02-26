@@ -38,7 +38,7 @@ local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
 		return false
 	end
 
-	for _, property in ipairs(MESH_RELOAD_PROPERTIES) do
+	for _, property in MESH_RELOAD_PROPERTIES do
 		local value = properties[property]
 
 		if not value then
@@ -79,15 +79,15 @@ function WriteProcessor:applyChanges(changes: Types.Changes, initial: boolean?)
 
 	setWaypoint("Sync")
 
-	for _, snapshot in ipairs(changes.additions) do
+	for _, snapshot in changes.additions do
 		self:applyAddition(snapshot, initial)
 	end
 
-	for _, snapshot in ipairs(changes.updates) do
+	for _, snapshot in changes.updates do
 		self:applyUpdate(snapshot, initial)
 	end
 
-	for _, object in ipairs(changes.removals) do
+	for _, object in changes.removals do
 		self:applyRemoval(object, initial)
 	end
 
@@ -172,7 +172,7 @@ function WriteProcessor:applyAddition(
 
 	instance.Name = snapshot.name
 
-	for property, value in pairs(snapshot.properties) do
+	for property, value in snapshot.properties do
 		local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
 
 		if not decodeSuccess then
@@ -196,7 +196,7 @@ function WriteProcessor:applyAddition(
 
 	self.tree:insertInstance(instance, snapshot.id, snapshot.meta)
 
-	for _, child in ipairs(snapshot.children) do
+	for _, child in snapshot.children do
 		child.parent = snapshot.id
 
 		self:applyAddition(child, initial)
@@ -238,7 +238,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		self.tree:updateMeta(snapshot.id, snapshot.meta)
 
 		if not snapshot.meta.keepUnknowns and not Config:get("KeepUnknowns") then
-			for _, child in ipairs(instance:GetChildren()) do
+			for _, child in instance:GetChildren() do
 				if self.tree:getId(child) then
 					continue
 				end
@@ -269,7 +269,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 
 		newInstance.Name = instance.Name
 
-		for property in pairs(defaultProperties) do
+		for property in defaultProperties do
 			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
 			if readSuccess then
@@ -282,7 +282,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 			end
 		end
 
-		for _, child in ipairs(instance:GetChildren()) do
+		for _, child in instance:GetChildren() do
 			child.Parent = newInstance
 		end
 
@@ -300,7 +300,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 
 	if snapshot.properties then
 		if initial then
-			for property, value in pairs(snapshot.properties) do
+			for property, value in snapshot.properties do
 				local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
 
 				if not decodeSuccess then
@@ -318,7 +318,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 				end
 			end
 		else
-			for property, default in pairs(defaultProperties or Dom.getDefaultProperties(instance.ClassName)) do
+			for property, default in (defaultProperties or Dom.getDefaultProperties(instance.ClassName)) do
 				local value = snapshot.properties[property]
 
 				if value then

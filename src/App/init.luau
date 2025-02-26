@@ -145,7 +145,7 @@ end
 function App:setPage(page)
 	local pages = peek(self.pages)
 
-	for id, child in pairs(pages) do
+	for id, child in pages do
 		if child._finished then
 			page[id] = nil
 			continue
@@ -207,7 +207,7 @@ function App:setPage(page)
 		local TWEEN_INFO = TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 		TweenService:Create(page, TWEEN_INFO, { BackgroundTransparency = 1 }):Play()
 
-		for _, descendant in ipairs(page:GetDescendants()) do
+		for _, descendant in page:GetDescendants() do
 			local properties = {}
 
 			if descendant:IsA("GuiObject") then

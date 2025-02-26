@@ -109,11 +109,11 @@ do
 
 		Theme.IsDark:set(isDark)
 
-		for key, color in pairs(getColors(isDark)) do
+		for key, color in getColors(isDark) do
 			if type(color) ~= "table" then
 				Theme.Colors[key]:set(color)
 			else
-				for subKey, subColor in pairs(color) do
+				for subKey, subColor in color do
 					Theme.Colors[key][subKey] = subColor
 				end
 			end

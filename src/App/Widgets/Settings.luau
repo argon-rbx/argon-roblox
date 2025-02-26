@@ -355,7 +355,7 @@ return function(props: Props): DockWidgetPluginGui
 						Selected = function(option)
 							level:set(option)
 
-							for setting, binding in pairs(bindings) do
+							for setting, binding in bindings do
 								binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
 							end
 						end,
@@ -389,7 +389,7 @@ return function(props: Props): DockWidgetPluginGui
 								Position = UDim2.fromScale(1, 0),
 								Text = "Restore Defaults",
 								Activated = function()
-									for setting, binding in pairs(bindings) do
+									for setting, binding in bindings do
 										binding:set(Config:getDefault(setting))
 									end
 

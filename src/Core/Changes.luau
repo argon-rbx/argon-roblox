@@ -31,15 +31,15 @@ function Changes:remove(object: Types.Ref | Instance)
 end
 
 function Changes:join(other: Types.Changes)
-	for _, addition in ipairs(other.additions) do
+	for _, addition in other.additions do
 		self:add(addition)
 	end
 
-	for _, update in ipairs(other.updates) do
+	for _, update in other.updates do
 		self:update(update)
 	end
 
-	for _, removal in ipairs(other.removals) do
+	for _, removal in other.removals do
 		self:remove(removal)
 	end
 end

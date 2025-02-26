@@ -178,7 +178,7 @@ return function(props: Props): TextButton
 	do
 		local maxSize = Vector2.zero
 
-		for _, option in ipairs(props.Options) do
+		for _, option in props.Options do
 			local textSize = getTextSize(option)
 
 			if textSize.X > maxSize.X then
