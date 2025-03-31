@@ -11,7 +11,7 @@ local equals = require(Argon.Helpers.equals)
 
 local Error = require(script.Parent.Parent.Error)
 
-local MESH_RELOAD_PROPERTIES = { "MeshId", "InitialSize" }
+local MESH_RELOAD_PROPERTIES = { "MeshContent", "InitialSize" }
 
 local function setWaypoint(action: string, name: string?)
 	name = name and ` "{name}"` or ""
@@ -62,6 +62,16 @@ local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
 	end
 
 	return false
+end
+
+local function warnNotCreatable(class: string)
+	local err = Error.new(Error.NotCreatable, class)
+
+	if class == "PackageLink" and not Config:get("OverridePackages") then
+		Log.info(err)
+	else
+		Log.warn(err)
+	end
 end
 
 local WriteProcessor = {}
@@ -159,14 +169,7 @@ function WriteProcessor:applyAddition(
 			return
 		end
 	else
-		local err = Error.new(Error.NotCreatable, snapshot.class)
-
-		if snapshot.class == "PackageLink" and not Config:get("OverridePackages") then
-			Log.info(err)
-		else
-			Log.warn(err)
-		end
-
+		warnNotCreatable(snapshot.class)
 		return
 	end
 
@@ -255,10 +258,15 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 		local newInstance
 
 		if snapshot.class then
+			if not Dom.isCreatable(snapshot.class) then
+				warnNotCreatable(snapshot.class)
+				return
+			end
+
 			newInstance = Instance.new(snapshot.class)
 			defaultProperties = Dom.getDefaultProperties(snapshot.class)
 		else
-			newInstance = loadMesh(snapshot.meta.meshSource or "Luau LSP fix")
+			newInstance = loadMesh(snapshot.meta.meshSource :: string)
 
 			if not newInstance then
 				return

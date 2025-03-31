@@ -64,7 +64,7 @@ local function isCreatable(className)
 	local class = database.Classes[className]
 
 	if not class then
-		return nil
+		return false
 	end
 
 	return table.find(class.Tags, "NotCreatable") == nil

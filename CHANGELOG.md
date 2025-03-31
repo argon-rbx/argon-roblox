@@ -6,9 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Support for new `Content` data type
+
 ### Changed
 
 - All initial sync changes can now be reverted in a single undo or redo step
+- Updated `rbx-dom` library to the latest major version
+
+### Fixed
+
+- MeshPart's MeshId property is now properly applied when connecting for the first time
+- Improper instance class changes no longer cause a crash
 
 ## [2.0.17] - 2025-02-05
 

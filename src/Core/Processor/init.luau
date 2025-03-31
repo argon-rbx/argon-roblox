@@ -185,6 +185,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, clientPrior
 			changes:update({
 				id = snapshot.id,
 				properties = updatedProperties,
+				meta = snapshot.meta.meshSource and snapshot.meta or nil,
 			})
 		end
 	end
