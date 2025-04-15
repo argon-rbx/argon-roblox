@@ -55,6 +55,38 @@ local function Button(props: ButtonProps): TextButton
 		state
 	)
 
+	local children = if props.IsFirst
+		then {
+			Corner {},
+			New "Frame" {
+				AnchorPoint = Vector2.new(1, 0),
+				Position = UDim2.fromScale(1, 0),
+				Size = UDim2.fromScale(0.1, 1),
+				BackgroundColor3 = color,
+				BorderSizePixel = 0,
+			},
+		}
+		elseif props.IsLast then {
+			Corner {},
+			New "Frame" {
+				Size = UDim2.fromScale(0.1, 1),
+				BackgroundColor3 = color,
+				BorderSizePixel = 0,
+			},
+		}
+		else {}
+
+	if not props.IsFirst then
+		table.insert(
+			children,
+			New "Frame" {
+				Size = UDim2.new(0, Theme.BorderThickness, 1, 0),
+				BackgroundColor3 = Theme.Colors.Border,
+				BorderSizePixel = 0,
+			}
+		)
+	end
+
 	return Hydrate(New "TextButton" {
 		Size = UDim2.fromScale(1, 1),
 		FontFace = Theme.Fonts.Regular,
@@ -85,26 +117,7 @@ local function Button(props: ButtonProps): TextButton
 			end
 		end,
 
-		[Children] = if props.IsFirst
-			then {
-				Corner {},
-				New "Frame" {
-					AnchorPoint = Vector2.new(1, 0),
-					Position = UDim2.fromScale(1, 0),
-					Size = UDim2.fromScale(0.1, 1),
-					BackgroundColor3 = color,
-					BorderSizePixel = 0,
-				},
-			}
-			elseif props.IsLast then {
-				Corner {},
-				New "Frame" {
-					Size = UDim2.fromScale(0.1, 1),
-					BackgroundColor3 = color,
-					BorderSizePixel = 0,
-				},
-			}
-			else {},
+		[Children] = children,
 	})(stripProps(props, BUTTON_COMPONENT_ONLY_PROPS))
 end
 

@@ -209,15 +209,6 @@ return {
 		},
 	},
 	MeshPart = {
-		MeshId = {
-			read = function(instance: MeshPart)
-				return true, instance.MeshId
-			end,
-			write = function()
-				-- Argon handles this in a custom way
-				return true
-			end,
-		},
 		MeshContent = {
 			read = function(instance: MeshPart)
 				return true, instance.MeshContent
