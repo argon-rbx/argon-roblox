@@ -201,7 +201,15 @@ function ReadProcessor:onRemove(instance: Instance): Types.Ref?
 end
 
 function ReadProcessor.shouldSyncProperties(instance: Instance, property: string?): boolean
-	return instance:IsA("LuaSourceContainer") or Config:get("SyncbackProperties") or property == "Name"
+	if instance:IsA("LuaSourceContainer") or property == "Name" then
+		return true
+	end
+
+	if property and not Dom.getDefaultProperties(instance.ClassName)[property] then
+		return false
+	end
+
+	return Config:get("SyncbackProperties")
 end
 
 return ReadProcessor

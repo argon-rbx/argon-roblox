@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Support for new `Content` data type
 - Minor UI enhancements
 
+### Fixed
+
+- Changing unsynced properties like `GuiState` no longer triggers syncback
+
 ### Changed
 
 - All initial sync changes can now be reverted in a single undo or redo step
