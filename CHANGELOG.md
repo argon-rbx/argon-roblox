@@ -9,21 +9,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Support for new `Content` data type
+- `game.Name` property can now be synced
 - Minor UI enhancements
-
-### Fixed
-
-- Changing unsynced properties like `GuiState` no longer triggers syncback
-
-### Changed
-
-- All initial sync changes can now be reverted in a single undo or redo step
-- Updated `rbx-dom` library to the latest major version
 
 ### Fixed
 
 - MeshPart's MeshId property is now properly applied when connecting for the first time
 - Improper instance class changes no longer cause a crash
+- Changing unsynced properties like `GuiState` no longer triggers syncback
+- `Attributes` and `Tags` of non-Value instances are now synced back properly
+
+### Changed
+
+- All initial sync changes can now be reverted in a single undo or redo step
+- Updated `rbx-dom` library to the latest major version
 
 ## [2.0.17] - 2025-02-05
 

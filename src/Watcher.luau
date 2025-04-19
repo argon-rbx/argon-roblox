@@ -11,10 +11,8 @@ local Log = require(Argon.Log)
 type Watcher = typeof(setmetatable(
 	{} :: {
 		isActive: boolean,
-		rootInstances: { Instance },
 		connections: { [Instance]: { RBXScriptConnection } },
 		tagConnections: { [string | CollectionService]: { RBXScriptConnection } },
-		valueInstances: { [Instance]: boolean },
 		signal: Signal.Signal,
 	},
 	{} :: WatcherImpl
@@ -41,10 +39,8 @@ Watcher.__index = Watcher
 function Watcher.new()
 	return setmetatable({
 		isActive = false,
-		rootInstances = {},
 		connections = {},
 		tagConnections = {},
-		valueInstances = {},
 		signal = Signal.new(),
 	}, Watcher)
 end
@@ -53,7 +49,8 @@ function Watcher:start(rootInstances)
 	Log.trace("Starting watcher..")
 
 	self.isActive = true
-	self.rootInstances = rootInstances
+
+	self:__connectEvents(game)
 
 	for _, instance in rootInstances do
 		self:__connectEvents(instance)
@@ -102,10 +99,8 @@ function Watcher:stop()
 	end
 
 	self.isActive = false
-	self.rootInstances = {}
 	self.connections = {}
 	self.tagConnections = {}
-	self.valueInstances = {}
 end
 
 function Watcher:restart(instances)
@@ -130,49 +125,42 @@ function Watcher:__connectEvents(instance)
 
 	local connections = {}
 
+	if instance ~= game then
+		table.insert(
+			connections,
+			instance.ChildAdded:Connect(function(child)
+				self:__onAdded(child)
+			end)
+		)
+
+		table.insert(
+			connections,
+			instance.ChildRemoved:Connect(function(child)
+				self:__onRemoved(child)
+			end)
+		)
+	end
+
+	local isValue = instance:IsA("ValueBase")
+
 	table.insert(
 		connections,
-		instance.ChildAdded:Connect(function(child)
-			self:__onAdded(child)
+		instance.Changed:Connect(function(property)
+			if property ~= "Parent" then
+				self:__onChanged(instance, isValue and "Value" or property)
+			end
 		end)
 	)
 
 	table.insert(
 		connections,
-		instance.ChildRemoved:Connect(function(child)
-			self:__onRemoved(child)
+		instance.AttributeChanged:Connect(function(_attribute)
+			self:__onChanged(instance, "Attributes")
 		end)
 	)
 
-	if not instance:IsA("ValueBase") then
-		table.insert(
-			connections,
-			instance.Changed:Connect(function(property)
-				if property ~= "Parent" then
-					self:__onChanged(instance, property)
-				end
-			end)
-		)
-	else
-		self.valueInstances[instance] = true
-
-		table.insert(
-			connections,
-			instance.Changed:Connect(function(_value)
-				self:__onChanged(instance, "Value")
-			end)
-		)
-
-		table.insert(
-			connections,
-			instance.AttributeChanged:Connect(function(_attribute)
-				self:__onChanged(instance, "Attributes")
-			end)
-		)
-
-		for _, tag in instance:GetTags() do
-			self:__watchTag(tag)
-		end
+	for _, tag in instance:GetTags() do
+		self:__watchTag(tag)
 	end
 
 	self.connections[instance] = connections
@@ -188,18 +176,14 @@ function Watcher:__watchTag(tag)
 	table.insert(
 		tagConnections,
 		CollectionService:GetInstanceAddedSignal(tag):Connect(function(instance)
-			if self.valueInstances[instance] then
-				self:__onChanged(instance, "Tags")
-			end
+			self:__onChanged(instance, "Tags")
 		end)
 	)
 
 	table.insert(
 		tagConnections,
 		CollectionService:GetInstanceRemovedSignal(tag):Connect(function(instance)
-			if self.valueInstances[instance] then
-				self:__onChanged(instance, "Tags")
-			end
+			self:__onChanged(instance, "Tags")
 		end)
 	)
 
@@ -244,10 +228,6 @@ function Watcher:__onRemoved(instance)
 		end
 
 		self.connections[instance] = nil
-	end
-
-	if self.valueInstances[instance] then
-		self.valueInstances[instance] = nil
 	end
 
 	self.signal:Fire({
