@@ -50,8 +50,6 @@ function Watcher:start(rootInstances)
 
 	self.isActive = true
 
-	self:__connectEvents(game)
-
 	for _, instance in rootInstances do
 		self:__connectEvents(instance)
 
@@ -124,24 +122,21 @@ function Watcher:__connectEvents(instance)
 	end
 
 	local connections = {}
-
-	if instance ~= game then
-		table.insert(
-			connections,
-			instance.ChildAdded:Connect(function(child)
-				self:__onAdded(child)
-			end)
-		)
-
-		table.insert(
-			connections,
-			instance.ChildRemoved:Connect(function(child)
-				self:__onRemoved(child)
-			end)
-		)
-	end
-
 	local isValue = instance:IsA("ValueBase")
+
+	table.insert(
+		connections,
+		instance.ChildAdded:Connect(function(child)
+			self:__onAdded(child)
+		end)
+	)
+
+	table.insert(
+		connections,
+		instance.ChildRemoved:Connect(function(child)
+			self:__onRemoved(child)
+		end)
+	)
 
 	table.insert(
 		connections,

@@ -49,7 +49,11 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 
 	Log.trace("Diffing initial snapshot..")
 
-	local changes = self:diff(snapshot, nil, initialSyncPriority == "Client")
+	local changes = Changes.new()
+
+	for _, child in snapshot.children do
+		changes:join(self:diff(child, snapshot.id, initialSyncPriority == "Client"))
+	end
 
 	if not Config:get("OverridePackages") and initialSyncPriority == "Server" then
 		local temp = {}
@@ -116,7 +120,7 @@ function Processor:hydrate(snapshot: Types.Snapshot, instance: Instance)
 	end
 end
 
-function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref?, clientPriority: boolean): Types.Changes
+function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, clientPriority: boolean): Types.Changes
 	local changes = Changes.new()
 
 	local instance = self.tree:getInstance(snapshot.id)
@@ -125,14 +129,6 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref?, clientPrio
 	if not instance then
 		changes:add(snapshot, parent)
 		return changes
-	end
-
-	-- Check if DataModel name changed
-	if not parent and not equals(instance.Name, snapshot.name) then
-		changes:update({
-			id = snapshot.id,
-			name = snapshot.name,
-		})
 	end
 
 	-- Diff properties, find updated ones

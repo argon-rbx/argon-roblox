@@ -9,7 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Support for new `Content` data type
-- `game.Name` property can now be synced
 - Minor UI enhancements
 
 ### Fixed
