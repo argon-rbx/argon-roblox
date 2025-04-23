@@ -203,7 +203,7 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, clientPrior
 		local childId = self.tree:getId(child)
 
 		if childId then
-			local childSnapshot = Util.filter(snapshot.children, function(child)
+			local childSnapshot = Util.find(snapshot.children, function(child)
 				return equals(child.id, childId)
 			end)
 

@@ -52,10 +52,6 @@ function Watcher:start(rootInstances)
 
 	for _, instance in rootInstances do
 		self:__connectEvents(instance)
-
-		for _, descendant in instance:GetDescendants() do
-			self:__connectEvents(descendant)
-		end
 	end
 
 	local tagConnections = {}
@@ -159,6 +155,10 @@ function Watcher:__connectEvents(instance)
 	end
 
 	self.connections[instance] = connections
+
+	for _, child in instance:GetChildren() do
+		self:__connectEvents(child)
+	end
 end
 
 function Watcher:__watchTag(tag)

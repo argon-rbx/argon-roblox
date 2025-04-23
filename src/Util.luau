@@ -39,9 +39,9 @@ function Util.dictionaryToArray(dictionary: { [any]: any }, __lastArray: { any }
 end
 
 --- Find the value and key of the first element that passes the filter
-function Util.filter<K, V>(table: { [K]: V }, filter: (value: V, key: K) -> boolean): (V?, K?)
+function Util.find<K, V>(table: { [K]: V }, compare: (value: V, key: K) -> boolean): (V?, K?)
 	for key, value in table do
-		if filter(value, key) then
+		if compare(value, key) then
 			return value, key
 		end
 	end

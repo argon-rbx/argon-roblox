@@ -347,7 +347,7 @@ function Core:__startSyncbackLoop()
 				end
 			end
 
-			aggregateChanges:join(changes)
+			aggregateChanges:join(changes, true)
 		end
 
 		resolve()

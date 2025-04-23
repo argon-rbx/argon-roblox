@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Improper instance class changes no longer cause a crash
 - Changing unsynced properties like `GuiState` no longer triggers syncback
 - `Attributes` and `Tags` of non-Value instances are now synced back properly
+- Instances added after initial sync are now watched for changes
+- Making rapid changes to the same instance no longer yields multiple changes on the server
 
 ### Changed
 

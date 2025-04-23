@@ -30,17 +30,39 @@ function Changes:remove(object: Types.Ref | Instance)
 	table.insert(self.removals, object)
 end
 
-function Changes:join(other: Types.Changes)
+function Changes:join(other: Types.Changes, check: boolean?)
 	for _, addition in other.additions do
+		if check then
+			self:removePrevious("additions", addition.id)
+		end
+
 		self:add(addition)
 	end
 
 	for _, update in other.updates do
+		if check then
+			self:removePrevious("updates", update.id)
+		end
+
 		self:update(update)
 	end
 
 	for _, removal in other.removals do
+		if check then
+			self:removePrevious("removals", removal)
+		end
+
 		self:remove(removal)
+	end
+end
+
+function Changes:removePrevious(kind: "additions" | "updates" | "removals", id: Types.Ref)
+	local changeId = buffer.tostring(id)
+
+	for index, change in self[kind] do
+		if buffer.tostring(kind == "removals" and change or change.id) == changeId then
+			table.remove(self[kind], index)
+		end
 	end
 end
 
