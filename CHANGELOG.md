@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.18] - 2025-04-28
+
 ### Added
 
 - Support for new `Content` data type
@@ -267,7 +269,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.17...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.18...HEAD
+[2.0.18]: https://github.com/argon-rbx/argon-roblox/compare/2.0.17...2.0.18
 [2.0.17]: https://github.com/argon-rbx/argon-roblox/compare/2.0.16...2.0.17
 [2.0.16]: https://github.com/argon-rbx/argon-roblox/compare/2.0.15...2.0.16
 [2.0.15]: https://github.com/argon-rbx/argon-roblox/compare/2.0.14...2.0.15
