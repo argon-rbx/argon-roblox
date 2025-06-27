@@ -1,4 +1,5 @@
 std = "roblox"
+exclude = ["src/Dom/**"]
 
 [lints]
 shadowing = "allow"
