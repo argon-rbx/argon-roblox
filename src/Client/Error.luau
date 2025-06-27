@@ -49,7 +49,7 @@ function Error.fromMessage(message: string): Error
 		end
 	end
 
-	if message == "HttpError: Unknown" then
+	if message == "HttpError: Unknown" or message == "HttpError: NetFail" then
 		return Error.new(Error.ConnectFail)
 	end
 

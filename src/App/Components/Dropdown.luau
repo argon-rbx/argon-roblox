@@ -32,6 +32,7 @@ local Computed = Fusion.Computed
 local Children = Fusion.Children
 local Observer = Fusion.Observer
 local ForValues = Fusion.ForValues
+local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
 local BUTTON_COMPONENT_ONLY_PROPS = {
@@ -275,7 +276,7 @@ return function(props: Props): TextButton
 									IsFirst = isFirst and isOpen or nil,
 									IsLast = option == props.Options[#props.Options],
 								}
-							end, Fusion.cleanup),
+							end, cleanup),
 						},
 					},
 				},

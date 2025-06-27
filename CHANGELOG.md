@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Renaming root project no longer causes a crash
+- Handle `NetFail` error on Windows and display useful message instead
+
+### Changed
+
+- Main page hostname and port inputs now update when respective settings are changed
 
 ## [2.0.18] - 2025-04-28
 

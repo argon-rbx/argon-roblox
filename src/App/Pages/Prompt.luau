@@ -22,6 +22,7 @@ local Computed = Fusion.Computed
 local ForPairs = Fusion.ForPairs
 local OnChange = Fusion.OnChange
 local Children = Fusion.Children
+local cleanup = Fusion.cleanup
 
 type Props = {
 	App: { [string]: any },
@@ -92,7 +93,7 @@ return function(props: Props): { Instance }
 								props.Signal:Fire(option)
 							end,
 						}
-				end, Fusion.cleanup),
+				end, cleanup),
 			},
 		},
 	}

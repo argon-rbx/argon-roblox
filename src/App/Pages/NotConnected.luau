@@ -22,6 +22,7 @@ local Box = require(Components.Box)
 
 local New = Fusion.New
 local Value = Fusion.Value
+local Cleanup = Fusion.Cleanup
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local Spring = Fusion.Spring
@@ -32,12 +33,25 @@ type Props = {
 	Port: number,
 }
 
+local function getValue(setting: Config.Setting, value: any): string
+	return value ~= Config:getDefault(setting) and value or ""
+end
+
 return function(props: Props): { Instance }
-	local hostInput = Value(props.Host ~= Config:getDefault("Host") and props.Host or "")
-	local portInput = Value(props.Port ~= Config:getDefault("Port") and props.Port or "")
+	local hostInput = Value(getValue("Host", props.Host))
+	local portInput = Value(getValue("Port", props.Port))
 
 	local hostFocused = Value(false)
 	local portFocused = Value(false)
+
+	local connections = {
+		Config:onChanged("Host", function(value)
+			hostInput:set(getValue("Host", value))
+		end),
+		Config:onChanged("Port", function(value)
+			portInput:set(getValue("Port", value))
+		end),
+	}
 
 	return {
 		List {},
@@ -127,6 +141,7 @@ return function(props: Props): { Instance }
 					Vertical = false,
 				},
 			},
+			[Cleanup] = connections,
 		},
 		Container {
 			Size = UDim2.fromScale(1, 0),

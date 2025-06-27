@@ -40,6 +40,7 @@ local OnChange = Fusion.OnChange
 local ForValues = Fusion.ForValues
 local ForPairs = Fusion.ForPairs
 local Spring = Fusion.Spring
+local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
 local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
@@ -377,9 +378,9 @@ return function(props: Props): DockWidgetPluginGui
 										Level = level,
 										Binding = binding,
 									}
-								end, Fusion.cleanup),
+								end, cleanup),
 							}
-					end, Fusion.cleanup),
+					end, cleanup),
 					Container {
 						Size = UDim2.fromScale(1, 0),
 						LayoutOrder = GlobalUtil.len(SETTINGS_DATA) + 1,

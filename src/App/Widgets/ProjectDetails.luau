@@ -23,6 +23,7 @@ local Hydrate = Fusion.Hydrate
 local Children = Fusion.Children
 local Computed = Fusion.Computed
 local ForValues = Fusion.ForValues
+local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
 type EntryProps = {
@@ -109,7 +110,7 @@ local function IconListEntry(props: IconListEntryProps): Frame
 								},
 							},
 						}
-					end, Fusion.cleanup),
+					end, cleanup),
 				},
 			},
 		},

@@ -22,6 +22,7 @@ local OnEvent = Fusion.OnEvent
 local Computed = Fusion.Computed
 local Children = Fusion.Children
 local ForValues = Fusion.ForValues
+local cleanup = Fusion.cleanup
 local peek = Fusion.peek
 
 local BUTTON_COMPONENT_ONLY_PROPS = {
@@ -169,7 +170,7 @@ return function(props: Props): Frame
 					IsFirst = option == props.Options[1],
 					IsLast = option == props.Options[#props.Options],
 				}
-			end, Fusion.cleanup),
+			end, cleanup),
 		},
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end
