@@ -238,9 +238,12 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	local defaultProperties
 
 	if snapshot.meta then
-		self.tree:updateMeta(snapshot.id, snapshot.meta)
+		local meta = self.tree:getMeta(snapshot.id)
 
-		if not snapshot.meta.keepUnknowns and not Config:get("KeepUnknowns") then
+		if
+			meta.keepUnknowns ~= snapshot.meta.keepUnknowns
+			and (not snapshot.meta.keepUnknowns and not Config:get("KeepUnknowns"))
+		then
 			for _, child in instance:GetChildren() do
 				if self.tree:getId(child) then
 					continue
@@ -249,6 +252,8 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 				self:applyRemoval(child)
 			end
 		end
+
+		self.tree:updateMeta(snapshot.id, snapshot.meta)
 	end
 
 	if
@@ -369,6 +374,10 @@ function WriteProcessor:applyRemoval(object: Types.Ref | Instance, initial: bool
 	Log.trace("Applying removal of", object)
 
 	if typeof(object) == "Instance" then
+		if not Dom.isCreatable(object.ClassName) then
+			return
+		end
+
 		self.tree:removeByInstance(object)
 		object.Parent = nil
 	else

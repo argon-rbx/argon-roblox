@@ -67,7 +67,7 @@ local function isCreatable(className)
 		return false
 	end
 
-	return table.find(class.Tags, "NotCreatable") == nil
+	return (table.find(class.Tags, "NotCreatable") or table.find(class.Tags, "Service")) == nil
 end
 
 local function readProperty(instance, propertyName)

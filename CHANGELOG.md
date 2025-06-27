@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Renaming root project no longer causes a crash
+
 ## [2.0.18] - 2025-04-28
 
 ### Added
