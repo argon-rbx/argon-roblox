@@ -1,5 +1,3 @@
-local ChangeHistoryService = game:GetService("ChangeHistoryService")
-
 local Argon = script:FindFirstAncestor("Argon")
 
 local Dom = require(Argon.Dom)
@@ -8,15 +6,11 @@ local Types = require(Argon.Types)
 local Config = require(Argon.Config)
 
 local equals = require(Argon.Helpers.equals)
+local setWaypoint = require(Argon.Helpers.setWaypoint)
 
 local Error = require(script.Parent.Parent.Error)
 
 local MESH_RELOAD_PROPERTIES = { "MeshContent", "InitialSize" }
-
-local function setWaypoint(action: string, name: string?)
-	name = name and ` "{name}"` or ""
-	ChangeHistoryService:SetWaypoint(`Argon: {action}{name} [{DateTime.now():FormatLocalTime("LTS", "en-us")}]`)
-end
 
 local function loadMesh(path: string)
 	local success, mesh = pcall(function()

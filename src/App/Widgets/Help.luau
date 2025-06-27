@@ -40,6 +40,7 @@ end
 local function Paragraph(text: string)
 	return Text {
 		Text = text,
+		RichText = true,
 		TextWrapped = true,
 		TextSize = Theme.TextSize.Small,
 		Color = Theme.Colors.TextDimmed,
@@ -104,21 +105,21 @@ return function(props: Props): DockWidgetPluginGui
 					Link("Visit official website to learn more:", "https://argon.wiki"),
 					Entry {
 						Header "1. Setting up the project",
-						Paragraph 'First you need to create new Argon project. If you are using CLI run "argon init" command.',
-						Paragraph 'If you are using VS Code extension open command palette (ctrl/cmd + shift + P) and run "Argon: Open Menu" -> "Init".',
+						Paragraph "First you need to create new Argon project. If you are using CLI run <b>argon init</b> command.",
+						Paragraph "If you are using VS Code extension open command palette (ctrl/cmd + shift + P) and run <b>Argon: Open Menu</b> -> <b>Init</b>.",
 					},
 					Entry {
 						Header "2. Starting the server",
-						Paragraph 'To start the server run "argon serve" command in your terminal or use "Argon: Open Menu" -> "Serve" command in VS Code.',
+						Paragraph "To start the server run <b>argon serve</b> command in your terminal or use <b>Argon: Open Menu</b> -> <b>Serve</b> command in VS Code.",
 					},
 					Entry {
 						Header "3. Connecting to the server",
-						Paragraph 'To connect to the server first make sure that host name and port are the same. Then press "Connect" button and you are done!',
+						Paragraph "To connect to the server first make sure that host name and port are the same. Then press <b>Connect</b> button and you are done!",
 					},
 					Entry {
 						Header "4. Syncing",
 						Paragraph "Now you can finally start syncing your changes. Remember to save your files in order to see the changes in Roblox Studio.",
-						Paragraph "You can also enable Two-Way Sync in the settings to sync changes made in Studio back to the file system.",
+						Paragraph "You can also enable <b>Two-Way Sync</b> in the settings to sync changes made in studio back to the file system.",
 					},
 				},
 			},

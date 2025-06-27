@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Improved Help widget
+- Argon now creates history waypoint before executing your code
+
 ### Fixed
 
 - Renaming root project no longer causes a crash
