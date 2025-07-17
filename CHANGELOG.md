@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Renaming root project no longer causes a crash
 - Handle `NetFail` error on Windows and display useful message instead
+- `Content` datatype deserialization in some edge cases (temporary fix)
 
 ### Changed
 

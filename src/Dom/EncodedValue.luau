@@ -183,7 +183,8 @@ types = {
 				if pod == "None" then
 					return Content.none
 				else
-					error(`unexpected Content value '{pod}'`)
+					-- error(`unexpected Content value '{pod}'`)
+					return Content.fromUri(pod) -- temporary
 				end
 			else
 				local ty, value = next(pod)
