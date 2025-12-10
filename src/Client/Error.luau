@@ -14,6 +14,7 @@ local Error = {
 	NotSubscribed = "Client with this ID: $1, was not subscribed to the server",
 	-- HttpService
 	ConnectFail = "Failed to connect! Make sure the server is running and the address is correct",
+	ConnectionClosed = "Connection closed! The server has been stopped",
 	DnsResolve = "Host name is corrupted or not found",
 	Timedout = "HTTP request timed out",
 }

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Improved network error messages
+
+### Fixed
+
+- All "Failed to read property ... from instance" warnings
+
 ## [2.0.19] - 2025-07-17
 
 ### Added
