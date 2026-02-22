@@ -42,6 +42,7 @@ local Error = require(Pages.Error)
 
 local Settings = require(Widgets.Settings)
 local Help = require(Widgets.Help)
+local Diff = require(Widgets.Diff)
 
 local New = Fusion.New
 local Value = Fusion.Value
@@ -80,6 +81,7 @@ function App.new()
 
 	self.settingsWidget = Value(nil)
 	self.helpWidget = Value(nil)
+	self.diffWidget = Value(nil)
 
 	local isOpen = Value(false)
 
@@ -314,7 +316,7 @@ function App:connect()
 		canceled = true
 	end)
 
-	self.core:onPrompt(function(message, changes)
+	self.core:onPrompt(function(message, changes, tree)
 		loading = false
 
 		local signal = Signal.new()
@@ -337,9 +339,34 @@ function App:connect()
 			local choice = signal:Wait()
 
 			while choice == "Diff" do
-				warn("This feature is not yet implemented!")
-				print("You can see raw changes here:", changes)
+				local widget = peek(self.diffWidget)
+
+				if widget then
+					widget:Destroy()
+					self.diffWidget:set(nil)
+				else
+					widget = Diff {
+						Changes = changes,
+						Tree = tree,
+						Closed = function()
+							local w = peek(self.diffWidget)
+							if w then
+								w:Destroy()
+								self.diffWidget:set(nil)
+							end
+						end,
+					}
+					self.diffWidget:set(widget)
+				end
+
 				choice = signal:Wait()
+			end
+
+			-- Close diff widget when user accepts or cancels
+			local widget = peek(self.diffWidget)
+			if widget then
+				widget:Destroy()
+				self.diffWidget:set(nil)
 			end
 
 			result = choice == "Accept"
