@@ -41,19 +41,23 @@ local function formatValue(encoded: any): string
 	return "?"
 end
 
-local function formatSourceValue(encoded: any): string
+local function countLines(source: string): number
+	local lines = 0
+	for _ in source:gmatch("[^\n]*\n") do
+		lines += 1
+	end
+	if not source:find("\n$") and #source > 0 then
+		lines += 1
+	end
+	return lines
+end
+
+local function countSourceLines(encoded: any): number?
 	local ok, decoded = Dom.EncodedValue.decode(encoded)
 	if ok and type(decoded) == "string" then
-		local lines = 0
-		for _ in decoded:gmatch("[^\n]*\n") do
-			lines += 1
-		end
-		if not decoded:find("\n$") and #decoded > 0 then
-			lines += 1
-		end
-		return `{lines} line{lines ~= 1 and "s" or ""}`
+		return countLines(decoded)
 	end
-	return formatValue(encoded)
+	return nil
 end
 
 local function readCurrentValue(instance: Instance, propertyName: string): string
@@ -68,19 +72,12 @@ local function readCurrentValue(instance: Instance, propertyName: string): strin
 	return "?"
 end
 
-local function readCurrentSourceValue(instance: Instance, propertyName: string): string
+local function countCurrentSourceLines(instance: Instance, propertyName: string): number?
 	local ok, value = Dom.readProperty(instance, propertyName)
 	if ok and type(value) == "string" then
-		local lines = 0
-		for _ in value:gmatch("[^\n]*\n") do
-			lines += 1
-		end
-		if not value:find("\n$") and #value > 0 then
-			lines += 1
-		end
-		return `{lines} line{lines ~= 1 and "s" or ""}`
+		return countLines(value)
 	end
-	return readCurrentValue(instance, propertyName)
+	return nil
 end
 
 local function isSourceProperty(propertyName: string): boolean
@@ -159,18 +156,30 @@ local function UpdateEntry(snapshot: Types.UpdatedSnapshot, tree: any)
 
 	if snapshot.properties then
 		for propName, encodedValue in snapshot.properties do
-			local newVal
-			local curVal
-
-			if isSourceProperty(propName) then
-				newVal = formatSourceValue(encodedValue)
-				curVal = if instance then readCurrentSourceValue(instance, propName) else "?"
-			else
-				newVal = formatValue(encodedValue)
-				curVal = if instance then readCurrentValue(instance, propName) else "?"
+			local ty = next(encodedValue)
+			if ty == "Enum" then
+				continue
 			end
 
-			table.insert(children, PropertyLine(propName, curVal, newVal))
+			if isSourceProperty(propName) then
+				local newLines = countSourceLines(encodedValue)
+				local curLines = if instance then countCurrentSourceLines(instance, propName) else 0
+				if newLines and curLines then
+					local delta = newLines - curLines
+					local sign = if delta > 0 then "+" else ""
+					table.insert(children, Text {
+						Text = `    {propName}: {sign}{delta} line{math.abs(delta) ~= 1 and "s" or ""}`,
+						Color = Theme.Colors.TextDimmed,
+						TextSize = Theme.TextSize.Small,
+						Font = Theme.Fonts.Mono,
+						TextWrapped = true,
+					})
+				end
+			else
+				local newVal = formatValue(encodedValue)
+				local curVal = if instance then readCurrentValue(instance, propName) else "?"
+				table.insert(children, PropertyLine(propName, curVal, newVal))
+			end
 		end
 	end
 
@@ -185,8 +194,13 @@ local function UpdateEntry(snapshot: Types.UpdatedSnapshot, tree: any)
 	}
 end
 
-local function RemovalEntry(ref: Types.Ref, tree: any)
-	local instance = tree:getInstance(ref)
+local function RemovalEntry(object: Types.Ref | Instance, tree: any)
+	local instance
+	if typeof(object) == "Instance" then
+		instance = object
+	else
+		instance = tree:getInstance(object)
+	end
 	local name = if instance then instance.Name else "?"
 	local className = if instance then instance.ClassName else "?"
 
