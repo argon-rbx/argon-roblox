@@ -137,6 +137,22 @@ function WriteProcessor:applyAddition(
 		end
 	end
 
+	do
+		local existing = parent:FindFirstChild(snapshot.name)
+
+		if existing and existing:IsA(snapshot.class) and self.tree:getId(existing) then
+			Log.trace("Instance already tracked in parent. Re-associating..")
+			self.tree:insertInstance(existing, snapshot.id, snapshot.meta)
+
+			for _, child in snapshot.children do
+				child.parent = snapshot.id
+				self:applyAddition(child, initial)
+			end
+
+			return existing
+		end
+	end
+
 	local instance
 	local isService = false
 
