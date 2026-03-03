@@ -48,7 +48,7 @@ function Core.new(host: string?, port: string?)
 	self.watcher = Watcher.new()
 	self.executor = Executor.new()
 
-	self.__prompt = function(_message: string, _changes: Types.Changes?): boolean
+	self.__prompt = function(_message: string, _changes: Types.Changes?, _tree: any): boolean
 		return true
 	end
 	self.__ready = function(_project: Types.Project) end
@@ -159,13 +159,13 @@ function Core:stop()
 	Util.clean(self.connections)
 end
 
-function Core:onPrompt(callback: (message: string, changes: Types.Changes?) -> boolean)
+function Core:onPrompt(callback: (message: string, changes: Types.Changes?, tree: any) -> boolean)
 	self.__prompt = function(message, changes)
 		if self.status == Core.Status.Disconnecting then
 			return false
 		end
 
-		return callback(message, changes)
+		return callback(message, changes, self.tree)
 	end
 end
 
