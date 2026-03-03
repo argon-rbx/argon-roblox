@@ -96,7 +96,6 @@ local function Button(props: ButtonProps): TextButton
 		TextColor3 = Computed(function(use)
 			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
 		end),
-
 		[OnEvent "InputBegan"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(true)
@@ -119,7 +118,6 @@ local function Button(props: ButtonProps): TextButton
 
 			props.Activated()
 		end,
-
 		[Cleanup] = disconnect,
 		[Children] = GlobalUtil.join(
 			{
@@ -193,7 +191,6 @@ return function(props: Props): TextButton
 	return Hydrate(Container {
 		AutomaticSize = Enum.AutomaticSize.None,
 		Size = size,
-
 		[Children] = {
 			Padding {
 				Padding = 6,
@@ -213,14 +210,12 @@ return function(props: Props): TextButton
 			Box {
 				ClipsDescendants = true,
 				AutomaticSize = Enum.AutomaticSize.None,
-
 				Size = Spring(
 					Computed(function(use)
 						return UDim2.new(1, 12, use(isOpen) and #props.Options or 1, 0)
 					end),
 					40
 				),
-
 				AnchorPoint = Computed(function(use)
 					if use(isOpen) then
 						local index = table.find(props.Options, peek(value))
@@ -229,15 +224,12 @@ return function(props: Props): TextButton
 
 					return Vector2.new(0.5, peek(anchor))
 				end),
-
 				Position = Computed(function(use)
 					return UDim2.fromScale(0.5, use(isOpen) and 0 or use(anchor))
 				end),
-
 				[Children] = {
 					Container {
 						Size = UDim2.fromScale(1, #props.Options),
-
 						[Children] = {
 							List {
 								Spacing = 0,

@@ -65,7 +65,6 @@ return function(props: Props): TextButton
 		TextColor3 = Computed(function(use)
 			return use(props.Solid) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
 		end),
-
 		[OnEvent "InputBegan"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(true)
@@ -85,7 +84,6 @@ return function(props: Props): TextButton
 				props.Activated()
 			end
 		end,
-
 		[Children] = {
 			Border {
 				Color = Computed(function(use)

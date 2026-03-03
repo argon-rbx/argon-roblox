@@ -72,14 +72,12 @@ return function(props: Props): Frame
 			end),
 			30
 		),
-
 		[Children] = {
 			New "TextButton" {
 				Text = "",
 				AutoButtonColor = false,
 				Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large),
 				BackgroundColor3 = color,
-
 				[OnEvent "InputBegan"] = function(input)
 					if input.UserInputType == Enum.UserInputType.MouseMovement then
 						isHovered:set(true)
@@ -97,7 +95,6 @@ return function(props: Props): Frame
 				[OnEvent "Activated"] = function()
 					isExpanded:set(not peek(isExpanded))
 				end,
-
 				[Children] = {
 					Corner {},
 					Container {

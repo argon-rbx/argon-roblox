@@ -56,27 +56,22 @@ return function(props: Props): TextBox
 		TextScaled = props.Scaled,
 		-- If the text is not scaled, enable ClipsDescendants so text scrolling works correctly.
 		ClipsDescendants = not props.Scaled,
-
 		[OnChange "Text"] = function(text)
 			if props.Changed then
 				props.Changed(text)
 			end
 		end,
-
 		[OnEvent "Focused"] = function()
 			if props.Started then
 				props.Started()
 			end
 		end,
-
 		[OnEvent "FocusLost"] = function()
 			if props.Finished then
 				props.Finished(peek(text))
 			end
 		end,
-
 		[Out "Text"] = text,
-
 		[Children] = props.Scaled and New("UITextSizeConstraint") {
 			MaxTextSize = props.TextSize or Theme.TextSize.Large,
 		} or nil,

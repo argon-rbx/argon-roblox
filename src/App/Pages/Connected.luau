@@ -10,7 +10,7 @@ local Types = require(Argon.Types)
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
 
-local ProjectDetails = require(Widgets.ProjectDetails)
+local Project = require(Widgets.Project)
 local TextButton = require(Components.TextButton)
 local IconButton = require(Components.IconButton)
 local Container = require(Components.Container)
@@ -33,7 +33,7 @@ type Props = {
 
 return function(props: Props): { Instance }
 	local syncedText = Value("just now")
-	local projectDetailsWidget = Value(nil)
+	local projectWidget = Value(nil)
 
 	local function updateSyncedText()
 		return task.spawn(function()
@@ -144,30 +144,30 @@ return function(props: Props): { Instance }
 				IconButton {
 					Icon = Assets.Icons.Info,
 					BackgroundActive = Computed(function(use)
-						return use(projectDetailsWidget) ~= nil
+						return use(projectWidget) ~= nil
 					end),
 					Activated = function()
-						local widget = peek(projectDetailsWidget)
+						local widget = peek(projectWidget)
 
 						if widget then
 							widget:Destroy()
 							widget = nil
 						else
-							widget = ProjectDetails {
+							widget = Project {
 								App = props.App,
 								Project = props.Project,
 
 								Closed = function()
-									peek(projectDetailsWidget):Destroy()
-									projectDetailsWidget:set(nil)
+									peek(projectWidget):Destroy()
+									projectWidget:set(nil)
 								end,
 							}
 						end
 
-						projectDetailsWidget:set(widget)
+						projectWidget:set(widget)
 					end,
 					[Cleanup] = function()
-						local widget = peek(projectDetailsWidget)
+						local widget = peek(projectWidget)
 
 						if widget then
 							widget:Destroy()

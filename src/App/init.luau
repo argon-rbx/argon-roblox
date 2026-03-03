@@ -93,7 +93,6 @@ function App.new()
 		Name = "Argon",
 		ToolTip = "Open Argon UI",
 		Image = self.icon,
-
 		[OnEvent "Click"] = function()
 			isOpen:set(not peek(isOpen))
 		end,
@@ -103,14 +102,12 @@ function App.new()
 		Name = "Argon",
 		MinimumSize = peek(self.rootSize),
 		Enabled = isOpen,
-
 		[OnChange "Enabled"] = function(isEnabled)
 			isOpen:set(isEnabled)
 		end,
 		[OnChange "AbsoluteSize"] = function(size)
 			self.rootSize:set(size)
 		end,
-
 		[Children] = self.pages,
 	}
 

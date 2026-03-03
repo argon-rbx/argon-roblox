@@ -34,7 +34,6 @@ return function(props: Props): Frame
 		Size = UDim2.fromOffset(120, Theme.CompSizeY.Large),
 		BackgroundColor3 = props.BackgroundColor or Theme.Colors.Background,
 		BackgroundTransparency = props.BackgroundTransparency or 0,
-
 		[Children] = {
 			Border {
 				Color = props.BorderColor,

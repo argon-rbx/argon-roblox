@@ -86,15 +86,12 @@ return function(props: Props): DockWidgetPluginGui
 		OverrideEnabled = true,
 		MinimumSize = Vector2.new(400, 350),
 		Closed = props.Closed,
-
 		[Children] = {
 			Padding {
 				Right = 4,
 			},
-
 			ScrollingContainer {
 				ScrollBar = true,
-
 				[Children] = {
 					List {
 						Spacing = 22,

@@ -125,19 +125,16 @@ type Props = {
 
 return function(props: Props): DockWidgetPluginGui
 	return Widget {
-		Name = "Argon - Project Details",
+		Name = "Argon - Project",
 		OverrideEnabled = true,
-		MinimumSize = Vector2.new(410, 300),
+		MinimumSize = Vector2.new(400, 300),
 		Closed = props.Closed,
-
 		[Children] = {
 			Padding {
 				Right = 4,
 			},
-
 			ScrollingContainer {
 				ScrollBar = true,
-
 				[Children] = {
 					List {
 						HorizontalAlignment = Enum.HorizontalAlignment.Center,

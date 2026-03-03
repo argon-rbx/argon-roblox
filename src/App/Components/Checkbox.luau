@@ -38,7 +38,6 @@ return function(props: Props): TextButton
 		Icon = Computed(function(use)
 			return use(value) and Assets.Icons.Checkmark or ""
 		end),
-
 		Activated = function()
 			value:set(not peek(value))
 

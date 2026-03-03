@@ -54,11 +54,9 @@ return function(props: Props): { Instance }
 
 				return UDim2.new(1, 0, 0, height)
 			end),
-
 			[OnChange "AbsoluteSize"] = function(size)
 				absoluteSize:set(size)
 			end,
-
 			[Children] = {
 				ScrollingContainer {
 					Size = UDim2.new(1, -2, 1, 0),

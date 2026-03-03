@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Implemented the `Diff` widget which allows viewing incoming changes in detail
+
 ## [2.0.20] - 2025-12-10
 
 ### Added

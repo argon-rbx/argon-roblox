@@ -35,7 +35,6 @@ return function(props: Props): TextLabel
 		BorderSizePixel = 0,
 		BackgroundTransparency = 1,
 		TextScaled = props.Scaled,
-
 		[Children] = props.Scaled and New("UITextSizeConstraint") {
 			MaxTextSize = props.TextSize or Theme.TextSize.Large,
 		} or nil,

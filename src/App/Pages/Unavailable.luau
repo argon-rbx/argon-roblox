@@ -10,8 +10,6 @@ local Padding = require(Components.Padding)
 local Text = require(Components.Text)
 local Box = require(Components.Box)
 
-local Value = Fusion.Value
-local OnChange = Fusion.OnChange
 local Children = Fusion.Children
 
 type Props = {
@@ -20,15 +18,8 @@ type Props = {
 }
 
 return function(): Frame
-	local absoluteSize = Value(Vector2.zero)
-
 	return Box {
 		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Large * 2),
-
-		[OnChange "AbsoluteSize"] = function(size)
-			absoluteSize:set(size)
-		end,
-
 		[Children] = {
 			Padding {},
 			Text {

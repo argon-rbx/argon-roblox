@@ -97,7 +97,6 @@ local function Button(props: ButtonProps): TextButton
 		TextColor3 = Computed(function(use)
 			return use(props.IsSelected) and use(Theme.Colors.TextBranded) or use(Theme.Colors.Text)
 		end),
-
 		[OnEvent "InputBegan"] = function(input)
 			if input.UserInputType == Enum.UserInputType.MouseMovement then
 				isHovered:set(true)
@@ -117,7 +116,6 @@ local function Button(props: ButtonProps): TextButton
 				props.Activated()
 			end
 		end,
-
 		[Children] = children,
 	})(stripProps(props, BUTTON_COMPONENT_ONLY_PROPS))
 end
@@ -141,7 +139,6 @@ return function(props: Props): Frame
 	return Hydrate(Box {
 		Size = UDim2.new(1, 0, 0, Theme.CompSizeY.Small),
 		AutomaticSize = Enum.AutomaticSize.None,
-
 		[Children] = {
 			List {
 				FillDirection = Enum.FillDirection.Horizontal,
@@ -154,7 +151,6 @@ return function(props: Props): Frame
 					IsSelected = Computed(function(use)
 						return use(value) == option
 					end),
-
 					Activated = function()
 						if option == peek(value) then
 							return
@@ -166,7 +162,6 @@ return function(props: Props): Frame
 							props.Selected(option)
 						end
 					end,
-
 					IsFirst = option == props.Options[1],
 					IsLast = option == props.Options[#props.Options],
 				}

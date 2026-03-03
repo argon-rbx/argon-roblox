@@ -213,7 +213,6 @@ local function Entry(props: EntryProps): Frame
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
 					PlaceholderText = Config:getDefault(setting),
-
 					Started = function()
 						focused:set(true)
 					end,
@@ -228,13 +227,12 @@ local function Entry(props: EntryProps): Frame
 						props.Binding:set(text)
 						Config:set(setting, text, peek(props.Level))
 					end,
-
+					[Cleanup] = disconnect,
 					[Children] = {
 						Padding {
 							Vertical = false,
 						},
 					},
-					[Cleanup] = disconnect,
 				},
 			},
 		}
@@ -258,7 +256,6 @@ local function Entry(props: EntryProps): Frame
 	return Container {
 		ZIndex = props.Data.Options and 2 or 1,
 		Size = UDim2.fromScale(1, 0),
-
 		[Children] = {
 			New "Frame" {
 				Size = UDim2.new(1, 0, 0, Theme.BorderThickness),
@@ -291,7 +288,6 @@ local function Entry(props: EntryProps): Frame
 										TextSize = Theme.TextSize.Small,
 										Color = Theme.Colors.TextDimmed,
 										Position = UDim2.fromOffset(0, 22),
-
 										Size = Computed(function(use)
 											local absoluteSize = use(absoluteSize)
 
@@ -304,7 +300,6 @@ local function Entry(props: EntryProps): Frame
 
 											return UDim2.new(1, 0, 0, size.Y)
 										end),
-
 										[OnChange "AbsoluteSize"] = function(size)
 											absoluteSize:set(size)
 										end,
@@ -337,15 +332,12 @@ return function(props: Props): DockWidgetPluginGui
 		OverrideEnabled = true,
 		MinimumSize = Vector2.new(350, 400),
 		Closed = props.Closed,
-
 		[Children] = {
 			Padding {
 				Right = 4,
 			},
-
 			ScrollingContainer {
 				ScrollBar = true,
-
 				[Children] = {
 					List {},
 					Padding {
