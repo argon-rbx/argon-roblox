@@ -16,6 +16,7 @@ local Signal = require(Packages.Signal)
 
 local manifest = require(Argon.manifest)
 local Config = require(Argon.Config)
+local Types = require(Argon.Types)
 local Util = require(Argon.Util)
 local Core = require(Argon.Core)
 local describeChanges = require(Helpers.describeChanges)
@@ -295,6 +296,26 @@ function App:help()
 	self.helpWidget:set(widget)
 end
 
+function App:diff(changes: Types.Changes?, tree: any?)
+	local widget = peek(self.diffWidget)
+
+	if widget then
+		widget:Destroy()
+		widget = nil
+	elseif changes and tree then
+		widget = Diff {
+			Changes = changes,
+			Tree = tree,
+			Closed = function()
+				peek(self.diffWidget):Destroy()
+				self.diffWidget:set(nil)
+			end,
+		}
+	end
+
+	self.diffWidget:set(widget)
+end
+
 function App:connect()
 	local project = Value({})
 	local canceled = false
@@ -339,35 +360,11 @@ function App:connect()
 			local choice = signal:Wait()
 
 			while choice == "Diff" do
-				local widget = peek(self.diffWidget)
-
-				if widget then
-					widget:Destroy()
-					self.diffWidget:set(nil)
-				else
-					widget = Diff {
-						Changes = changes,
-						Tree = tree,
-						Closed = function()
-							local w = peek(self.diffWidget)
-							if w then
-								w:Destroy()
-								self.diffWidget:set(nil)
-							end
-						end,
-					}
-					self.diffWidget:set(widget)
-				end
-
+				self:diff(changes, tree)
 				choice = signal:Wait()
 			end
 
-			-- Close diff widget when user accepts or cancels
-			local widget = peek(self.diffWidget)
-			if widget then
-				widget:Destroy()
-				self.diffWidget:set(nil)
-			end
+			self:diff()
 
 			result = choice == "Accept"
 		-- Prompt user whether to continue when server ID differs

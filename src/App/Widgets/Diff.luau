@@ -10,213 +10,292 @@ local Types = require(Argon.Types)
 
 local Widget = require(Components.Plugin.Widget)
 local ScrollingContainer = require(Components.ScrollingContainer)
+local Collapsible = require(Components.Collapsible)
 local Container = require(Components.Container)
 local Padding = require(Components.Padding)
 local List = require(Components.List)
 local Text = require(Components.Text)
-local Box = require(Components.Box)
 
+local New = Fusion.New
 local Children = Fusion.Children
+local ForValues = Fusion.ForValues
+local cleanup = Fusion.cleanup
 
-local function countChildren(snapshot: Types.Snapshot): number
-	local count = 0
+local MAX_VALUE_LENGTH = 80
+
+local function countDescendants(snapshot: Types.AddedSnapshot): number
+	local descendants = 0
+
 	if snapshot.children then
-		count = #snapshot.children
-		for _, child in snapshot.children do
-			count += countChildren(child)
-		end
-	end
-	return count
-end
+		descendants = #snapshot.children
 
-local function formatValue(encoded: any): string
-	local ok, decoded = Dom.EncodedValue.decode(encoded)
-	if ok then
-		local str = tostring(decoded)
-		if #str > 80 then
-			return str:sub(1, 77) .. "..."
+		for _, child in snapshot.children do
+			descendants += countDescendants(child)
 		end
-		return str
 	end
-	return "?"
+
+	return descendants
 end
 
 local function countLines(source: string): number
-	local lines = 0
-	for _ in source:gmatch("[^\n]*\n") do
-		lines += 1
-	end
-	if not source:find("\n$") and #source > 0 then
-		lines += 1
-	end
-	return lines
+	return #source:split("\n")
 end
 
-local function countSourceLines(encoded: any): number?
-	local ok, decoded = Dom.EncodedValue.decode(encoded)
-	if ok and type(decoded) == "string" then
-		return countLines(decoded)
+local function countSnapshotLines(snapshot: Types.AddedSnapshot | Types.UpdatedSnapshot): number
+	local source = snapshot.properties and snapshot.properties.Source
+
+	if not source then
+		return 0
 	end
-	return nil
+
+	local ok, decoded = Dom.EncodedValue.decode(source)
+	return ok and countLines(decoded) or 0
 end
 
-local function readCurrentValue(instance: Instance, propertyName: string): string
-	local ok, value = Dom.readProperty(instance, propertyName)
-	if ok then
-		local str = tostring(value)
-		if #str > 80 then
-			return str:sub(1, 77) .. "..."
-		end
-		return str
+local function countInstanceLines(instance: Instance): number
+	if not instance:IsA("LuaSourceContainer") then
+		return 0
 	end
-	return "?"
+
+	local ok, source = Dom.readProperty(instance, "Source")
+	return ok and countLines(source) or 0
 end
 
-local function countCurrentSourceLines(instance: Instance, propertyName: string): number?
-	local ok, value = Dom.readProperty(instance, propertyName)
-	if ok and type(value) == "string" then
-		return countLines(value)
+local function formatValue(value: any)
+	if type(value) == "string" then
+		value = `"{value}"`
+	elseif typeof(value) == "EnumItem" then
+		value = value.Name
 	end
-	return nil
+
+	value = tostring(value)
+
+	if value:find(",") then
+		value = `({value})`
+	end
+
+	if #value > MAX_VALUE_LENGTH then
+		return value:sub(1, MAX_VALUE_LENGTH - 3) .. "..."
+	end
+
+	return value
 end
 
-local function isSourceProperty(propertyName: string): boolean
-	return propertyName == "Source"
+local function formatSnapshotValue(encoded: any, decoded: any?): string
+	local ok, value = Dom.EncodedValue.decode(encoded)
+
+	if ok and typeof(decoded) == "EnumItem" then
+		local enum = decoded.EnumType
+		value = enum:FromValue(value)
+	end
+
+	return ok and formatValue(value) or "?"
 end
 
-local function SectionHeader(text: string, color: Color3)
-	return Container {
-		Size = UDim2.fromScale(1, 0),
-		[Children] = {
-			Padding {
-				Top = 4,
-				Bottom = 4,
-			},
-			Text {
-				Font = Theme.Fonts.Bold,
-				Text = text,
-				Color = color,
-				TextSize = Theme.TextSize.Medium,
-			},
-		},
+local function formatInstanceValue(instance: Instance, property: string): (string, any?)
+	local ok, value = Dom.readProperty(instance, property)
+	return ok and formatValue(value), value or "?", nil
+end
+
+type SectionProps = {
+	Title: string,
+	Color: Color3,
+	Elements: { { any } },
+}
+
+local function Section(props: SectionProps)
+	return Collapsible {
+		Title = props.Title,
+		Color = props.Color,
+		Expanded = true,
+		Elements = ForValues(props.Elements, function(_, element)
+			return Container {
+				Size = UDim2.fromScale(1, 0),
+				[Children] = {
+					New "Frame" {
+						Size = UDim2.new(1, 0, 0, Theme.BorderThickness),
+						BackgroundColor3 = Theme.Colors.Border,
+						BorderSizePixel = 0,
+					},
+					Container {
+						Size = UDim2.fromScale(1, 1),
+						[Children] = {
+							List {
+								Spacing = 0,
+							},
+							Padding {},
+							element,
+						},
+					},
+				},
+			}
+		end, cleanup),
 	}
 end
 
-local function AdditionEntry(snapshot: Types.AddedSnapshot)
-	local childCount = countChildren(snapshot)
-	local details = ""
-	if childCount > 0 then
-		details = `  ({childCount} descendant{childCount ~= 1 and "s" or ""})`
-	end
+type TitleProps = {
+	Symbol: string,
+	Name: string,
+	Class: string,
+	Color: Color3,
+}
 
-	return Box {
-		Size = UDim2.fromScale(1, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		[Children] = {
-			Padding {},
-			Text {
-				Text = `+ [{snapshot.class}] "{snapshot.name}"{details}`,
-				Color = Theme.Colors.Diff.Add,
-				TextSize = Theme.TextSize.Small,
-				Font = Theme.Fonts.Mono,
-				TextWrapped = true,
-			},
-		},
-	}
-end
-
-local function PropertyLine(propertyName: string, currentValue: string, newValue: string)
+local function Title(props: TitleProps)
 	return Text {
-		Text = `    {propertyName}: {currentValue} → {newValue}`,
-		Color = Theme.Colors.TextDimmed,
+		Text = `{props.Symbol} [{props.Class}] {props.Name}`,
+		Color = props.Color,
 		TextSize = Theme.TextSize.Small,
 		Font = Theme.Fonts.Mono,
 		TextWrapped = true,
 	}
 end
 
-local function UpdateEntry(snapshot: Types.UpdatedSnapshot, tree: any)
-	local instance = tree:getInstance(snapshot.id)
-	local name = if instance then instance.Name else (snapshot.name or "?")
-	local className = if instance then instance.ClassName else (snapshot.class or "?")
+local function Property(name: string, old: any, new: any?)
+	local text
 
-	local children = {
-		Padding {},
-		List {
-			Spacing = 2,
-		},
-		Text {
-			Text = `~ [{className}] "{name}"`,
-			Color = Theme.Colors.Diff.Update,
-			TextSize = Theme.TextSize.Small,
-			Font = Theme.Fonts.Mono,
-			TextWrapped = true,
-		},
-	}
-
-	if snapshot.properties then
-		for propName, encodedValue in snapshot.properties do
-			local ty = next(encodedValue)
-			if ty == "Enum" then
-				continue
-			end
-
-			if isSourceProperty(propName) then
-				local newLines = countSourceLines(encodedValue)
-				local curLines = if instance then countCurrentSourceLines(instance, propName) else 0
-				if newLines and curLines then
-					local delta = newLines - curLines
-					local sign = if delta > 0 then "+" else ""
-					table.insert(children, Text {
-						Text = `    {propName}: {sign}{delta} line{math.abs(delta) ~= 1 and "s" or ""}`,
-						Color = Theme.Colors.TextDimmed,
-						TextSize = Theme.TextSize.Small,
-						Font = Theme.Fonts.Mono,
-						TextWrapped = true,
-					})
-				end
-			else
-				local newVal = formatValue(encodedValue)
-				local curVal = if instance then readCurrentValue(instance, propName) else "?"
-				table.insert(children, PropertyLine(propName, curVal, newVal))
-			end
-		end
+	if new then
+		text = `<b>{old}</b> → <b>{new}</b>`
+	else
+		text = `<b>{old}</b>`
 	end
 
-	if snapshot.name and instance and instance.Name ~= snapshot.name then
-		table.insert(children, PropertyLine("Name", instance.Name, snapshot.name))
-	end
-
-	return Box {
-		Size = UDim2.fromScale(1, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		[Children] = children,
+	return Text {
+		Text = `    {name}: {text}`,
+		Color = Theme.Colors.TextDimmed,
+		TextSize = Theme.TextSize.Small,
+		Font = Theme.Fonts.Mono,
+		TextWrapped = true,
+		RichText = true,
 	}
 end
 
-local function RemovalEntry(object: Types.Ref | Instance, tree: any)
-	local instance
-	if typeof(object) == "Instance" then
-		instance = object
-	else
-		instance = tree:getInstance(object)
-	end
-	local name = if instance then instance.Name else "?"
-	local className = if instance then instance.ClassName else "?"
+local function Additions(snapshots: { Types.AddedSnapshot }, tree: any)
+	local elements = {}
 
-	return Box {
-		Size = UDim2.fromScale(1, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		[Children] = {
-			Padding {},
-			Text {
-				Text = `- [{className}] "{name}"`,
-				Color = Theme.Colors.Diff.Remove,
-				TextSize = Theme.TextSize.Small,
-				Font = Theme.Fonts.Mono,
-				TextWrapped = true,
+	for _, snapshot in snapshots do
+		local parent = tree:getInstance(snapshot.parent)
+		local name = snapshot.name
+
+		if parent then
+			name = parent:GetFullName() .. "." .. name
+		end
+
+		local element = {
+			Title {
+				Symbol = "+",
+				Name = name,
+				Class = snapshot.class,
+				Color = Theme.Colors.Diff.Add,
 			},
-		},
+		}
+
+		local descendants = countDescendants(snapshot)
+		if descendants > 0 then
+			table.insert(element, Property("Descendants", descendants))
+		end
+
+		local lines = countSnapshotLines(snapshot)
+		if lines > 0 then
+			table.insert(element, Property("Lines", lines))
+		end
+
+		table.insert(elements, element)
+	end
+
+	return Section {
+		Title = `Additions ({#snapshots})`,
+		Color = Theme.Colors.Diff.Add,
+		Elements = elements,
+	}
+end
+
+local function Updates(snapshots: { Types.UpdatedSnapshot }, tree: any)
+	local elements = {}
+
+	for _, snapshot in snapshots do
+		local instance = tree:getInstance(snapshot.id)
+		local element = {
+			Title {
+				Symbol = "~",
+				Name = instance and instance:GetFullName() or snapshot.name or "?",
+				Class = instance and instance.ClassName or snapshot.class or "?",
+				Color = Theme.Colors.Diff.Update,
+			},
+		}
+
+		for property, value in snapshot.properties or {} do
+			if property ~= "Source" then
+				local formatted, raw = "?", nil
+
+				if instance then
+					formatted, raw = formatInstanceValue(instance, property)
+				end
+
+				table.insert(element, Property(property, formatted, formatSnapshotValue(value, raw)))
+
+				continue
+			end
+
+			local new = countSnapshotLines(snapshot)
+			local old = instance and countInstanceLines(instance) or 0
+			local delta = new - old
+			local sign = if delta > 0 then "+" elseif delta < 0 then "-" else "~"
+
+			delta = math.abs(delta)
+
+			table.insert(element, Property(property, `{sign}{delta} line{delta ~= 1 and "s" or ""}`))
+		end
+
+		if snapshot.name and instance and instance.Name ~= snapshot.name then
+			table.insert(element, Property("Name", instance.Name, snapshot.name))
+		end
+
+		table.insert(elements, element)
+	end
+
+	return Section {
+		Title = `Updates ({#snapshots})`,
+		Color = Theme.Colors.Diff.Update,
+		Elements = elements,
+	}
+end
+
+local function Removals(objects: { Types.Ref | Instance }, tree: any)
+	local elements = {}
+
+	for _, object in objects do
+		local instance = object
+
+		if typeof(object) == "buffer" then
+			instance = tree:getInstance(object)
+		end
+
+		local element = {
+			Title {
+				Symbol = "-",
+				Name = instance and instance:GetFullName() or "?",
+				Class = instance and instance.ClassName or "?",
+				Color = Theme.Colors.Diff.Remove,
+			},
+		}
+
+		local descendants = instance and #instance:GetDescendants() or 0
+		if descendants > 0 then
+			table.insert(element, Property("Descendants", descendants))
+		end
+
+		local lines = instance and countInstanceLines(instance) or 0
+		if lines > 0 then
+			table.insert(element, Property("Lines", lines))
+		end
+
+		table.insert(elements, element)
+	end
+
+	return Section {
+		Title = `Removals ({#objects})`,
+		Color = Theme.Colors.Diff.Remove,
+		Elements = elements,
 	}
 end
 
@@ -231,34 +310,22 @@ return function(props: Props): DockWidgetPluginGui
 	local tree = props.Tree
 	local entries = {}
 
-	-- Additions
 	if #changes.additions > 0 then
-		table.insert(entries, SectionHeader(`Additions ({#changes.additions})`, Theme.Colors.Diff.Add))
-		for _, snapshot in changes.additions do
-			table.insert(entries, AdditionEntry(snapshot))
-		end
+		table.insert(entries, Additions(changes.additions, tree))
 	end
 
-	-- Updates
 	if #changes.updates > 0 then
-		table.insert(entries, SectionHeader(`Updates ({#changes.updates})`, Theme.Colors.Diff.Update))
-		for _, snapshot in changes.updates do
-			table.insert(entries, UpdateEntry(snapshot, tree))
-		end
+		table.insert(entries, Updates(changes.updates, tree))
 	end
 
-	-- Removals
 	if #changes.removals > 0 then
-		table.insert(entries, SectionHeader(`Removals ({#changes.removals})`, Theme.Colors.Diff.Remove))
-		for _, ref in changes.removals do
-			table.insert(entries, RemovalEntry(ref, tree))
-		end
+		table.insert(entries, Removals(changes.removals, tree))
 	end
 
 	return Widget {
 		Name = "Argon - Diff",
 		OverrideEnabled = true,
-		MinimumSize = Vector2.new(450, 400),
+		MinimumSize = Vector2.new(500, 400),
 		Closed = props.Closed,
 
 		[Children] = {
@@ -270,9 +337,7 @@ return function(props: Props): DockWidgetPluginGui
 				ScrollBar = true,
 
 				[Children] = {
-					List {
-						Spacing = 6,
-					},
+					List {},
 					Padding {
 						Padding = Theme.WidgetPadding,
 					},
