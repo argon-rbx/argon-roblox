@@ -33,23 +33,29 @@ type Props = {
 	Port: number,
 }
 
-local function getValue(setting: Config.Setting, value: any): string
-	return value ~= Config:getDefault(setting) and value or ""
+local function getValue(setting: Config.Setting, value: any, input: boolean?): string
+	if input then
+		return value ~= Config:getDefault(setting) and value or ""
+	else
+		return value ~= "" and value or Config:getDefault(setting)
+	end
 end
 
 return function(props: Props): { Instance }
-	local hostInput = Value(getValue("Host", props.Host))
-	local portInput = Value(getValue("Port", props.Port))
+	local hostInput = Value(getValue("Host", props.Host, true))
+	local portInput = Value(getValue("Port", props.Port, true))
 
 	local hostFocused = Value(false)
 	local portFocused = Value(false)
 
 	local connections = {
 		Config:onChanged("Host", function(value)
-			hostInput:set(getValue("Host", value))
+			hostInput:set(getValue("Host", value, true))
+			props.App:setHost(getValue("Host", value))
 		end),
 		Config:onChanged("Port", function(value)
-			portInput:set(getValue("Port", value))
+			portInput:set(getValue("Port", value, true))
+			props.App:setPort(getValue("Port", value))
 		end),
 	}
 
@@ -89,7 +95,7 @@ return function(props: Props): { Instance }
 					end,
 					Finished = function(host)
 						hostFocused:set(false)
-						props.App:setHost(host ~= "" and host or Config:getDefault("Host"))
+						props.App:setHost(getValue("Host", host))
 					end,
 					[Children] = {
 						-- The cursor will not be visible when it is all the way at the left because of ClipsDescendants,
@@ -126,7 +132,7 @@ return function(props: Props): { Instance }
 					end,
 					Finished = function(port)
 						portFocused:set(false)
-						props.App:setPort(port ~= "" and tonumber(port) or Config:getDefault("Port"))
+						props.App:setPort(getValue("Port", port))
 					end,
 				},
 				Padding {

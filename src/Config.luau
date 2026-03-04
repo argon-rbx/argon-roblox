@@ -27,7 +27,7 @@ type Config = {
 	__configs: { [Level]: { [Setting]: any } },
 	__callbacks: { [Setting]: { (value: any) -> () } },
 	load: () -> (),
-	get: (self: Config, setting: Setting, level: Level?) -> any,
+	get: (self: Config, setting: Setting, level: Level?, exact: boolean?) -> any,
 	getDefault: (self: Config, setting: Setting) -> any,
 	set: (self: Config, setting: Setting, value: any, level: Level) -> (),
 	restoreDefaults: (self: Config, level: Level) -> (),
@@ -52,6 +52,7 @@ local DEFAULTS = {
 	OverridePackages = true,
 }
 
+local CONFIGS_ORDERED = { "Place", "Game", "Global" }
 local CONFIGS = {
 	Place = "ArgonConfigPlace_" .. game.PlaceId,
 	Game = "ArgonConfigGame_" .. game.GameId,
@@ -75,20 +76,41 @@ function Config.load()
 	end
 end
 
-function Config:get(setting, level)
+function Config:get(setting, level, exact)
 	local default = DEFAULTS[setting]
+	local relevant = not level
 
 	if default == nil then
 		Log.error(`Setting '{setting}' does not exist!`)
 	end
 
-	if level then
+	if exact then
 		return self.__configs[level][setting]
 	end
 
-	for _, config in self.__configs do
-		if config[setting] ~= nil then
-			return config[setting]
+	if level and level ~= "Global" then
+		local index = table.find(CONFIGS_ORDERED, level)
+
+		if not index then
+			Log.error(`Config level '{level}' does not exist!`)
+		end
+
+		level = CONFIGS_ORDERED[index + 1]
+	end
+
+	for _, config in CONFIGS_ORDERED do
+		if not relevant then
+			if config == level then
+				relevant = true
+			else
+				continue
+			end
+		end
+
+		local value = self.__configs[config][setting]
+
+		if value ~= nil then
+			return value
 		end
 	end
 
@@ -107,22 +129,24 @@ end
 
 function Config:set(setting, value, level)
 	local default = DEFAULTS[setting]
+	local config = self.__configs[level]
 
 	if default == nil then
 		Log.error(`Setting '{setting}' does not exist!`)
 	end
 
-	value = Util.cast(value, type(default))
-
-	if value ~= self.__configs[level][setting] and self.__callbacks[setting] then
-		for _, callback in self.__callbacks[setting] do
-			callback(value)
-		end
+	if value == config[setting] then
+		return
 	end
 
-	self.__configs[level][setting] = if value == default then nil else value
+	value = Util.cast(value, type(default))
+	config[setting] = if value == default then nil else value
 
-	local config = self.__configs[level]
+	if self.__callbacks[setting] then
+		for _, callback in self.__callbacks[setting] do
+			callback(self:get(setting))
+		end
+	end
 
 	if not next(config) then
 		plugin:SetSetting(CONFIGS[level], nil)
@@ -132,6 +156,8 @@ function Config:set(setting, value, level)
 end
 
 function Config:restoreDefaults(level)
+	self.__configs[level] = {}
+
 	for setting, _ in self.__configs[level] do
 		if self.__callbacks[setting] then
 			for _, callback in self.__callbacks[setting] do
@@ -139,8 +165,6 @@ function Config:restoreDefaults(level)
 			end
 		end
 	end
-
-	self.__configs[level] = {}
 
 	plugin:SetSetting(CONFIGS[level], nil)
 end

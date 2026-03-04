@@ -55,7 +55,7 @@ function Processor:init(snapshot: Types.Snapshot, initialSyncPriority: string): 
 		changes:join(self:diff(child, snapshot.id, initialSyncPriority == "Client"))
 	end
 
-	if not Config:get("OverridePackages") and initialSyncPriority == "Server" then
+	if initialSyncPriority == "Server" and not Config:get("OverridePackages") then
 		local temp = {}
 
 		for _, snapshot in changes.additions do

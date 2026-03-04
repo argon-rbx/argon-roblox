@@ -85,11 +85,7 @@ return function(props: Props): TextButton
 			end
 		end,
 		[Children] = {
-			Border {
-				Color = Computed(function(use)
-					return use(props.Solid) and use(color) or use(Theme.Colors.Border)
-				end),
-			},
+			Border {},
 		},
 	})(stripProps(props, COMPONENT_ONLY_PROPS))
 end

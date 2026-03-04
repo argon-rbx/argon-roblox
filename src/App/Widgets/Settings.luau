@@ -168,23 +168,36 @@ type EntryProps = {
 }
 
 local function Entry(props: EntryProps): Frame
-	local setting = props.Data.Setting
-	local absoluteSize = Value(Vector2.zero)
-
 	local valueComponent
+	local setting = props.Data.Setting
+
+	local absoluteSize = Value(Vector2.zero)
+	local placeholder = Value(Config:get(setting))
+
+	local connections = {
+		Config:onChanged(setting, function(value)
+			placeholder:set(value)
+		end),
+		Observer(props.Level):onChange(function()
+			placeholder:set(Config:get(setting))
+		end),
+	}
 
 	if props.Data.Filter then
 		local userInput = false
 
-		local disconnect = Observer(props.Binding):onChange(function()
-			local value = peek(props.Binding)
+		table.insert(
+			connections,
+			Observer(props.Binding):onChange(function()
+				local value = peek(props.Binding)
 
-			if not userInput and value == Config:getDefault(setting) then
-				props.Binding:set("")
-			end
+				if not userInput and value == Config:getDefault(setting) then
+					props.Binding:set("")
+				end
 
-			userInput = false
-		end)
+				userInput = false
+			end)
+		)
 
 		if peek(props.Binding) == Config:getDefault(setting) then
 			props.Binding:set("")
@@ -212,7 +225,7 @@ local function Entry(props: EntryProps): Frame
 				Input {
 					Size = UDim2.fromScale(1, 1),
 					Text = props.Binding,
-					PlaceholderText = Config:getDefault(setting),
+					PlaceholderText = placeholder,
 					Started = function()
 						focused:set(true)
 					end,
@@ -227,7 +240,6 @@ local function Entry(props: EntryProps): Frame
 						props.Binding:set(text)
 						Config:set(setting, text, peek(props.Level))
 					end,
-					[Cleanup] = disconnect,
 					[Children] = {
 						Padding {
 							Vertical = false,
@@ -240,6 +252,7 @@ local function Entry(props: EntryProps): Frame
 		valueComponent = Dropdown {
 			Options = props.Data.Options,
 			Value = props.Binding,
+			Placeholder = placeholder,
 			Selected = function(value)
 				Config:set(setting, value, peek(props.Level))
 			end,
@@ -247,6 +260,7 @@ local function Entry(props: EntryProps): Frame
 	else
 		valueComponent = Checkbox {
 			Value = props.Binding,
+			Placeholder = placeholder,
 			Changed = function(value)
 				Config:set(setting, value, peek(props.Level))
 			end,
@@ -307,6 +321,7 @@ local function Entry(props: EntryProps): Frame
 								},
 							},
 							Hydrate(valueComponent) {
+								[Cleanup] = connections,
 								[Children] = {
 									New "UIFlexItem" {},
 								},
@@ -349,7 +364,7 @@ return function(props: Props): DockWidgetPluginGui
 							level:set(option)
 
 							for setting, binding in bindings do
-								binding:set(default(Config:get(setting, option), Config:getDefault(setting)))
+								binding:set(default(Config:get(setting, option, true), Config:getDefault(setting)))
 							end
 						end,
 					},
@@ -376,6 +391,7 @@ return function(props: Props): DockWidgetPluginGui
 					Container {
 						Size = UDim2.fromScale(1, 0),
 						LayoutOrder = GlobalUtil.len(SETTINGS_DATA) + 1,
+						ZIndex = 0,
 						[Children] = {
 							TextButton {
 								AnchorPoint = Vector2.new(1, 0),

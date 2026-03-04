@@ -1,4 +1,4 @@
-return function(value: any, default: any): any
+return function<T>(value: T?, default: T): T
 	if value == nil then
 		return default
 	else

@@ -125,7 +125,6 @@ return function(props: Props): { Instance }
 					Text = "Disconnect",
 					LayoutOrder = 2,
 					Solid = true,
-
 					Activated = function()
 						props.App:disconnect()
 						props.App:home()

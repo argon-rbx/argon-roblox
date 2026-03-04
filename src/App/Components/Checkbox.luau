@@ -20,23 +20,26 @@ local Computed = Fusion.Computed
 local COMPONENT_ONLY_PROPS = {
 	"Changed",
 	"Value",
+	"Placeholder",
 }
 
 type Props = {
 	Changed: ((value: boolean) -> ())?,
 	Value: Fusion.CanBeState<boolean>?,
+	Placeholder: Fusion.CanBeState<boolean>?,
 	[any]: any,
 }
 
 return function(props: Props): TextButton
 	local value = isState(props.Value) and props.Value or Value(props.Value or false)
+	local placeholder = isState(props.Placeholder) and props.Placeholder or Value(props.Placeholder or false)
 
 	return Hydrate(IconButton {
 		Size = UDim2.fromOffset(Theme.CompSizeY.Medium, Theme.CompSizeY.Medium),
 		Solid = value,
 		Blending = false,
 		Icon = Computed(function(use)
-			return use(value) and Assets.Icons.Checkmark or ""
+			return if use(value) and use(placeholder) or use(placeholder) then Assets.Icons.Checkmark else ""
 		end),
 		Activated = function()
 			value:set(not peek(value))

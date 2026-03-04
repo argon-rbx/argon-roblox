@@ -8,7 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Implemented the `Diff` widget which allows viewing incoming changes in detail
+- Implemented the `Diff` widget which allows viewing incoming changes in detail ([#20](https://github.com/argon-rbx/argon-roblox/pull/20))
+
+### Fixed
+
+- Newly created files no longer appear twice in Studio when two-way sync is enabled ([#21](https://github.com/argon-rbx/argon-roblox/pull/21))
+
+### Changed
+
+- Config levels are now loaded hierarchically with settings UI updated accordingly ([#19](https://github.com/argon-rbx/argon-roblox/pull/19))
 
 ## [2.0.20] - 2025-12-10
 

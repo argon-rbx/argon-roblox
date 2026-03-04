@@ -64,7 +64,9 @@ return function(props: Props): Frame
 	)
 
 	return Hydrate(Box {
-		ClipsDescendants = true,
+		ClipsDescendants = Computed(function(use)
+			return not use(isExpanded)
+		end),
 		AutomaticSize = Enum.AutomaticSize.None,
 		Size = Spring(
 			Computed(function(use)
