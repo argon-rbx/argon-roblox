@@ -58,6 +58,16 @@ local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
 	return false
 end
 
+local function findChild(parent: Instance, name: string, class: string): Instance?
+	for _, child in parent:GetChildren() do
+		if child.Name == name and child.ClassName == class then
+			return child
+		end
+	end
+
+	return nil
+end
+
 local function warnNotCreatable(class: string)
 	local err = Error.new(Error.NotCreatable, class)
 
@@ -130,26 +140,10 @@ function WriteProcessor:applyAddition(
 	end
 
 	if skipExisting then
-		local instance = parent:FindFirstChild(snapshot.name)
+		local instance = findChild(parent, snapshot.name, snapshot.class)
 
-		if instance and instance:IsA(snapshot.class) then
+		if instance then
 			return instance
-		end
-	end
-
-	do
-		local existing = parent:FindFirstChild(snapshot.name)
-
-		if existing and existing:IsA(snapshot.class) and self.tree:getId(existing) then
-			Log.trace("Instance already tracked in parent. Re-associating..")
-			self.tree:insertInstance(existing, snapshot.id, snapshot.meta)
-
-			for _, child in snapshot.children do
-				child.parent = snapshot.id
-				self:applyAddition(child, initial)
-			end
-
-			return existing
 		end
 	end
 
@@ -211,7 +205,6 @@ function WriteProcessor:applyAddition(
 
 	for _, child in snapshot.children do
 		child.parent = snapshot.id
-
 		self:applyAddition(child, initial)
 	end
 

@@ -20,11 +20,6 @@ end
 function Tree:insertInstance(instance: Instance, id: Types.Ref, meta: Types.Meta)
 	local strId = buffer.tostring(id)
 
-	local existingStrId = self.idMap[instance]
-	if existingStrId and existingStrId ~= strId then
-		self.instanceMap[existingStrId] = nil
-	end
-
 	self.instanceMap[strId] = instance
 	self.idMap[instance] = strId
 
