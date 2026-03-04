@@ -27,6 +27,11 @@ end
 function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.AddedSnapshot?
 	Log.trace("Detected addition of", instance)
 
+	if self.tree:getId(instance) then
+		Log.trace("Instance already tracked. Skipping..")
+		return nil
+	end
+
 	if not isScriptRelated(instance) and Config:get("OnlyCodeMode") then
 		Log.trace("Instance is not script related (Only Code Mode). Skipping..")
 		return nil

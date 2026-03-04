@@ -21,7 +21,7 @@ local Tree = require(script.Tree)
 local Error = require(script.Error)
 
 local SYNCBACK_RATE = 0.5
-local SYNCBACK_DEBOUNCE = 0.01
+local SYNCBACK_DEBOUNCE = 0.1
 
 local Core = {
 	Status = {
