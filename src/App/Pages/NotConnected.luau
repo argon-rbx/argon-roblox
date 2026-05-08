@@ -57,6 +57,9 @@ return function(props: Props): { Instance }
 			portInput:set(getValue("Port", value, true))
 			props.App:setPort(getValue("Port", value))
 		end),
+		Config:onChanged("Https", function(value)
+			props.App:setHttps(value)
+		end),
 	}
 
 	return {

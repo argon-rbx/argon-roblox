@@ -67,6 +67,11 @@ local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
 				Filter = filterPort,
 				CustomWidth = 70,
 			},
+			{
+				Setting = "Https",
+				Name = "Use HTTPS",
+				Description = "Use HTTPS (TLS) instead of plain HTTP when connecting to the server",
+			},
 		},
 	},
 	{

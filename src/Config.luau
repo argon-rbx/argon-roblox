@@ -10,6 +10,7 @@ export type Setting =
 	"InitialSyncPriority"
 	| "Host"
 	| "Port"
+	| "Https"
 	| "AutoConnect"
 	| "AutoReconnect"
 	| "LiveHydrate"
@@ -38,6 +39,7 @@ local DEFAULTS = {
 	InitialSyncPriority = "Server",
 	Host = "localhost",
 	Port = 8000,
+	Https = false,
 	AutoConnect = true,
 	AutoReconnect = false,
 	LiveHydrate = true,
