@@ -33,7 +33,7 @@ local Core = {
 }
 Core.__index = Core
 
-function Core.new(host: string?, port: string)
+function Core.new(host: string?, port: string?)
 	local self = setmetatable({}, Core)
 
 	self.project = nil
