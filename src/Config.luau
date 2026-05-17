@@ -10,7 +10,6 @@ export type Setting =
 	"InitialSyncPriority"
 	| "Host"
 	| "Port"
-	| "Https"
 	| "AutoConnect"
 	| "AutoReconnect"
 	| "LiveHydrate"
@@ -19,6 +18,7 @@ export type Setting =
 	| "SyncbackProperties"
 	| "OnlyCodeMode"
 	| "OpenInEditor"
+	| "Https"
 	| "DisplayPrompts"
 	| "ChangesThreshold"
 	| "LogLevel"
@@ -39,7 +39,6 @@ local DEFAULTS = {
 	InitialSyncPriority = "Server",
 	Host = "localhost",
 	Port = 8000,
-	Https = false,
 	AutoConnect = true,
 	AutoReconnect = false,
 	LiveHydrate = true,
@@ -48,6 +47,7 @@ local DEFAULTS = {
 	SyncbackProperties = false,
 	OnlyCodeMode = true,
 	OpenInEditor = false,
+	Https = false,
 	DisplayPrompts = "Always",
 	ChangesThreshold = 5,
 	LogLevel = "Warn",

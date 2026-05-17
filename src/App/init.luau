@@ -72,7 +72,6 @@ function App.new()
 
 	self.host = Config:get("Host")
 	self.port = Config:get("Port")
-	self.https = Config:get("Https")
 
 	self.lastSync = Value(os.time())
 	self.lastSyncKind = Value("Unknown")
@@ -319,7 +318,7 @@ function App:connect()
 	local canceled = false
 	local loading = true
 
-	self.core = Core.new(self.host, self.port, self.https)
+	self.core = Core.new(self.host, self.port)
 
 	task.spawn(function()
 		task.wait(0.2)
@@ -471,10 +470,6 @@ end
 
 function App:setPort(port: number)
 	self.port = port
-end
-
-function App:setHttps(https: boolean)
-	self.https = https
 end
 
 return App

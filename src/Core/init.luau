@@ -33,7 +33,7 @@ local Core = {
 }
 Core.__index = Core
 
-function Core.new(host: string?, port: string?, https: boolean?)
+function Core.new(host: string?, port: string)
 	local self = setmetatable({}, Core)
 
 	self.project = nil
@@ -43,7 +43,7 @@ function Core.new(host: string?, port: string?, https: boolean?)
 	self.lastSync = os.clock()
 
 	self.tree = Tree.new()
-	self.client = Client.new(host or Config:get("Host"), port or Config:get("Port"), if https ~= nil then https else Config:get("Https"))
+	self.client = Client.new(host or Config:get("Host"), port or Config:get("Port"), Config:get("Https"))
 	self.processor = Processor.new(self.tree, self.client)
 	self.watcher = Watcher.new()
 	self.executor = Executor.new()

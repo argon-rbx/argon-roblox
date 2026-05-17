@@ -16,7 +16,7 @@ end
 local Client = {}
 Client.__index = Client
 
-function Client.new(host: string, port: number, https: boolean?)
+function Client.new(host: string, port: number, https: boolean)
 	local self = setmetatable({}, Client)
 
 	self.isSubscribed = false
@@ -24,13 +24,13 @@ function Client.new(host: string, port: number, https: boolean?)
 	self.placeName = Place.Name
 	self.host = host
 	self.port = port
-	self.https = https or false
+	self.https = https
 
 	return self
 end
 
 function Client:getUrl(endpoint: string?): string
-	local protocol = if self.https then "https" else "http"
+	local protocol = self.https and "https" or "http"
 	return `{protocol}://{self.host}:{self.port}/{endpoint or ""}`
 end
 
