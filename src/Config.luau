@@ -18,6 +18,7 @@ export type Setting =
 	| "SyncbackProperties"
 	| "OnlyCodeMode"
 	| "OpenInEditor"
+	| "Https"
 	| "DisplayPrompts"
 	| "ChangesThreshold"
 	| "LogLevel"
@@ -46,6 +47,7 @@ local DEFAULTS = {
 	SyncbackProperties = false,
 	OnlyCodeMode = true,
 	OpenInEditor = false,
+	Https = false,
 	DisplayPrompts = "Always",
 	ChangesThreshold = 5,
 	LogLevel = "Warn",

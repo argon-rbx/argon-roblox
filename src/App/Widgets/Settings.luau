@@ -123,6 +123,11 @@ local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
 		Title = "Misc",
 		Settings = {
 			{
+				Setting = "Https",
+				Name = "Use HTTPS",
+				Description = "Use HTTPS (TLS) instead of plain HTTP protocol when connecting to the server",
+			},
+			{
 				Setting = "DisplayPrompts",
 				Name = "Display Prompts",
 				Description = "When to show prompts for actions that require confirmation",

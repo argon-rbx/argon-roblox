@@ -43,7 +43,7 @@ function Core.new(host: string?, port: string?)
 	self.lastSync = os.clock()
 
 	self.tree = Tree.new()
-	self.client = Client.new(host or Config:get("Host"), port or Config:get("Port"))
+	self.client = Client.new(host or Config:get("Host"), port or Config:get("Port"), Config:get("Https"))
 	self.processor = Processor.new(self.tree, self.client)
 	self.watcher = Watcher.new()
 	self.executor = Executor.new()

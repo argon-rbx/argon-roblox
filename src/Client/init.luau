@@ -16,7 +16,7 @@ end
 local Client = {}
 Client.__index = Client
 
-function Client.new(host: string, port: number)
+function Client.new(host: string, port: number, https: boolean)
 	local self = setmetatable({}, Client)
 
 	self.isSubscribed = false
@@ -24,12 +24,14 @@ function Client.new(host: string, port: number)
 	self.placeName = Place.Name
 	self.host = host
 	self.port = port
+	self.https = https
 
 	return self
 end
 
 function Client:getUrl(endpoint: string?): string
-	return `http://{self.host}:{self.port}/{endpoint or ""}`
+	local protocol = self.https and "https" or "http"
+	return `{protocol}://{self.host}:{self.port}/{endpoint or ""}`
 end
 
 function Client:fetchDetails(): Promise.TypedPromise<Types.Project>
