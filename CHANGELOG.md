@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Implemented the `Script Diff` widget which allows viewing incoming script changes line by line ([#22](https://github.com/argon-rbx/argon-roblox/issues/22))
+- Property validation that will warn the user when attempting to sync malformed data instead of throwing `Bad Request` error ([#25](https://github.com/argon-rbx/argon-roblox/issues/25))
 
 ### Fixed
 

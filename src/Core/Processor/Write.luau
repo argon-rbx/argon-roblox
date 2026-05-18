@@ -13,7 +13,7 @@ local Error = require(script.Parent.Parent.Error)
 
 local MESH_RELOAD_PROPERTIES = { "MeshContent", "InitialSize" }
 
-local function loadMesh(path: string)
+local function loadMesh(path: string): MeshPart?
 	local success, mesh = pcall(function()
 		return game:GetObjects("rbxasset://argon/" .. path)[1]
 	end)
@@ -28,7 +28,7 @@ local function loadMesh(path: string)
 	return mesh
 end
 
-local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?)
+local function shouldReloadMesh(mesh: MeshPart, properties: Types.Properties?): boolean
 	if not properties then
 		return false
 	end

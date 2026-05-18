@@ -16,6 +16,28 @@ local function isScriptRelated(instance: Instance): boolean
 	return instance:IsA("LuaSourceContainer") or instance:FindFirstChildWhichIsA("LuaSourceContainer", true) ~= nil
 end
 
+local function validateValue(value: any, propertyType: string?): boolean
+	if propertyType == "BinaryString" then
+		return true
+	end
+
+	local valueType = type(value)
+
+	if valueType == "string" then
+		return utf8.len(value) ~= nil
+	end
+
+	if valueType == "table" then
+		for k, v in value do
+			if not validateValue(k) or not validateValue(v) then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
 local ReadProcessor = {}
 ReadProcessor.__index = ReadProcessor
 
@@ -64,6 +86,14 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 
 			if not equals(instanceValue, defaultValue) then
 				local propertyType = next(default)
+
+				if not validateValue(instanceValue, propertyType) then
+					local err = Error.new(Error.ValidationFailed, property, instance, instanceValue)
+					Log.warn(err)
+
+					continue
+				end
+
 				local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, propertyType)
 
 				if not encodeSuccess then
@@ -175,6 +205,14 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 
 		if not equals(instanceValue, defaultValue) then
 			local propertyType = next(default)
+
+			if not validateValue(instanceValue, propertyType) then
+				local err = Error.new(Error.ValidationFailed, property, instance, instanceValue)
+				Log.warn(err)
+
+				continue
+			end
+
 			local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, propertyType)
 
 			if not encodeSuccess then

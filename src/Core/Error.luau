@@ -29,6 +29,7 @@ local Error = {
 	NotCreatable = "Tried to create an instance of class: $1 that is not creatable",
 	NotRemovable = "Tried to remove an instance of class: $1 that is not removable",
 	HydrationFailed = "Failed to hydrate root service, snapshot: $1",
+	ValidationFailed = "Skipped property: $1 from instance: $2, because it contains malformed data: $3",
 	MeshLoadFailed = "Failed to load MeshPart: $1. If you just updated Roblox Studio, please restart Argon session!",
 }
 
