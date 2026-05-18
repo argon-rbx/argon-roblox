@@ -1,6 +1,6 @@
 --!native
 --!strict
-local msgpack = {}
+local MsgPack = {}
 
 local band = bit32.band
 local bor = bit32.bor
@@ -130,17 +130,17 @@ local function parse(message: buffer, offset: number): (any, number)
 		local length = readu8(message, offset + 1)
 		local newBuf = bufferCreate(length)
 		bufferCopy(newBuf, 0, message, offset + 3, length)
-		return msgpack.Extension.new(readu8(message, offset + 2), newBuf), offset + 2 + length
+		return MsgPack.Extension.new(readu8(message, offset + 2), newBuf), offset + 3 + length
 	elseif byte == 0xC8 then -- ext 16
 		local length = readu16(message, offset + 1)
 		local newBuf = bufferCreate(length)
 		bufferCopy(newBuf, 0, message, offset + 4, length)
-		return msgpack.Extension.new(readu8(message, offset + 3), newBuf), offset + 3 + length
+		return MsgPack.Extension.new(readu8(message, offset + 3), newBuf), offset + 4 + length
 	elseif byte == 0xC9 then -- ext 32
 		local length = readu32(message, offset + 1)
 		local newBuf = bufferCreate(length)
 		bufferCopy(newBuf, 0, message, offset + 6, length)
-		return msgpack.Extension.new(readu8(message, offset + 5), newBuf), offset + 5 + length
+		return MsgPack.Extension.new(readu8(message, offset + 5), newBuf), offset + 6 + length
 	elseif byte == 0xCA then -- float 32
 		return readf32(message, offset + 1), offset + 5
 	elseif byte == 0xCB then -- float 64
@@ -164,23 +164,23 @@ local function parse(message: buffer, offset: number): (any, number)
 	elseif byte == 0xD4 then -- fixext 1
 		local newBuf = bufferCreate(1)
 		bufferCopy(newBuf, 0, message, offset + 2, 1)
-		return msgpack.Extension.new(readu8(message, offset + 1), newBuf), offset + 3
+		return MsgPack.Extension.new(readu8(message, offset + 1), newBuf), offset + 3
 	elseif byte == 0xD5 then -- fixext 2
 		local newBuf = bufferCreate(2)
 		bufferCopy(newBuf, 0, message, offset + 2, 2)
-		return msgpack.Extension.new(readu8(message, offset + 1), newBuf), offset + 4
+		return MsgPack.Extension.new(readu8(message, offset + 1), newBuf), offset + 4
 	elseif byte == 0xD6 then -- fixext 4
 		local newBuf = bufferCreate(4)
 		bufferCopy(newBuf, 0, message, offset + 2, 4)
-		return msgpack.Extension.new(readu8(message, offset + 1), newBuf), offset + 6
+		return MsgPack.Extension.new(readu8(message, offset + 1), newBuf), offset + 6
 	elseif byte == 0xD7 then -- fixext 8
 		local newBuf = bufferCreate(8)
 		bufferCopy(newBuf, 0, message, offset + 2, 8)
-		return msgpack.Extension.new(readu8(message, offset + 1), newBuf), offset + 10
+		return MsgPack.Extension.new(readu8(message, offset + 1), newBuf), offset + 10
 	elseif byte == 0xD8 then -- fixext 16
 		local newBuf = bufferCreate(16)
 		bufferCopy(newBuf, 0, message, offset + 2, 16)
-		return msgpack.Extension.new(readu8(message, offset + 1), newBuf), offset + 18
+		return MsgPack.Extension.new(readu8(message, offset + 1), newBuf), offset + 18
 	elseif byte == 0xD9 then -- str 8
 		local length = readu8(message, offset + 1)
 		return readstring(message, offset + 2, length), offset + 2 + length
@@ -346,7 +346,7 @@ local function computeLength(data: any, tableSet: { [any]: boolean }): number
 		local msgpackType = data._msgpackType
 
 		if msgpackType then
-			if msgpackType == msgpack.Extension then
+			if msgpackType == MsgPack.Extension then
 				local length = bufferLen(data.data)
 
 				if length == 1 then
@@ -573,7 +573,7 @@ local function encode(result: buffer, offset: number, data: any): number
 		local msgpackType = data._msgpackType
 
 		if msgpackType then
-			if msgpackType == msgpack.Extension then
+			if msgpackType == MsgPack.Extension then
 				local length = bufferLen(data.data)
 				local extType = extensionTypeLUT[length]
 
@@ -668,17 +668,17 @@ local function encode(result: buffer, offset: number, data: any): number
 	error(string.format('Could not encode - unsupported datatype "%s"', typeof(data)))
 end
 
-msgpack.Extension = {}
+MsgPack.Extension = {}
 
-function msgpack.Extension.new(extensionType: number, blob: buffer): Extension
+function MsgPack.Extension.new(extensionType: number, blob: buffer): Extension
 	return {
-		_msgpackType = msgpack.Extension,
+		_msgpackType = MsgPack.Extension,
 		type = extensionType,
 		data = blob,
 	}
 end
 
-function msgpack.utf8Encode(message: string): string
+function MsgPack.utf8Encode(message: string): string
 	local messageLength = #message
 	local nBytes = math.ceil(messageLength * (8 / 7))
 	local result = bufferCreate(nBytes)
@@ -713,7 +713,7 @@ function msgpack.utf8Encode(message: string): string
 	return bufferToString(result)
 end
 
-function msgpack.utf8Decode(message: string): string
+function MsgPack.utf8Decode(message: string): string
 	local nBytes = floor(#message * 7 / 8)
 	local result = bufferCreate(nBytes)
 
@@ -739,7 +739,7 @@ function msgpack.utf8Decode(message: string): string
 	return bufferToString(result)
 end
 
-function msgpack.decode(message: string): any
+function MsgPack.decode(message: string): any
 	if message == "" then
 		error("Could not decode - input string is too short")
 	end
@@ -749,7 +749,7 @@ function msgpack.decode(message: string): any
 	return (parse(messageBuf, 0))
 end
 
-function msgpack.encode(data: any): string
+function MsgPack.encode(data: any): string
 	local length = computeLength(data, {})
 	local result = bufferCreate(length)
 
@@ -758,9 +758,9 @@ function msgpack.encode(data: any): string
 	return bufferToString(result)
 end
 
-export type Extension = { _msgpackType: typeof(msgpack.Extension), type: number, data: buffer }
+export type Extension = { _msgpackType: typeof(MsgPack.Extension), type: number, data: buffer }
 
-return msgpack
+return MsgPack
 
 --[[
 MIT License

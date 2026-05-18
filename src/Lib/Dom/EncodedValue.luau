@@ -184,7 +184,7 @@ types = {
 					return Content.none
 				else
 					-- error(`unexpected Content value '{pod}'`)
-					return Content.fromUri(pod) -- temporary
+					return Content.fromUri(pod) -- Temporary
 				end
 			else
 				local ty, value = next(pod)

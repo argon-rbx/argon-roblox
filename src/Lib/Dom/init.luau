@@ -42,7 +42,7 @@ local function getDefaultProperties(className)
 	local properties = {}
 
 	if not class then
-		return nil
+		return properties
 	end
 
 	for property, default in pairs(class.DefaultProperties) do

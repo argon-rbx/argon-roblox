@@ -56,7 +56,7 @@ function Core.new(host: string?, port: string?)
 
 	self:__handleOpenInEditor(Config:get("OpenInEditor"))
 
-	-- watch for `OpenInEditor setting
+	-- Watch for `OpenInEditor setting
 	table.insert(
 		self.connections,
 		Config:onChanged("OpenInEditor", function(enabled)
@@ -64,7 +64,7 @@ function Core.new(host: string?, port: string?)
 		end)
 	)
 
-	-- watch for `TwoWaySync` setting
+	-- Watch for `TwoWaySync` setting
 	table.insert(
 		self.connections,
 		Config:onChanged("TwoWaySync", function(enabled)
