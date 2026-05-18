@@ -4,8 +4,8 @@ local Components = App.Components
 local Util = Components.Util
 
 local Fusion = require(Argon.Packages.Fusion)
-local Config = require(Argon.Config)
 
+local Config = require(Argon.Config)
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
 local filterHost = require(Util.filterHost)
@@ -136,8 +136,7 @@ return function(props: Props): { Instance }
 					end,
 				},
 				Padding {
-					Padding = 10,
-					Vertical = false,
+					Horizontal = 10,
 				},
 			},
 		},

@@ -67,6 +67,7 @@ local Theme = {
 		Bold = Font.fromName("Ubuntu", Enum.FontWeight.Bold),
 		Italic = Font.fromName("Ubuntu", Enum.FontWeight.Regular, Enum.FontStyle.Italic),
 		Mono = Font.fromName("RobotoMono"),
+		MonoBold = Font.fromName("RobotoMono", Enum.FontWeight.Bold),
 
 		-- required for TextService:GetTextSize()
 		Enums = {
@@ -74,6 +75,7 @@ local Theme = {
 			Bold = Enum.Font.Ubuntu,
 			Italic = Enum.Font.Ubuntu,
 			Mono = Enum.Font.RobotoMono,
+			MonoBold = Enum.Font.RobotoMono,
 		},
 	},
 

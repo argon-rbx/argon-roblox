@@ -3,9 +3,9 @@ local HttpService = game:GetService("HttpService")
 local Argon = script:FindFirstAncestor("Argon")
 
 local Promise = require(Argon.Packages.Promise)
+local MsgPack = require(Argon.Lib.MsgPack)
 
 local Error = require(script.Parent.Error)
-local MsgPack = require(script.Parent.MsgPack)
 
 type Response = {
 	Body: string,

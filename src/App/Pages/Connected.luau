@@ -1,12 +1,11 @@
 local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
-local Components = App.Components
 local Widgets = App.Widgets
+local Components = App.Components
 
 local Fusion = require(Argon.Packages.Fusion)
 
 local Types = require(Argon.Types)
-
 local Assets = require(App.Assets)
 local Theme = require(App.Theme)
 

@@ -128,8 +128,7 @@ local function Button(props: ButtonProps): TextButton
 		[Children] = GlobalUtil.join(
 			{
 				Padding {
-					Padding = 6,
-					Vertical = false,
+					Horizontal = 6,
 				},
 			},
 			if props.IsFirst
@@ -204,8 +203,7 @@ return function(props: Props): TextButton
 		Size = size,
 		[Children] = {
 			Padding {
-				Padding = 6,
-				Vertical = false,
+				Horizontal = 6,
 			},
 			Image {
 				AnchorPoint = Vector2.new(1, 0.5),

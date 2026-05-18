@@ -159,4 +159,9 @@ function Util.clean(...: () -> () | RBXScriptConnection | Instance | { [any]: an
 	end
 end
 
+--- Get the plural form of a word
+function Util.plural(count: number): string
+	return math.abs(count) ~= 1 and "s" or ""
+end
+
 return Util

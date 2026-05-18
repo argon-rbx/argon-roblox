@@ -19,6 +19,7 @@ export type Setting =
 	| "OnlyCodeMode"
 	| "OpenInEditor"
 	| "Https"
+	| "DiffLinesLimit"
 	| "DisplayPrompts"
 	| "ChangesThreshold"
 	| "LogLevel"
@@ -48,6 +49,7 @@ local DEFAULTS = {
 	OnlyCodeMode = true,
 	OpenInEditor = false,
 	Https = false,
+	DiffLinesLimit = 3000,
 	DisplayPrompts = "Always",
 	ChangesThreshold = 5,
 	LogLevel = "Warn",

@@ -1,7 +1,8 @@
 local Argon = script:FindFirstAncestor("Argon")
 
+local Dom = require(Argon.Lib.Dom)
+
 local Types = require(Argon.Types)
-local Dom = require(Argon.Dom)
 local Log = require(Argon.Log)
 local Config = require(Argon.Config)
 

@@ -7,7 +7,6 @@ local Components = App.Components
 local Fusion = require(Argon.Packages.Fusion)
 
 local Types = require(Argon.Types)
-
 local Theme = require(App.Theme)
 
 local Widget = require(Components.Plugin.Widget)

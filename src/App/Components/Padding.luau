@@ -6,7 +6,6 @@ local Util = Components.Util
 local Fusion = require(Argon.Packages.Fusion)
 
 local Theme = require(App.Theme)
-local default = require(Util.default)
 local stripProps = require(Util.stripProps)
 
 local New = Fusion.New
@@ -25,9 +24,10 @@ local COMPONENT_ONLY_PROPS = {
 type Props = {
 	-- Mode 1
 	Padding: number?,
-	Horizontal: boolean?,
-	Vertical: boolean?,
 	-- Mode 2
+	Horizontal: number?,
+	Vertical: number?,
+	-- Mode 3
 	Left: number?,
 	Right: number?,
 	Top: number?,
@@ -46,15 +46,22 @@ return function(props: Props): UIPadding
 		right = UDim.new(0, props.Right or padding)
 		top = UDim.new(0, props.Top or padding)
 		bottom = UDim.new(0, props.Bottom or padding)
+	elseif props.Horizontal or props.Vertical then
+		local padding = props.Padding or 0
+		local horizontal = UDim.new(0, props.Horizontal or padding)
+		local vertical = UDim.new(0, props.Vertical or padding)
+
+		left = horizontal
+		right = horizontal
+		top = vertical
+		bottom = vertical
 	else
 		local padding = UDim.new(0, props.Padding or Theme.Padding)
-		local horizontal = default(props.Horizontal, true)
-		local vertical = default(props.Vertical, true)
 
-		left = horizontal and padding or nil
-		right = horizontal and padding or nil
-		top = vertical and padding or nil
-		bottom = vertical and padding or nil
+		left = padding
+		right = padding
+		top = padding
+		bottom = padding
 	end
 
 	return Hydrate(New "UIPadding" {

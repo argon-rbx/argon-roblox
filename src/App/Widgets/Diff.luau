@@ -1,25 +1,35 @@
 local Argon = script:FindFirstAncestor("Argon")
 local App = Argon.App
+local Widgets = App.Widgets
 local Components = App.Components
 
 local Fusion = require(Argon.Packages.Fusion)
+local Dom = require(Argon.Lib.Dom)
 
-local Theme = require(App.Theme)
-local Dom = require(Argon.Dom)
+local GlobalUtil = require(Argon.Util)
 local Types = require(Argon.Types)
+local Theme = require(App.Theme)
+local Assets = require(App.Assets)
 
+local ScriptDiff = require(Widgets.ScriptDiff)
 local Widget = require(Components.Plugin.Widget)
 local ScrollingContainer = require(Components.ScrollingContainer)
 local Collapsible = require(Components.Collapsible)
 local Container = require(Components.Container)
 local Padding = require(Components.Padding)
+local Image = require(Components.Image)
 local List = require(Components.List)
 local Text = require(Components.Text)
 
 local New = Fusion.New
+local Value = Fusion.Value
+local OnEvent = Fusion.OnEvent
+local Cleanup = Fusion.Cleanup
 local Children = Fusion.Children
+local Computed = Fusion.Computed
 local ForValues = Fusion.ForValues
 local cleanup = Fusion.cleanup
+local peek = Fusion.peek
 
 local MAX_VALUE_LENGTH = 80
 
@@ -41,24 +51,24 @@ local function countLines(source: string): number
 	return #source:split("\n")
 end
 
-local function countSnapshotLines(snapshot: Types.AddedSnapshot | Types.UpdatedSnapshot): number
+local function getSnapshotSource(snapshot: Types.AddedSnapshot | Types.UpdatedSnapshot): string?
 	local source = snapshot.properties and snapshot.properties.Source
 
 	if not source then
-		return 0
+		return nil
 	end
 
 	local ok, decoded = Dom.EncodedValue.decode(source)
-	return ok and countLines(decoded) or 0
+	return ok and decoded or ""
 end
 
-local function countInstanceLines(instance: Instance): number
+local function getInstanceSource(instance: Instance): string?
 	if not instance:IsA("LuaSourceContainer") then
-		return 0
+		return nil
 	end
 
 	local ok, source = Dom.readProperty(instance, "Source")
-	return ok and countLines(source) or 0
+	return ok and source or ""
 end
 
 local function formatValue(value: any)
@@ -150,22 +160,105 @@ local function Title(props: TitleProps)
 	}
 end
 
-local function Property(name: string, old: any, new: any?)
+type PropertyProps = {
+	Name: string,
+	Old: any,
+	New: any?,
+	Script: string?,
+}
+
+local function Property(props: PropertyProps)
+	local isHovered = Value(false)
+	local scriptDiffWidget = Value(nil)
+
+	local isScript = props.Script ~= nil
 	local text
 
-	if new then
-		text = `<b>{old}</b> → <b>{new}</b>`
+	if isScript and props.New then
+		local delta = countLines(props.New) - countLines(props.Old)
+		local sign = if delta > 0 then "+" elseif delta < 0 then "-" else "~"
+
+		delta = math.abs(delta)
+
+		text = `<b>{sign}{delta} line{GlobalUtil.plural(delta)}</b>`
+	elseif isScript then
+		local lines = countLines(props.Old)
+		text = `<b>{lines} line{GlobalUtil.plural(lines)}</b>`
+	elseif props.New then
+		text = `<b>{props.Old}</b> → <b>{props.New}</b>`
 	else
-		text = `<b>{old}</b>`
+		text = `<b>{props.Old}</b>`
 	end
 
 	return Text {
-		Text = `    {name}: {text}`,
+		Text = Computed(function(use)
+			return if use(isHovered) or use(scriptDiffWidget)
+				then `    <u>{props.Name}: {text}  </u>`
+				else `    {props.Name}: {text}  `
+		end),
 		Color = Theme.Colors.TextDimmed,
 		TextSize = Theme.TextSize.Small,
 		Font = Theme.Fonts.Mono,
 		TextWrapped = true,
 		RichText = true,
+		[OnEvent "InputBegan"] = function(inputObject)
+			if not isScript then
+				return
+			end
+
+			if inputObject.UserInputType == Enum.UserInputType.MouseMovement then
+				isHovered:set(true)
+				return
+			elseif inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 then
+				return
+			end
+
+			local widget = peek(scriptDiffWidget)
+
+			if widget then
+				widget:Destroy()
+				widget = nil
+			else
+				widget = ScriptDiff {
+					Name = props.Script,
+					OldSource = props.Old,
+					NewSource = props.New,
+					Closed = function()
+						peek(scriptDiffWidget):Destroy()
+						scriptDiffWidget:set(nil)
+					end,
+				}
+			end
+
+			scriptDiffWidget:set(widget)
+		end,
+		[OnEvent "InputEnded"] = function(inputObject)
+			if isScript and inputObject.UserInputType == Enum.UserInputType.MouseMovement then
+				isHovered:set(false)
+			end
+		end,
+		[Cleanup] = function()
+			local widget = peek(scriptDiffWidget)
+
+			if widget then
+				widget:Destroy()
+				widget = nil
+			end
+		end,
+		[Children] = isScript and Container {
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.fromScale(1, 0),
+			Size = UDim2.fromOffset(Theme.TextSize.Small, Theme.TextSize.Small),
+			[Children] = {
+				Image {
+					AnchorPoint = Vector2.new(0, 0.5),
+					Position = UDim2.fromScale(0.3, 0.55),
+					Size = UDim2.fromScale(0.6, 0.6),
+					Image = Assets.Icons.External,
+					ImageColor3 = Theme.Colors.Text,
+				},
+			},
+		} or nil,
 	}
 end
 
@@ -191,12 +284,25 @@ local function Additions(snapshots: { Types.AddedSnapshot }, tree: any)
 
 		local descendants = countDescendants(snapshot)
 		if descendants > 0 then
-			table.insert(element, Property("Descendants", descendants))
+			table.insert(
+				element,
+				Property({
+					Name = "Descendants",
+					Old = descendants,
+				})
+			)
 		end
 
-		local lines = countSnapshotLines(snapshot)
-		if lines > 0 then
-			table.insert(element, Property("Lines", lines))
+		local source = getSnapshotSource(snapshot)
+		if source then
+			table.insert(
+				element,
+				Property({
+					Name = "Source",
+					Old = source,
+					Script = name,
+				})
+			)
 		end
 
 		table.insert(elements, element)
@@ -214,40 +320,60 @@ local function Updates(snapshots: { Types.UpdatedSnapshot }, tree: any)
 
 	for _, snapshot in snapshots do
 		local instance = tree:getInstance(snapshot.id)
+		local name = instance and instance:GetFullName() or snapshot.name or "?"
+
 		local element = {
 			Title {
 				Symbol = "~",
-				Name = instance and instance:GetFullName() or snapshot.name or "?",
+				Name = name,
 				Class = instance and instance.ClassName or snapshot.class or "?",
 				Color = Theme.Colors.Diff.Update,
 			},
 		}
 
 		for property, value in snapshot.properties or {} do
-			if property ~= "Source" then
-				local formatted, raw = "?", nil
+			if property == "Source" then
+				local old = instance and getInstanceSource(instance) or ""
+				local new = getSnapshotSource(snapshot) or ""
 
-				if instance then
-					formatted, raw = formatInstanceValue(instance, property)
-				end
-
-				table.insert(element, Property(property, formatted, formatSnapshotValue(value, raw)))
+				table.insert(
+					element,
+					Property({
+						Name = property,
+						Old = old,
+						New = new,
+						Script = name,
+					})
+				)
 
 				continue
 			end
 
-			local new = countSnapshotLines(snapshot)
-			local old = instance and countInstanceLines(instance) or 0
-			local delta = new - old
-			local sign = if delta > 0 then "+" elseif delta < 0 then "-" else "~"
+			local formatted, raw = "?", nil
 
-			delta = math.abs(delta)
+			if instance then
+				formatted, raw = formatInstanceValue(instance, property)
+			end
 
-			table.insert(element, Property(property, `{sign}{delta} line{delta ~= 1 and "s" or ""}`))
+			table.insert(
+				element,
+				Property({
+					Name = property,
+					Old = formatted,
+					New = formatSnapshotValue(value, raw),
+				})
+			)
 		end
 
 		if snapshot.name and instance and instance.Name ~= snapshot.name then
-			table.insert(element, Property("Name", instance.Name, snapshot.name))
+			table.insert(
+				element,
+				Property({
+					Name = "Name",
+					Old = instance.Name,
+					New = snapshot.name,
+				})
+			)
 		end
 
 		table.insert(elements, element)
@@ -265,6 +391,7 @@ local function Removals(objects: { Types.Ref | Instance }, tree: any)
 
 	for _, object in objects do
 		local instance = object
+		local name = instance and instance:GetFullName() or "?"
 
 		if typeof(object) == "buffer" then
 			instance = tree:getInstance(object)
@@ -273,7 +400,7 @@ local function Removals(objects: { Types.Ref | Instance }, tree: any)
 		local element = {
 			Title {
 				Symbol = "-",
-				Name = instance and instance:GetFullName() or "?",
+				Name = name,
 				Class = instance and instance.ClassName or "?",
 				Color = Theme.Colors.Diff.Remove,
 			},
@@ -281,12 +408,25 @@ local function Removals(objects: { Types.Ref | Instance }, tree: any)
 
 		local descendants = instance and #instance:GetDescendants() or 0
 		if descendants > 0 then
-			table.insert(element, Property("Descendants", descendants))
+			table.insert(
+				element,
+				Property({
+					Name = "Descendants",
+					Old = descendants,
+				})
+			)
 		end
 
-		local lines = instance and countInstanceLines(instance) or 0
-		if lines > 0 then
-			table.insert(element, Property("Lines", lines))
+		local source = instance and getInstanceSource(instance)
+		if source then
+			table.insert(
+				element,
+				Property({
+					Name = "Source",
+					Old = source,
+					Script = name,
+				})
+			)
 		end
 
 		table.insert(elements, element)

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Implemented the `Script Diff` widget which allows viewing incoming script changes line by line ([#22](https://github.com/argon-rbx/argon-roblox/issues/22))
+
 ## [2.0.21] - 2026-03-04
 
 ### Added

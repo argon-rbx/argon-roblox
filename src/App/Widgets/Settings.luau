@@ -58,7 +58,7 @@ local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
 				Name = "Server Host",
 				Description = "The host of the server that you want to connect to",
 				Filter = filterHost,
-				CustomWidth = 0.31,
+				CustomWidth = 0.33,
 			},
 			{
 				Setting = "Port",
@@ -128,6 +128,13 @@ local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
 				Description = "Use HTTPS (TLS) instead of plain HTTP protocol when connecting to the server",
 			},
 			{
+				Setting = "DiffLinesLimit",
+				Name = "Diff Lines Limit",
+				Description = "Maximum number of lines that can be rendered in the script diff view",
+				Filter = filterNumber,
+				CustomWidth = 70,
+			},
+			{
 				Setting = "DisplayPrompts",
 				Name = "Display Prompts",
 				Description = "When to show prompts for actions that require confirmation",
@@ -136,9 +143,9 @@ local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
 			{
 				Setting = "ChangesThreshold",
 				Name = "Changes Threshold",
-				Description = "The maximum number of changes that will be applied before prompting the user",
+				Description = "Maximum number of changes that can be applied before prompting the user",
 				Filter = filterNumber,
-				CustomWidth = 50,
+				CustomWidth = 40,
 			},
 			{
 				Setting = "LogLevel",
@@ -247,7 +254,7 @@ local function Entry(props: EntryProps): Frame
 					end,
 					[Children] = {
 						Padding {
-							Vertical = false,
+							Horizontal = Theme.Padding,
 						},
 					},
 				},
