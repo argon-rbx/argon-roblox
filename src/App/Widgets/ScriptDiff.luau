@@ -48,8 +48,8 @@ return function(props: Props): DockWidgetPluginGui
 
 		for i = 1, math.min(total, lineLimit) do
 			new[i] = lines[i]
-			colors[i] = lines[i]:find("^%+") and Theme.Colors.Diff.Add
-				or lines[i]:find("^%-") and Theme.Colors.Diff.Remove
+			colors[i] = lines[i]:find("^%+ ") and Theme.Colors.Diff.Add
+				or lines[i]:find("^%- ") and Theme.Colors.Diff.Remove
 				or nil
 		end
 
@@ -103,7 +103,8 @@ return function(props: Props): DockWidgetPluginGui
 								[Children] = {
 									Text {
 										Size = UDim2.new(0, lineWidth, 1, 0),
-										Font = Theme.Fonts.MonoBold,
+										Font = color and Theme.Fonts.MonoBold or Theme.Fonts.Mono,
+										Color = color and Theme.Colors.Text or Theme.Colors.TextDimmed,
 										TextXAlignment = Enum.TextXAlignment.Right,
 										TextSize = Theme.TextSize.Medium,
 										Text = index,
