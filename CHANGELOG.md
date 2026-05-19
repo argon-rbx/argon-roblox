@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.22] - 2026-05-19
+
 ### Added
 
 - Implemented the `Script Diff` widget which allows viewing incoming script changes line by line ([#22](https://github.com/argon-rbx/argon-roblox/issues/22))
@@ -319,7 +321,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First Argon 2 plugin pre-release
 
-[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.21...HEAD
+[unreleased]: https://github.com/argon-rbx/argon-roblox/compare/2.0.22...HEAD
+[2.0.22]: https://github.com/argon-rbx/argon-roblox/compare/2.0.21...2.0.22
 [2.0.21]: https://github.com/argon-rbx/argon-roblox/compare/2.0.20...2.0.21
 [2.0.20]: https://github.com/argon-rbx/argon-roblox/compare/2.0.19...2.0.20
 [2.0.19]: https://github.com/argon-rbx/argon-roblox/compare/2.0.18...2.0.19
