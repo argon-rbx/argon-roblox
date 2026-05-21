@@ -209,7 +209,7 @@ return {
 		},
 	},
 	StyleRule = {
-		Properties = {
+		PropertiesSerialize = {
 			read = function(instance: StyleRule)
 				return true, instance:GetProperties()
 			end,
@@ -220,7 +220,9 @@ return {
 
 				local existing = instance:GetProperties()
 
-				instance:SetProperties(value)
+				for itemName, itemValue in pairs(value) do
+					instance:SetProperty(itemName, itemValue)
+				end
 
 				for existingItemName in pairs(existing) do
 					if value[existingItemName] == nil then
