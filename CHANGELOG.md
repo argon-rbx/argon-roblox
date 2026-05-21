@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Line diff detection and line coloring in `Script Diff` widget
+- Some properties like `UICorner.CornerRadius` being lost when syncing ([#26](https://github.com/argon-rbx/argon-roblox/issues/26))
+
 ## [2.0.22] - 2026-05-19
 
 ### Added
