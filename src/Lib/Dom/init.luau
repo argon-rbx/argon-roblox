@@ -60,6 +60,41 @@ local function getDefaultProperties(className)
 	return properties
 end
 
+local function getRefProperties(className)
+	local properties = {}
+	local seen = {}
+
+	local currentClassName = className
+
+	while currentClassName ~= nil do
+		local currentClass = database.Classes[currentClassName]
+
+		if currentClass == nil then
+			break
+		end
+
+		for property, propertyData in pairs(currentClass.Properties) do
+			if seen[property] then
+				continue
+			end
+
+			seen[property] = true
+
+			if
+				propertyData.Kind.Canonical ~= nil
+				and propertyData.Scriptability == "ReadWrite"
+				and propertyData.DataType.Value == "Ref"
+			then
+				table.insert(properties, property)
+			end
+		end
+
+		currentClassName = currentClass.Superclass
+	end
+
+	return properties
+end
+
 local function isCreatable(className)
 	local class = database.Classes[className]
 
@@ -100,6 +135,7 @@ return {
 	writeProperty = writeProperty,
 	findCanonicalPropertyDescriptor = findCanonicalPropertyDescriptor,
 	getDefaultProperties = getDefaultProperties,
+	getRefProperties = getRefProperties,
 	Error = Error,
 	EncodedValue = require(script.EncodedValue),
 }

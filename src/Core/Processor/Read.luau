@@ -106,6 +106,25 @@ function ReadProcessor:onAdd(instance: Instance, __parentId: Types.Ref?): Types.
 				properties[property] = encodedValue
 			end
 		end
+
+		for _, property in Dom.getRefProperties(instance.ClassName) do
+			local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+			if not readSuccess then
+				local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
+				Log.warn(err)
+
+				continue
+			end
+
+			local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, "Ref", self.tree)
+
+			if not encodeSuccess or encodedValue.Ref == nil then
+				continue
+			end
+
+			properties[property] = encodedValue
+		end
 	end
 
 	for _, child in instance:GetChildren() do
@@ -224,6 +243,25 @@ function ReadProcessor:onChange(instance: Instance, property: string?): Types.Up
 
 			properties[property] = encodedValue
 		end
+	end
+
+	for _, property in Dom.getRefProperties(instance.ClassName) do
+		local readSuccess, instanceValue = Dom.readProperty(instance, property)
+
+		if not readSuccess then
+			local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
+			Log.warn(err)
+
+			continue
+		end
+
+		local encodeSuccess, encodedValue = Dom.EncodedValue.encode(instanceValue, "Ref", self.tree)
+
+		if not encodeSuccess or encodedValue.Ref == nil then
+			continue
+		end
+
+		properties[property] = encodedValue
 	end
 
 	return Snapshot.newUpdated(id):withProperties(properties)

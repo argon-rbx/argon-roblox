@@ -181,7 +181,7 @@ function WriteProcessor:applyAddition(
 	instance.Name = snapshot.name
 
 	for property, value in snapshot.properties do
-		local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
+		local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value, self.tree)
 
 		if not decodeSuccess then
 			local err = Error.new(Error.DecodeFailed, property, value)
@@ -318,7 +318,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	if snapshot.properties then
 		if initial then
 			for property, value in snapshot.properties do
-				local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
+				local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value, self.tree)
 
 				if not decodeSuccess then
 					local err = Error.new(Error.DecodeFailed, property, value)
@@ -339,7 +339,7 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 				local value = snapshot.properties[property]
 
 				if value then
-					local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+					local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value, self.tree)
 
 					if not decodeSuccess then
 						local err = Error.new(Error.DecodeFailed, property, value)
@@ -362,6 +362,30 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 						local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
 						Log.warn(err)
 					end
+				end
+			end
+
+			for _, property in Dom.getRefProperties(instance.ClassName) do
+				local value = snapshot.properties[property]
+
+				if value == nil then
+					continue
+				end
+
+				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value, self.tree)
+
+				if not decodeSuccess then
+					local err = Error.new(Error.DecodeFailed, property, value)
+					Log.warn(err)
+
+					continue
+				end
+
+				local writeSuccess, reason = Dom.writeProperty(instance, property, snapshotValue)
+
+				if not writeSuccess then
+					local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
+					Log.warn(err)
 				end
 			end
 		end

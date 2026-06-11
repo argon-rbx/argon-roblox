@@ -437,12 +437,24 @@ types = {
 	},
 
 	Ref = {
-		fromPod = function(_)
-			error("Ref cannot be decoded on its own")
+		fromPod = function(pod, tree)
+			if tree == nil then
+				return nil
+			end
+
+			return tree:getInstance(pod)
 		end,
 
-		toPod = function(_)
-			error("Ref can not be encoded on its own")
+		toPod = function(roblox, tree)
+			if roblox == nil then
+				return buffer.create(16) -- represents Ref::none()
+			end
+
+			if tree == nil then
+				return nil
+			end
+
+			return tree:getId(roblox)
 		end,
 	},
 
@@ -470,12 +482,20 @@ types = {
 	},
 
 	SharedString = {
-		fromPod = function(_pod)
-			error("SharedString is not supported")
+		fromPod = function(pod)
+			if typeof(pod) == "buffer" then
+				return buffer.tostring(pod)
+			end
+
+			return pod
 		end,
 
-		toPod = function(_roblox)
-			error("SharedString is not supported")
+		toPod = function(roblox)
+			if typeof(roblox) == "string" then
+				return buffer.fromstring(roblox)
+			end
+
+			return roblox
 		end,
 	},
 
@@ -568,7 +588,7 @@ types.OptionalCFrame = {
 	end,
 }
 
-function EncodedValue.decode(encodedValue)
+function EncodedValue.decode(encodedValue, tree)
 	local ty, value = next(encodedValue)
 
 	if ty == nil then
@@ -581,10 +601,10 @@ function EncodedValue.decode(encodedValue)
 		return false, "Couldn't decode value " .. tostring(ty)
 	end
 
-	return true, typeImpl.fromPod(value)
+	return true, typeImpl.fromPod(value, tree)
 end
 
-function EncodedValue.encode(rbxValue, propertyType)
+function EncodedValue.encode(rbxValue, propertyType, tree)
 	assert(propertyType ~= nil, "Property type descriptor is required")
 
 	local typeImpl = types[propertyType]
@@ -593,7 +613,7 @@ function EncodedValue.encode(rbxValue, propertyType)
 	end
 
 	return true, {
-		[propertyType] = typeImpl.toPod(rbxValue),
+		[propertyType] = typeImpl.toPod(rbxValue, tree),
 	}
 end
 
