@@ -82,8 +82,22 @@ types = {
 		end,
 	},
 
+	-- rbx_types serializes BinaryString (Vec<u8>) as a msgpack integer array for
+	-- compat reasons, unlike SharedString (&[u8]) which uses msgpack bin → buffer.
 	BinaryString = {
-		fromPod = base64.decode,
+		fromPod = function(pod)
+			if typeof(pod) == "table" then
+				local chars = table.create(#pod)
+
+				for i, b in ipairs(pod) do
+					chars[i] = string.char(b)
+				end
+
+				return table.concat(chars)
+			end
+
+			return base64.decode(pod)
+		end,
 		toPod = base64.encode,
 	},
 
@@ -470,12 +484,20 @@ types = {
 	},
 
 	SharedString = {
-		fromPod = function(_pod)
-			error("SharedString is not supported")
+		fromPod = function(pod)
+			if typeof(pod) == "buffer" then
+				return buffer.tostring(pod)
+			end
+
+			return pod
 		end,
 
-		toPod = function(_roblox)
-			error("SharedString is not supported")
+		toPod = function(roblox)
+			if typeof(roblox) == "string" then
+				return buffer.fromstring(roblox)
+			end
+
+			return roblox
 		end,
 	},
 
