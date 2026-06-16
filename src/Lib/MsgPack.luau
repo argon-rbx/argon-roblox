@@ -23,7 +23,9 @@ local sbyte = string.byte
 local tableCreate = table.create
 
 -- MsgPack numbers are big-endian, buffer methods are little-endian
--- Will need to reverse 16 and 32 bit ints, floats and doubles
+-- Temporary buffer for float byte-swapping without mutating the source
+local floatBuf = bufferCreate(8)
+
 local function reverse(b: buffer, offset: number, count: number): ()
 	for i = 1, count // 2 do
 		local byte = readu8(b, offset + i - 1)
@@ -73,33 +75,38 @@ local function writef64(b: buffer, offset: number, value: number): ()
 end
 
 local function readu16(b: buffer, offset: number): number
-	reverse(b, offset, 2)
-	return buffer.readu16(b, offset)
+	return bor(lshift(readu8(b, offset), 8), readu8(b, offset + 1))
 end
 
 local function readi16(b: buffer, offset: number): number
-	reverse(b, offset, 2)
-	return buffer.readi16(b, offset)
+	local v = readu16(b, offset)
+	return if v >= 0x8000 then v - 0x10000 else v
 end
 
 local function readu32(b: buffer, offset: number): number
-	reverse(b, offset, 4)
-	return buffer.readu32(b, offset)
+	return bor(
+		lshift(readu8(b, offset), 24),
+		lshift(readu8(b, offset + 1), 16),
+		lshift(readu8(b, offset + 2), 8),
+		readu8(b, offset + 3)
+	)
 end
 
 local function readi32(b: buffer, offset: number): number
-	reverse(b, offset, 4)
-	return buffer.readi32(b, offset)
+	local v = readu32(b, offset)
+	return if v >= 0x80000000 then v - 0x100000000 else v
 end
 
 local function readf32(b: buffer, offset: number): number
-	reverse(b, offset, 4)
-	return buffer.readf32(b, offset)
+	bufferCopy(floatBuf, 0, b, offset, 4)
+	reverse(floatBuf, 0, 4)
+	return buffer.readf32(floatBuf, 0)
 end
 
 local function readf64(b: buffer, offset: number): number
-	reverse(b, offset, 8)
-	return buffer.readf64(b, offset)
+	bufferCopy(floatBuf, 0, b, offset, 8)
+	reverse(floatBuf, 0, 8)
+	return buffer.readf64(floatBuf, 0)
 end
 
 local function parse(message: buffer, offset: number): (any, number)
