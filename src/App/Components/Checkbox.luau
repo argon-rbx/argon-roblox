@@ -32,14 +32,13 @@ type Props = {
 
 return function(props: Props): TextButton
 	local value = isState(props.Value) and props.Value or Value(props.Value or false)
-	local placeholder = isState(props.Placeholder) and props.Placeholder or Value(props.Placeholder or false)
 
 	return Hydrate(IconButton {
 		Size = UDim2.fromOffset(Theme.CompSizeY.Medium, Theme.CompSizeY.Medium),
 		Solid = value,
 		Blending = false,
 		Icon = Computed(function(use)
-			return if use(value) and use(placeholder) or use(placeholder) then Assets.Icons.Checkmark else ""
+			return if use(value) then Assets.Icons.Checkmark else ""
 		end),
 		Activated = function()
 			value:set(not peek(value))

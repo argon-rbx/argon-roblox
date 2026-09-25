@@ -9,7 +9,6 @@ local Config = require(Argon.Config)
 local GlobalUtil = require(Argon.Util)
 
 local Theme = require(App.Theme)
-local default = require(Util.default)
 local filterHost = require(Util.filterHost)
 local filterPort = require(Util.filterPort)
 local filterNumber = require(Util.filterNumber)
@@ -184,14 +183,28 @@ local function Entry(props: EntryProps): Frame
 	local setting = props.Data.Setting
 
 	local absoluteSize = Value(Vector2.zero)
+	local isSet = Value(Config:isSet(setting, peek(props.Level)))
+	local sourceLevel = Value((select(2, Config:resolve(setting, peek(props.Level)))))
 	local placeholder = Value(Config:get(setting))
 
+	local function updateEntryState()
+		local val, src, isExplicit = Config:resolve(setting, peek(props.Level))
+		isSet:set(isExplicit)
+		sourceLevel:set(src)
+		placeholder:set(val)
+		if props.Data.Filter then
+			props.Binding:set(if isExplicit then tostring(val) else "")
+		else
+			props.Binding:set(val)
+		end
+	end
+
 	local connections = {
-		Config:onChanged(setting, function(value)
-			placeholder:set(value)
+		Config:onChanged(setting, function()
+			updateEntryState()
 		end),
 		Observer(props.Level):onChange(function()
-			placeholder:set(Config:get(setting))
+			updateEntryState()
 		end),
 	}
 
@@ -211,7 +224,8 @@ local function Entry(props: EntryProps): Frame
 			end)
 		)
 
-		if peek(props.Binding) == Config:getDefault(setting) then
+		local isExplicit = Config:isSet(setting, peek(props.Level))
+		if not isExplicit and peek(props.Binding) == Config:getDefault(setting) then
 			props.Binding:set("")
 		end
 
@@ -247,10 +261,12 @@ local function Entry(props: EntryProps): Frame
 					end,
 					Finished = function(text)
 						focused:set(false)
-						text = text ~= "" and text or Config:getDefault(setting)
-
-						props.Binding:set(text)
-						Config:set(setting, text, peek(props.Level))
+						if text == "" then
+							Config:unset(setting, peek(props.Level))
+						else
+							Config:set(setting, text, peek(props.Level))
+						end
+						updateEntryState()
 					end,
 					[Children] = {
 						Padding {
@@ -267,6 +283,7 @@ local function Entry(props: EntryProps): Frame
 			Placeholder = placeholder,
 			Selected = function(value)
 				Config:set(setting, value, peek(props.Level))
+				updateEntryState()
 			end,
 		}
 	else
@@ -275,9 +292,34 @@ local function Entry(props: EntryProps): Frame
 			Placeholder = placeholder,
 			Changed = function(value)
 				Config:set(setting, value, peek(props.Level))
+				updateEntryState()
 			end,
 		}
 	end
+
+	local subtitleText = Computed(function(use)
+		if use(isSet) then
+			return "Set at this level"
+		end
+
+		local src = use(sourceLevel)
+		if src == "Default" then
+			return "Default"
+		else
+			return `Inherited from {src}`
+		end
+	end)
+
+	local unsetButton = TextButton {
+		Text = "Unset",
+		TextSize = 12,
+		Size = UDim2.fromOffset(46, 18),
+		Visible = isSet,
+		Activated = function()
+			Config:unset(setting, peek(props.Level))
+			updateEntryState()
+		end,
+	}
 
 	return Container {
 		ZIndex = props.Data.Options and 2 or 1,
@@ -292,10 +334,6 @@ local function Entry(props: EntryProps): Frame
 				Size = UDim2.fromScale(1, 1),
 				[Children] = {
 					Padding {},
-					Text {
-						Text = props.Data.Name,
-						Font = Theme.Fonts.Bold,
-					},
 					Container {
 						Size = UDim2.fromScale(1, 0),
 						[Children] = {
@@ -306,6 +344,18 @@ local function Entry(props: EntryProps): Frame
 							},
 							Container {
 								[Children] = {
+									List {
+										FillDirection = Enum.FillDirection.Vertical,
+										Spacing = 4,
+									},
+									New "UIFlexItem" {
+										FlexMode = Enum.UIFlexMode.Fill,
+									},
+									Text {
+										Text = props.Data.Name,
+										Font = Theme.Fonts.Bold,
+										Color = Theme.Colors.Text,
+									},
 									Text {
 										RichText = true,
 										TextWrapped = true,
@@ -313,7 +363,6 @@ local function Entry(props: EntryProps): Frame
 										Text = props.Data.Description,
 										TextSize = Theme.TextSize.Small,
 										Color = Theme.Colors.TextDimmed,
-										Position = UDim2.fromOffset(0, 22),
 										Size = Computed(function(use)
 											local absoluteSize = use(absoluteSize)
 
@@ -329,6 +378,24 @@ local function Entry(props: EntryProps): Frame
 										[OnChange "AbsoluteSize"] = function(size)
 											absoluteSize:set(size)
 										end,
+									},
+									Container {
+										AutomaticSize = Enum.AutomaticSize.XY,
+										[Children] = {
+											List {
+												FillDirection = Enum.FillDirection.Horizontal,
+												VerticalAlignment = Enum.VerticalAlignment.Center,
+												Spacing = 6,
+											},
+											Text {
+												Text = subtitleText,
+												TextSize = 12,
+												Font = Theme.Fonts.Regular,
+												Color = Theme.Colors.TextDimmed,
+												TextTransparency = 0.45,
+											},
+											unsetButton,
+										},
 									},
 								},
 							},
@@ -352,7 +419,6 @@ type Props = {
 
 return function(props: Props): DockWidgetPluginGui
 	local level = Value("Global")
-	local bindings = {}
 
 	return Widget {
 		Name = "Argon - Settings",
@@ -374,10 +440,6 @@ return function(props: Props): DockWidgetPluginGui
 						Options = LEVELS,
 						Selected = function(option)
 							level:set(option)
-
-							for setting, binding in bindings do
-								binding:set(default(Config:get(setting, option, true), Config:getDefault(setting)))
-							end
 						end,
 					},
 					ForPairs(SETTINGS_DATA, function(_, index, data)
@@ -387,10 +449,10 @@ return function(props: Props): DockWidgetPluginGui
 								Expanded = index == 1,
 								Elements = ForValues(data.Settings, function(_, data)
 									local setting = data.Setting
+									local val = Config:resolve(setting, peek(level))
+									local isExplicit = Config:isSet(setting, peek(level))
 									local binding =
-										Value(default(Config:get(setting, peek(level)), Config:getDefault(setting)))
-
-									bindings[setting] = binding
+										Value(if data.Filter then (if isExplicit then tostring(val) else "") else val)
 
 									return Entry {
 										Data = data,
@@ -410,10 +472,6 @@ return function(props: Props): DockWidgetPluginGui
 								Position = UDim2.fromScale(1, 0),
 								Text = "Restore Defaults",
 								Activated = function()
-									for setting, binding in bindings do
-										binding:set(Config:getDefault(setting))
-									end
-
 									Config:restoreDefaults(peek(level))
 								end,
 							},

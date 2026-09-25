@@ -25,13 +25,18 @@ export type Setting =
 	| "LogLevel"
 	| "OverridePackages"
 
+export type Source = Level | "Default"
+
 type Config = {
 	__configs: { [Level]: { [Setting]: any } },
-	__callbacks: { [Setting]: { (value: any) -> () } },
+	__callbacks: { [Setting]: { [string]: (value: any) -> () } },
 	load: () -> (),
 	get: (self: Config, setting: Setting, level: Level?, exact: boolean?) -> any,
 	getDefault: (self: Config, setting: Setting) -> any,
 	set: (self: Config, setting: Setting, value: any, level: Level) -> (),
+	unset: (self: Config, setting: Setting, level: Level) -> (),
+	isSet: (self: Config, setting: Setting, level: Level) -> boolean,
+	resolve: (self: Config, setting: Setting, level: Level?) -> (any, Source, boolean),
 	restoreDefaults: (self: Config, level: Level) -> (),
 	onChanged: (self: Config, setting: Setting, callback: (value: any) -> ()) -> () -> (),
 }
@@ -80,48 +85,48 @@ function Config.load()
 	end
 end
 
-function Config:get(setting, level, exact)
+function Config:resolve(setting: Setting, level: Level?): (any, Source, boolean)
 	local default = DEFAULTS[setting]
-	local relevant = not level
+
+	if default == nil then
+		Log.error(`Setting '{setting}' does not exist!`)
+	end
+
+	local startLevel: Level = level or "Place"
+	local isExplicit = self.__configs[startLevel][setting] ~= nil
+
+	local startIndex = table.find(CONFIGS_ORDERED, startLevel) or 1
+	for i = startIndex, #CONFIGS_ORDERED do
+		local lvl = CONFIGS_ORDERED[i]
+		local val = self.__configs[lvl][setting]
+		if val ~= nil then
+			return val, lvl, isExplicit
+		end
+	end
+
+	return default, "Default", isExplicit
+end
+
+function Config:isSet(setting: Setting, level: Level): boolean
+	return self.__configs[level][setting] ~= nil
+end
+
+function Config:get(setting: Setting, level: Level?, exact: boolean?): any
+	local default = DEFAULTS[setting]
 
 	if default == nil then
 		Log.error(`Setting '{setting}' does not exist!`)
 	end
 
 	if exact then
-		return self.__configs[level][setting]
+		return if level then self.__configs[level][setting] else nil
 	end
 
-	if level and level ~= "Global" then
-		local index = table.find(CONFIGS_ORDERED, level)
-
-		if not index then
-			Log.error(`Config level '{level}' does not exist!`)
-		end
-
-		level = CONFIGS_ORDERED[index + 1]
-	end
-
-	for _, config in CONFIGS_ORDERED do
-		if not relevant then
-			if config == level then
-				relevant = true
-			else
-				continue
-			end
-		end
-
-		local value = self.__configs[config][setting]
-
-		if value ~= nil then
-			return value
-		end
-	end
-
-	return default
+	local val = self:resolve(setting, level)
+	return val
 end
 
-function Config:getDefault(setting)
+function Config:getDefault(setting: Setting): any
 	local default = DEFAULTS[setting]
 
 	if default == nil then
@@ -131,7 +136,7 @@ function Config:getDefault(setting)
 	return default
 end
 
-function Config:set(setting, value, level)
+function Config:set(setting: Setting, value: any, level: Level)
 	local default = DEFAULTS[setting]
 	local config = self.__configs[level]
 
@@ -144,7 +149,7 @@ function Config:set(setting, value, level)
 	end
 
 	value = Util.cast(value, type(default))
-	config[setting] = if value == default then nil else value
+	config[setting] = value
 
 	if self.__callbacks[setting] then
 		for _, callback in self.__callbacks[setting] do
@@ -159,13 +164,36 @@ function Config:set(setting, value, level)
 	end
 end
 
-function Config:restoreDefaults(level)
+function Config:unset(setting: Setting, level: Level)
+	local config = self.__configs[level]
+
+	if config[setting] == nil then
+		return
+	end
+
+	config[setting] = nil
+
+	if self.__callbacks[setting] then
+		for _, callback in self.__callbacks[setting] do
+			callback(self:get(setting))
+		end
+	end
+
+	if not next(config) then
+		plugin:SetSetting(CONFIGS[level], nil)
+	else
+		plugin:SetSetting(CONFIGS[level], config)
+	end
+end
+
+function Config:restoreDefaults(level: Level)
+	local oldConfig = self.__configs[level]
 	self.__configs[level] = {}
 
-	for setting, _ in self.__configs[level] do
+	for setting, _ in oldConfig do
 		if self.__callbacks[setting] then
 			for _, callback in self.__callbacks[setting] do
-				callback(self:getDefault(setting))
+				callback(self:get(setting))
 			end
 		end
 	end
