@@ -39,6 +39,8 @@ local peek = Fusion.peek
 
 local BUTTON_COMPONENT_ONLY_PROPS = {
 	"Activated",
+	"Pressed",
+	"Released",
 	"IsSelected",
 	"IsDimmed",
 	"IsFirst",
@@ -47,6 +49,8 @@ local BUTTON_COMPONENT_ONLY_PROPS = {
 
 type ButtonProps = {
 	Activated: () -> (),
+	Pressed: (() -> ())?,
+	Released: (() -> ())?,
 	IsSelected: Fusion.Computed<boolean>,
 	IsDimmed: Fusion.Computed<boolean>,
 	IsFirst: Fusion.Value<boolean>?,
@@ -107,6 +111,9 @@ local function Button(props: ButtonProps): TextButton
 				isHovered:set(true)
 			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(true)
+				if props.Pressed then
+					props.Pressed()
+				end
 			end
 		end,
 		[OnEvent "InputEnded"] = function(input)
@@ -114,6 +121,9 @@ local function Button(props: ButtonProps): TextButton
 				isHovered:set(false)
 			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
 				isPressed:set(false)
+				if props.Released then
+					props.Released()
+				end
 			end
 		end,
 		[OnEvent "Activated"] = function()
@@ -182,6 +192,8 @@ return function(props: Props): TextButton
 	local isOpen = Value(false)
 	local anchor = Value(0)
 	local ref = Value(nil)
+	local isPressingOption = false
+	local wasOpenWhenPressed = false
 
 	local size
 	do
@@ -218,8 +230,10 @@ return function(props: Props): TextButton
 			},
 			Input {
 				Finished = function()
-					task.delay(0.1, function()
-						isOpen:set(false)
+					task.defer(function()
+						if not isPressingOption then
+							isOpen:set(false)
+						end
 					end)
 				end,
 				[Ref] = ref,
@@ -268,15 +282,33 @@ return function(props: Props): TextButton
 									IsDimmed = Computed(function(use)
 										return not use(isOpen) and use(value) ~= use(placeholder)
 									end),
+									Pressed = function()
+										wasOpenWhenPressed = peek(isOpen)
+										isPressingOption = true
+									end,
+									Released = function()
+										isPressingOption = false
+										task.defer(function()
+											if wasOpenWhenPressed then
+												wasOpenWhenPressed = false
+												isOpen:set(false)
+											end
+										end)
+									end,
 									Activated = function()
-										local open = peek(isOpen)
-										isOpen:set(not open)
+										local wasOpen = wasOpenWhenPressed
+										wasOpenWhenPressed = false
+										isPressingOption = false
 
-										if not open then
+										if not wasOpen then
+											isOpen:set(true)
 											peek(ref):CaptureFocus()
+											return
 										end
 
-										if not open or option == peek(value) then
+										isOpen:set(false)
+
+										if option == peek(value) then
 											return
 										end
 
