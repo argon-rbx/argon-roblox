@@ -332,6 +332,10 @@ local function Updates(snapshots: { Types.UpdatedSnapshot }, tree: any)
 		}
 
 		for property, value in snapshot.properties or {} do
+			if property == "ArgonEmpty" then
+				continue
+			end
+
 			if property == "Source" then
 				local old = instance and getInstanceSource(instance) or ""
 				local new = getSnapshotSource(snapshot) or ""

@@ -136,48 +136,31 @@ function Processor:diff(snapshot: Types.Snapshot, parent: Types.Ref, clientPrior
 	if not clientPriority or ReadProcessor.shouldSyncProperties(instance) then
 		local updatedProperties = {}
 
-		for property, default in Dom.getDefaultProperties(instance.ClassName) do
-			local value = snapshot.properties[property]
+		for property, value in snapshot.properties do
+			if property == "ArgonEmpty" then
+				continue
+			end
 
-			if value then
-				local readSuccess, instanceValue = Dom.readProperty(instance, property)
+			local readSuccess, instanceValue = Dom.readProperty(instance, property)
 
-				if not readSuccess then
-					local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
-					Log.warn(err)
+			if not readSuccess then
+				local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
+				Log.warn(err)
 
-					continue
-				end
+				continue
+			end
 
-				local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+			local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
 
-				if not decodeSuccess then
-					local err = Error.new(Error.DecodeFailed, property, value)
-					Log.warn(err)
+			if not decodeSuccess then
+				local err = Error.new(Error.DecodeFailed, property, value)
+				Log.warn(err)
 
-					continue
-				end
+				continue
+			end
 
-				if not equals(instanceValue, snapshotValue) then
-					updatedProperties[property] = value
-				end
-
-				-- If snapshot does not have the property we want it to be default
-			else
-				local readSuccess, instanceValue = Dom.readProperty(instance, property)
-
-				if not readSuccess then
-					local err = Error.new(Error.ReadFailed, property, instance, instanceValue.kind)
-					Log.warn(err)
-
-					continue
-				end
-
-				local _, defaultValue = Dom.EncodedValue.decode(default)
-
-				if not equals(instanceValue, defaultValue) then
-					updatedProperties[property] = default
-				end
+			if not equals(instanceValue, snapshotValue) then
+				updatedProperties[property] = value
 			end
 		end
 

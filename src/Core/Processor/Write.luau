@@ -181,6 +181,10 @@ function WriteProcessor:applyAddition(
 	instance.Name = snapshot.name
 
 	for property, value in snapshot.properties do
+		if property == "ArgonEmpty" then
+			continue
+		end
+
 		local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
 
 		if not decodeSuccess then
@@ -316,53 +320,25 @@ function WriteProcessor:applyUpdate(snapshot: Types.UpdatedSnapshot, initial: bo
 	end
 
 	if snapshot.properties then
-		if initial then
-			for property, value in snapshot.properties do
-				local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
-
-				if not decodeSuccess then
-					local err = Error.new(Error.DecodeFailed, property, value)
-					Log.warn(err)
-
-					continue
-				end
-
-				local writeSuccess, reason = Dom.writeProperty(instance, property, decodedValue)
-
-				if not writeSuccess then
-					local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
-					Log.warn(err)
-				end
+		for property, value in snapshot.properties do
+			if property == "ArgonEmpty" then
+				continue
 			end
-		else
-			for property, default in (defaultProperties or Dom.getDefaultProperties(instance.ClassName)) do
-				local value = snapshot.properties[property]
 
-				if value then
-					local decodeSuccess, snapshotValue = Dom.EncodedValue.decode(value)
+			local decodeSuccess, decodedValue = Dom.EncodedValue.decode(value)
 
-					if not decodeSuccess then
-						local err = Error.new(Error.DecodeFailed, property, value)
-						Log.warn(err)
+			if not decodeSuccess then
+				local err = Error.new(Error.DecodeFailed, property, value)
+				Log.warn(err)
 
-						continue
-					end
+				continue
+			end
 
-					local writeSuccess, reason = Dom.writeProperty(instance, property, snapshotValue)
+			local writeSuccess, reason = Dom.writeProperty(instance, property, decodedValue)
 
-					if not writeSuccess then
-						local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
-						Log.warn(err)
-					end
-				else
-					local _, defaultValue = Dom.EncodedValue.decode(default)
-					local writeSuccess, reason = Dom.writeProperty(instance, property, defaultValue)
-
-					if not writeSuccess then
-						local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
-						Log.warn(err)
-					end
-				end
+			if not writeSuccess then
+				local err = Error.new(Error.WriteFailed, property, instance, reason.kind)
+				Log.warn(err)
 			end
 		end
 	end
