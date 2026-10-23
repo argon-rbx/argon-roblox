@@ -67,6 +67,12 @@ local SETTINGS_DATA: { { Title: string, Settings: { SettingData } } } = {
 				Filter = filterPort,
 				CustomWidth = 70,
 			},
+			{
+				Setting = "ConfirmProject",
+				Name = "Confirm Project",
+				Description = "Show the project name and ask before connecting <b>(Changed = only when it differs from the last project of this place)</b>",
+				Options = { "Always", "Changed", "Never" },
+			},
 		},
 	},
 	{

@@ -90,6 +90,7 @@ function Core:run(): Promise.Promise
 		local project = self.client:fetchDetails():expect()
 		self.project = project
 
+		self:__confirmProject(project):expect()
 		self:__verifyProject(project, true):expect()
 
 		Log.trace("Subscribing to the server queue..")
@@ -194,6 +195,37 @@ function Core.wasExitGraceful(err: Error.Error)
 end
 
 -- Internal functions
+
+local function escapeRichText(text: string): string
+	return (text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"))
+end
+
+-- Show which project is served on the selected port before anything gets synced
+function Core:__confirmProject(project: Types.Project): Promise.Promise
+	local mode = Config:get("ConfirmProject")
+	local lastProject = Config:get("LastProject", "Place", true)
+	local known = lastProject ~= nil and lastProject ~= ""
+	local changed = known and lastProject ~= project.name
+
+	if mode == "Never" or (mode == "Changed" and known and not changed) then
+		return Promise.resolve()
+	end
+
+	local message = `Connect to project <b>{escapeRichText(project.name)}</b>`
+		.. ` on <b>{self.client.host}:{self.client.port}</b>?`
+
+	if changed then
+		message ..= `\n\n<font color="#FFAA00">Warning: this place was last synced with <b>{escapeRichText(lastProject)}</b>!</font>`
+	end
+
+	if not self.__prompt(message) then
+		return Promise.reject(Error.new(Error.Terminated))
+	end
+
+	Config:set("LastProject", project.name, "Place")
+
+	return Promise.resolve()
+end
 
 function Core:__verifyProject(project: Types.Project, initial: boolean?): Promise.Promise
 	if not self:__shouldPrompt(initial) then
